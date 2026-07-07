@@ -28,6 +28,14 @@ https://gmjeremy22.github.io/culture-alert-site/
 - 기본 실행에서는 느리고 실패 가능성이 큰 `official-page-monitor`를 제외합니다.
 - 필요할 때만 workflow 환경변수 `CULTURE_ALERT_INCLUDE_OFFICIAL_MONITOR=1`로 켤 수 있습니다.
 
+## 주간 반자동 후보 점검
+
+- `.github/workflows/weekly-semi-auto.yml`은 매주 월요일 08:10 KST에 실행됩니다.
+- 보류 기관과 위험도가 있는 기관은 바로 사이트 카드에 섞지 않고 `event_candidates` 후보로 먼저 저장합니다.
+- 후보는 자동 병합 가능, 검토 필요, 폐기로 나뉘며 자동 병합 가능 후보만 임시 DB에 합쳐 카드와 감사 리포트를 다시 만듭니다.
+- 기본 주간 실행은 Pages에 게시하지 않고 Actions artifact에 검토 결과를 남깁니다.
+- 필요할 때만 `Actions` -> `Weekly semi-auto candidate review` -> `Run workflow`에서 `publish_to_pages`를 켜면 검증 통과 후보가 포함된 보호 페이지를 게시합니다.
+
 ## 로컬에서 수동 게시
 
 로컬 원본 프로젝트의 최신 HTML을 암호화해서 `public/index.html`을 만들고 싶을 때 사용합니다.
@@ -42,7 +50,7 @@ $env:CULTURE_ALERT_SITE_PASSWORD="<비밀번호>"
 아래 명령은 임시 비밀번호로 암호화/복호화가 되는지 확인합니다. 이 비밀번호를 커밋하지 않습니다.
 
 ```powershell
-$env:CULTURE_ALERT_SITE_PASSWORD="temporary-test-password"
+$env:CULTURE_ALERT_SITE_PASSWORD="<임시검증용비밀번호>"
 python automation\run_daily_update.py --output "$env:TEMP\culture-alert-test.html"
 Remove-Item "$env:TEMP\culture-alert-test.html"
 ```

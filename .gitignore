@@ -14,6 +14,7 @@ source-report.html
 /automation/culture-alert/outputs/*.json
 /automation/culture-alert/outputs/raw-event-candidates.csv
 /automation/culture-alert/outputs/curated-candidate-shortlist.csv
+/automation/culture-alert/outputs/semi-auto-candidates.csv
 /automation/culture-alert/outputs/site-profile-results.json
 /automation/culture-alert/outputs/expanded-site-profile-results.json
 

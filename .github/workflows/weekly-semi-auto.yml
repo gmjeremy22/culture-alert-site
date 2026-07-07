@@ -1,0 +1,86 @@
+name: Weekly semi-auto candidate review
+
+on:
+  schedule:
+    # 08:10 Asia/Seoul every Monday. GitHub cron uses UTC.
+    - cron: "10 23 * * 0"
+  workflow_dispatch:
+    inputs:
+      publish_to_pages:
+        description: "검증 통과 후보까지 포함한 사이트를 Pages에 게시"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: weekly-semi-auto-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    timeout-minutes: 45
+    runs-on: ubuntu-latest
+    env:
+      PYTHONIOENCODING: utf-8
+      CULTURE_ALERT_SITE_PASSWORD: ${{ secrets.CULTURE_ALERT_SITE_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Check password secret
+        run: |
+          if [ -z "$CULTURE_ALERT_SITE_PASSWORD" ]; then
+            echo "::error::Add the CULTURE_ALERT_SITE_PASSWORD repository secret before running this workflow."
+            exit 1
+          fi
+
+      - name: Install Python dependencies
+        run: python -m pip install -r automation/requirements.txt
+
+      - name: Build semi-auto review
+        run: python automation/run_weekly_semi_auto.py
+
+      - name: Upload semi-auto review artifact
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: semi-auto-candidate-review
+          if-no-files-found: warn
+          path: |
+            automation/culture-alert/outputs/weekly-semi-auto-update-report.md
+            automation/culture-alert/outputs/semi-auto-candidate-report.md
+            automation/culture-alert/outputs/semi-auto-candidates.csv
+            automation/culture-alert/outputs/semi-auto-candidates.json
+            automation/culture-alert/outputs/culture-data-audit-report.md
+            automation/culture-alert/outputs/culture-ui-audit-report.md
+            public/index.html
+
+      - name: Configure Pages
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_pages }}
+        uses: actions/configure-pages@v6
+
+      - name: Upload site artifact
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_pages }}
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_to_pages }}
+        id: deployment
+        uses: actions/deploy-pages@v5

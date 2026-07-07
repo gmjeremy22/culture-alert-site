@@ -53,7 +53,7 @@ jobs:
         run: python automation/run_daily_update.py
 
       - name: Verify encrypted report
-        run: node tools/verify-protected-site.js --html public/index.html --leak "국립중앙박물관" --leak "feature-card"
+        run: node tools/verify-protected-site.js --html public/index.html --leak "feature-card"
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

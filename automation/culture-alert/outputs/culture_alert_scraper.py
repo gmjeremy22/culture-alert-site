@@ -1,4 +1,5 @@
 import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import csv
 import html
 import json
@@ -22,12 +23,87 @@ BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DB = BASE_DIR / "culture-alert.sqlite"
 REPORT_PATH = BASE_DIR / "latest-collection-report.md"
 OFFICIAL_PAGE_MONITOR_REPORT = BASE_DIR / "official-page-monitor-report.md"
+PROMOTED_LOW_GRADE_REPORT = BASE_DIR / "promoted-low-grade-report.md"
 INSTITUTION_CSV = BASE_DIR / "expanded-institution-candidates.csv"
 
 OFFICIAL_PAGE_FETCH_OVERRIDES = {
     "https://www.bok.or.kr/museum/": "https://www.bok.or.kr/museum/main/main.do",
     "https://whankimuseum.org/now/": "http://whankimuseum.org/exhibition_category/exhibition_now/",
     "https://museum.seoul.go.kr/scwm/board/NR_boardView.do?bbsCd=1080&seq=20260623174312968": "https://museum.seoul.go.kr/www/board/NR_boardView.do?bbsCd=1002&seq=20260623174312968",
+}
+
+PROMOTED_LOW_GRADE_GROUPS = {"B", "C", "SMALL", "SEOUL"}
+
+PROMOTED_LOW_GRADE_ALREADY_FORMAL_NAMES = {
+    "겸재정선미술관",
+    "허준박물관",
+    "성북구립미술관",
+    "성북구립 최만린미술관",
+    "성북선잠박물관",
+    "서대문자연사박물관",
+    "실학박물관",
+    "전곡선사박물관",
+    "경기도어린이박물관",
+}
+
+PROMOTED_LOW_GRADE_HOLD_NAMES = {
+    "한국은행 화폐박물관",
+    "용인시박물관",
+    "안양파빌리온",
+    "서울생활사박물관",
+    "청계천박물관",
+    "한양도성박물관",
+    "서울우리소리박물관",
+    "돈의문박물관마을",
+    "금호미술관",
+    "성곡미술관",
+    "환기미술관",
+    "코리아나미술관 스페이스씨",
+    "인천상륙작전기념관",
+    "경희궁",
+    "이화여자대학교 자연사박물관",
+    "고려대학교박물관",
+    "서울교육박물관",
+    "농업박물관",
+    "안양박물관",
+    "서대문형무소역사관",
+    "김달진미술자료박물관",
+    "목인박물관 목석원",
+    "혜곡최순우기념관",
+    "토탈미술관",
+    "아라리오뮤지엄 인 스페이스",
+    "김세중미술관",
+    "김중업건축박물관",
+}
+
+PROMOTED_LOW_GRADE_HOLD_REASONS = {
+    "한국은행 화폐박물관": "official URL returned 404 in precheck",
+    "용인시박물관": "SSL handshake failed in precheck",
+    "안양파빌리온": "SSL handshake failed in precheck",
+    "서울생활사박물관": "Seoul Museum board URL failed SSL precheck",
+    "청계천박물관": "Seoul Museum board URL failed SSL precheck",
+    "한양도성박물관": "Seoul Museum board URL failed SSL precheck",
+    "서울우리소리박물관": "official host did not resolve in precheck",
+    "돈의문박물관마을": "official host did not resolve in precheck",
+    "금호미술관": "configured exhibition URL returned 404",
+    "성곡미술관": "official site returned 406",
+    "환기미술관": "official site returned 406",
+    "코리아나미술관 스페이스씨": "official site returned 403",
+    "인천상륙작전기념관": "official site refused connection",
+    "경희궁": "Seoul Museum root failed SSL precheck",
+    "이화여자대학교 자연사박물관": "official site returned 403",
+    "고려대학교박물관": "official site refused connection",
+    "서울교육박물관": "official site timed out",
+    "농업박물관": "official page body was too short to verify safely",
+    "안양박물관": "SSL handshake failed in precheck",
+    "서대문형무소역사관": "official host did not resolve in precheck",
+    "김달진미술자료박물관": "official site returned 406",
+    "목인박물관 목석원": "official site timed out",
+    "혜곡최순우기념관": "official site returned 404",
+    "토탈미술관": "official site failed SSL precheck",
+    "아라리오뮤지엄 인 스페이스": "official site used an unsupported SSL key",
+    "김세중미술관": "official site timed out",
+    "김중업건축박물관": "SSL handshake failed in precheck",
 }
 
 
@@ -1974,16 +2050,17 @@ def backfill_source_groups():
     from small_local_backfill_collector import SMALL_LOCAL_SOURCES
 
     groups = []
-    for tier, sources in (
-        ("A", A_GRADE_SOURCES),
-        ("B", B_GRADE_SOURCES),
-        ("C", C_GRADE_SOURCES),
-        ("C", SMALL_LOCAL_SOURCES),
-        ("C", SEOUL_EXPANSION_SOURCES),
+    for tier, group, sources in (
+        ("A", "A", A_GRADE_SOURCES),
+        ("B", "B", B_GRADE_SOURCES),
+        ("C", "C", C_GRADE_SOURCES),
+        ("C", "SMALL", SMALL_LOCAL_SOURCES),
+        ("C", "SEOUL", SEOUL_EXPANSION_SOURCES),
     ):
         for source in sources:
             item = dict(source)
             item.setdefault("tier", tier)
+            item.setdefault("backfill_group", group)
             groups.append(item)
     return groups
 
@@ -2001,6 +2078,237 @@ def source_page_confidence(source_name, event_title, page_text):
         compact_name = source_name.replace(" ", "")
         checks.append(compact_name and compact_name in text.replace(" ", ""))
     return "높음" if any(checks) else "낮음"
+
+
+def promoted_low_grade_source_status(source):
+    group = source.get("backfill_group")
+    name = source.get("name", "")
+    events = source.get("events") or []
+    if group not in PROMOTED_LOW_GRADE_GROUPS:
+        return "out-of-scope"
+    if name in PROMOTED_LOW_GRADE_ALREADY_FORMAL_NAMES:
+        return "already-formal"
+    if name in PROMOTED_LOW_GRADE_HOLD_NAMES:
+        return "hold"
+    if not events:
+        return "hold-no-events"
+    return "promoted"
+
+
+def fetch_promoted_low_grade_pages(urls):
+    if not urls:
+        return {}
+
+    def fetch_one(url):
+        try:
+            page, final_url = fetch_html_relaxed(url)
+            if len(clean_text(page)) < 20:
+                return url, (None, final_url, "page text too short")
+            return url, (page, final_url, None)
+        except Exception as exc:
+            return url, (None, url, str(exc))
+
+    cache = {}
+    workers = min(12, max(1, len(urls)))
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        future_map = {executor.submit(fetch_one, url): url for url in urls}
+        for future in as_completed(future_map):
+            url, result = future.result()
+            cache[url] = result
+    return cache
+
+
+def promoted_low_grade_source_urls(source, metadata):
+    urls = []
+    meta = metadata.get(source.get("name", ""), {})
+    for event in source.get("events") or []:
+        source_url = clean_href(
+            event.get("source_url") or source.get("official_url") or meta.get("official_url") or ""
+        )
+        if source_url and source_url not in urls:
+            urls.append(source_url)
+    if not urls:
+        source_url = clean_href(source.get("official_url") or meta.get("official_url") or "")
+        if source_url:
+            urls.append(source_url)
+    return urls
+
+
+def markdown_cell(value):
+    return clean_text(str(value or "")).replace("|", "\\|")
+
+
+def promoted_low_grade_result_label(status):
+    return {
+        "promoted": "업그레이드 완료",
+        "already-formal": "이미 정식 수집기",
+        "hold": "보류",
+        "hold-no-events": "보류",
+    }.get(status, status)
+
+
+def promoted_low_grade_result_reason(name, status):
+    if status == "promoted":
+        return "official URL precheck passed; included in promoted-low-grade"
+    if status == "already-formal":
+        return "dedicated scraper already runs in daily automation"
+    if status == "hold-no-events":
+        return "no usable low-grade event definition yet"
+    if status == "hold":
+        return PROMOTED_LOW_GRADE_HOLD_REASONS.get(
+            name,
+            "site was unstable or not safe enough for daily automation",
+        )
+    return ""
+
+
+def extract_promoted_low_grade_events():
+    metadata = load_candidate_metadata()
+    sources = backfill_source_groups()
+    selected_sources = [
+        source
+        for source in sources
+        if promoted_low_grade_source_status(source) == "promoted"
+    ]
+    all_source_status = [
+        (
+            source.get("backfill_group", ""),
+            source.get("name", ""),
+            promoted_low_grade_source_status(source),
+            source,
+        )
+        for source in sources
+        if source.get("backfill_group") in PROMOTED_LOW_GRADE_GROUPS
+    ]
+
+    urls = []
+    for source in selected_sources:
+        meta = metadata.get(source.get("name", ""), {})
+        for event in source.get("events") or []:
+            source_url = clean_href(
+                event.get("source_url") or source.get("official_url") or meta.get("official_url") or ""
+            )
+            if source_url and source_url not in urls:
+                urls.append(source_url)
+
+    page_cache = fetch_promoted_low_grade_pages(urls)
+    events = []
+    failures = []
+    skipped_ended = []
+    promoted_rows = []
+
+    for source in selected_sources:
+        name = source["name"]
+        meta = metadata.get(name, {})
+        source_event_count = 0
+        for event in source.get("events") or []:
+            source_url = clean_href(
+                event.get("source_url") or source.get("official_url") or meta.get("official_url") or ""
+            )
+            if not source_url:
+                failures.append((name, event.get("title", ""), "source URL missing"))
+                continue
+            page, final_url, error = page_cache.get(source_url, (None, source_url, "not fetched"))
+            if error:
+                failures.append((name, event.get("title", ""), error))
+                continue
+
+            start_date = event.get("start_date")
+            end_date = event.get("end_date")
+            status = event.get("status") or infer_status(start_date, end_date)
+            if status == "종료":
+                skipped_ended.append((name, event.get("title", "")))
+                continue
+            confidence = source_page_confidence(name, event.get("title", ""), page)
+            image_url = event.get("image_url") or image_from_block(final_url, page)
+            description = clean_text(event.get("description") or "")
+            if not description:
+                description = clean_text(page)[:360]
+            region = source.get("region") or meta.get("region")
+            raw_text = (
+                f"promoted-low-grade scraper. institution={name}; "
+                f"group={source.get('backfill_group')}; confidence={confidence}; "
+                f"strategy={source.get('collection_strategy', '')}; source={final_url}; "
+                f"description={description}"
+            )
+            events.append(
+                {
+                    "institution_name": name,
+                    "content_type": event.get("content_type") or "전시",
+                    "title": clean_text(event.get("title") or ""),
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "location": event.get("location"),
+                    "region": region,
+                    "price": event.get("price"),
+                    "description": description or None,
+                    "keywords": event.get("keywords"),
+                    "image_url": image_url,
+                    "source_url": OFFICIAL_PAGE_FETCH_OVERRIDES.get(source_url, source_url),
+                    "status": status,
+                    "raw_text": raw_text,
+                    "occurrences": event.get("occurrences"),
+                }
+            )
+            source_event_count += 1
+        promoted_rows.append((source.get("backfill_group", ""), name, source_event_count))
+
+    lines = [
+        "# Promoted low-grade scraper report",
+        "",
+        f"- sources reviewed: {len(all_source_status)}",
+        f"- promoted sources selected: {len(selected_sources)}",
+        f"- urls checked: {len(page_cache)}",
+        f"- events collected: {len(events)}",
+        f"- ended events skipped: {len(skipped_ended)}",
+        f"- failed event checks: {len(failures)}",
+        "",
+        "## Institution status",
+        "",
+        "| group | institution | result | reason | source URL | daily automation | collected events |",
+        "| --- | --- | --- | --- | --- | --- | ---: |",
+    ]
+    collected_by_name = {name: count for _group, name, count in promoted_rows}
+    for group, name, status, source in sorted(
+        all_source_status,
+        key=lambda item: (item[0], item[1], item[2]),
+    ):
+        count = collected_by_name.get(name, 0)
+        source_urls = promoted_low_grade_source_urls(source, metadata)
+        url_text = "<br>".join(source_urls[:3])
+        if len(source_urls) > 3:
+            url_text += f"<br>+{len(source_urls) - 3} more"
+        included = "yes" if status in {"promoted", "already-formal"} else "no"
+        lines.append(
+            "| "
+            + " | ".join(
+                [
+                    markdown_cell(group),
+                    markdown_cell(name),
+                    markdown_cell(promoted_low_grade_result_label(status)),
+                    markdown_cell(promoted_low_grade_result_reason(name, status)),
+                    markdown_cell(url_text),
+                    included,
+                    str(count),
+                ]
+            )
+            + " |"
+        )
+    lines.extend(["", "## Event check failures", ""])
+    if failures:
+        for name, title, error in failures[:120]:
+            lines.append(f"- {name} - {clean_text(title or '')}: {clean_text(error)[:240]}")
+    else:
+        lines.append("- none")
+    lines.extend(["", "## Ended events skipped", ""])
+    if skipped_ended:
+        for name, title in skipped_ended[:120]:
+            lines.append(f"- {name} - {clean_text(title or '')}")
+    else:
+        lines.append("- none")
+    PROMOTED_LOW_GRADE_REPORT.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+    return events
 
 
 def extract_official_page_monitor_events():
@@ -2112,6 +2420,7 @@ SCRAPERS = {
     "national-museum": extract_national_museum_current_exhibitions,
     "nfm": extract_nfm_exhibitions,
     "official-page-monitor": extract_official_page_monitor_events,
+    "promoted-low-grade": extract_promoted_low_grade_events,
     "seoul-craft": extract_seoul_craft_museum_exhibitions,
     "seoul-history": extract_seoul_history_exhibitions,
     "seoul284": extract_seoul284_exhibitions,

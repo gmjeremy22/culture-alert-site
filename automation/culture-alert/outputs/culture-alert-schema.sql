@@ -104,6 +104,33 @@ CREATE TABLE IF NOT EXISTS event_occurrences (
   UNIQUE (event_id, occurrence_date, start_time, label)
 );
 
+CREATE TABLE IF NOT EXISTS event_candidates (
+  candidate_id TEXT PRIMARY KEY,
+  institution_name TEXT,
+  region TEXT,
+  city TEXT,
+  category TEXT,
+  tier TEXT,
+  content_type TEXT,
+  title TEXT,
+  start_date TEXT,
+  end_date TEXT,
+  image_url TEXT,
+  source_url TEXT,
+  page_url TEXT,
+  confidence REAL,
+  reason TEXT,
+  snippet TEXT,
+  extracted_at TEXT,
+  collection_group TEXT,
+  review_status TEXT,
+  validation_score REAL,
+  validation_reasons TEXT,
+  merged_event_id INTEGER,
+  merge_note TEXT,
+  reviewed_at TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_institutions_phase ON institutions(collection_phase, priority);
 CREATE INDEX IF NOT EXISTS idx_events_dates ON cultural_events(start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_events_status ON cultural_events(status);
@@ -114,3 +141,6 @@ CREATE INDEX IF NOT EXISTS idx_event_keywords_keyword ON event_keywords(keyword,
 CREATE INDEX IF NOT EXISTS idx_event_keywords_event ON event_keywords(event_id);
 CREATE INDEX IF NOT EXISTS idx_related_links_event ON related_links(event_id, rank);
 CREATE INDEX IF NOT EXISTS idx_event_occurrences_event ON event_occurrences(event_id, occurrence_date);
+CREATE INDEX IF NOT EXISTS idx_event_candidates_institution ON event_candidates(institution_name);
+CREATE INDEX IF NOT EXISTS idx_event_candidates_dates ON event_candidates(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_event_candidates_review ON event_candidates(review_status, validation_score);
