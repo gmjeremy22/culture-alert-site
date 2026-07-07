@@ -1,0 +1,24 @@
+# Do not commit raw local report artifacts.
+*.sqlite
+*.db
+*.sqlite3
+keyword-recommendation-report.html
+culture-card-gallery.html
+source-report.html
+/outputs/
+/work/
+/automation/culture-alert/outputs/culture-alert.before-maintenance.sqlite
+/automation/culture-alert/outputs/*-report.md
+/automation/culture-alert/outputs/*.html
+/automation/culture-alert/outputs/*.jpg
+/automation/culture-alert/outputs/*.json
+/automation/culture-alert/outputs/raw-event-candidates.csv
+/automation/culture-alert/outputs/curated-candidate-shortlist.csv
+/automation/culture-alert/outputs/site-profile-results.json
+/automation/culture-alert/outputs/expanded-site-profile-results.json
+
+# Local OS/editor noise.
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc

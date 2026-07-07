@@ -1,0 +1,53 @@
+name: Deploy protected report
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    env:
+      CULTURE_ALERT_SITE_PASSWORD: ${{ secrets.CULTURE_ALERT_SITE_PASSWORD }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Check password secret
+        run: |
+          if [ -z "$CULTURE_ALERT_SITE_PASSWORD" ]; then
+            echo "::error::Add the CULTURE_ALERT_SITE_PASSWORD repository secret before deploying."
+            exit 1
+          fi
+
+      - name: Verify encrypted report
+        run: node tools/verify-protected-site.js --html public/index.html --leak "국립중앙박물관" --leak "feature-card"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload site artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
