@@ -1,0 +1,153 @@
+institution_name,region,city,category,tier,official_url,notes
+국립중앙박물관,서울,용산구,박물관,A,https://www.museum.go.kr/,이미 수집기 적용
+국립현대미술관 서울관,서울,종로구,미술관,A,https://www.mmca.go.kr/,통합 전시 페이지 확인 필요
+국립현대미술관 덕수궁관,서울,중구,미술관,A,https://www.mmca.go.kr/,통합 전시 페이지 확인 필요
+서울시립미술관 서소문본관,서울,중구,미술관,A,https://sema.seoul.go.kr/,이미 서울시립미술관 통합 수집기 적용
+서울시립 북서울미술관,서울,노원구,미술관,A,https://sema.seoul.go.kr/,서울시립미술관 계열
+서울시립 남서울미술관,서울,관악구,미술관,A,https://sema.seoul.go.kr/,서울시립미술관 계열
+서울시립 미술아카이브,서울,종로구,미술관,A,https://sema.seoul.go.kr/,서울시립미술관 계열
+SeMA 백남준기념관,서울,종로구,미술관,B,https://sema.seoul.go.kr/,서울시립미술관 계열
+서울공예박물관,서울,종로구,박물관,A,https://craftmuseum.seoul.go.kr/,이미 수집기 적용
+서울역사박물관,서울,종로구,박물관,A,https://museum.seoul.go.kr/,전시/교육 모두 중요
+서울생활사박물관,서울,노원구,박물관,B,https://museum.seoul.go.kr/,서울역사박물관 계열
+청계천박물관,서울,성동구,박물관,B,https://museum.seoul.go.kr/,서울역사박물관 계열
+한양도성박물관,서울,종로구,박물관,B,https://museum.seoul.go.kr/,서울역사박물관 계열
+경희궁,서울,종로구,역사문화공간,C,https://museum.seoul.go.kr/,서울역사박물관 계열 전시 여부 확인
+한성백제박물관,서울,송파구,박물관,A,https://baekjemuseum.seoul.go.kr/,역사 전시 후보
+몽촌역사관,서울,송파구,박물관,B,https://baekjemuseum.seoul.go.kr/,한성백제박물관 계열
+국립민속박물관,서울,종로구,박물관,A,https://www.nfm.go.kr/,전시/교육 풍부
+국립한글박물관,서울,용산구,박물관,A,https://www.hangeul.go.kr/,전시/교육 풍부
+전쟁기념관,서울,용산구,박물관,A,https://www.warmemo.or.kr/,근현대사 관심사 중요
+대한민국역사박물관,서울,종로구,박물관,A,https://www.much.go.kr/,근현대사 핵심 후보
+국립고궁박물관,서울,종로구,박물관,A,https://www.gogung.go.kr/,궁중문화 전시
+국립기상박물관,서울,종로구,박물관,B,https://science.kma.go.kr/,전시/교육 후보
+서울우리소리박물관,서울,종로구,박물관,B,https://gomuseum.seoul.go.kr/,서울시립 박물관 후보
+돈의문박물관마을,서울,종로구,복합문화공간,B,https://dmvillage.info/,전시/프로그램 후보
+문화역서울284,서울,중구,복합문화공간,A,https://www.seoul284.org/,대형 전시 자주 개최
+예술의전당 한가람미술관,서울,서초구,미술관,A,https://www.sac.or.kr/,대형 기획전
+예술의전당 한가람디자인미술관,서울,서초구,미술관,A,https://www.sac.or.kr/,디자인 전시
+소마미술관,서울,송파구,미술관,A,https://soma.kspo.or.kr/,전시 후보
+리움미술관,서울,용산구,미술관,A,https://www.leeumhoam.org/leeum/,이미 수집기 적용
+아모레퍼시픽미술관,서울,용산구,미술관,A,https://apma.amorepacific.com/,대형 전시 후보
+디뮤지엄,서울,성동구,미술관,A,https://www.daelimmuseum.org/,대중 전시 후보
+대림미술관,서울,종로구,미술관,A,https://www.daelimmuseum.org/,대중 전시 후보
+아트선재센터,서울,종로구,미술관,A,https://artsonje.org/,현대미술 후보
+일민미술관,서울,종로구,미술관,A,https://ilmin.org/,현대미술 후보
+아르코미술관,서울,종로구,미술관,A,https://www.arko.or.kr/artcenter/,현대미술 후보
+금호미술관,서울,종로구,미술관,B,https://www.kumhomuseum.com/,전시 후보
+성곡미술관,서울,종로구,미술관,B,https://www.sungkokmuseum.org/,전시 후보
+환기미술관,서울,종로구,미술관,B,https://whankimuseum.org/,전시 후보
+사비나미술관,서울,은평구,미술관,B,https://www.savinamuseum.com/,전시 후보
+코리아나미술관 스페이스씨,서울,강남구,미술관,B,https://www.spacec.co.kr/,전시 후보
+호림박물관 신사분관,서울,강남구,박물관,B,https://www.horimmuseum.org/,전통미술 후보
+뮤지엄한미 삼청,서울,종로구,미술관,B,https://museumhanmi.or.kr/,사진 관심사 후보
+서울대학교미술관,서울,관악구,미술관,B,https://www.snumoa.org/,대학 미술관
+이화여자대학교박물관,서울,서대문구,박물관,C,https://museum.ewha.ac.kr/,대학 박물관
+이화여자대학교 자연사박물관,서울,서대문구,박물관,C,https://nhm.ewha.ac.kr/,대학 박물관
+연세대학교박물관,서울,서대문구,박물관,C,https://museum.yonsei.ac.kr/,대학 박물관
+고려대학교박물관,서울,성북구,박물관,C,https://museum.korea.ac.kr/,대학 박물관
+숙명여자대학교박물관,서울,용산구,박물관,C,https://museum.sookmyung.ac.kr/,대학 박물관
+서울교육박물관,서울,종로구,박물관,C,https://edumuseum.sen.go.kr/,교육사 후보
+경찰박물관,서울,종로구,박물관,C,https://www.policemuseum.go.kr/,전시 빈도 확인 필요
+우표박물관,서울,중구,박물관,C,https://stampmuseum.kr/,전시 빈도 확인 필요
+한국은행 화폐박물관,서울,중구,박물관,C,https://www.bok.or.kr/museum/,전시/교육 후보
+농업박물관,서울,중구,박물관,C,https://www.agrimuseum.or.kr/,전시 후보
+국립항공박물관,서울,강서구,박물관,A,https://www.aviation.or.kr/,교육/전시 후보
+국립현대미술관 과천관,경기,과천시,미술관,A,https://www.mmca.go.kr/,통합 전시 페이지 확인 필요
+경기도미술관,경기,안산시,미술관,A,https://gmoma.ggcf.kr/,경기권 핵심
+경기도박물관,경기,용인시,박물관,A,https://musenet.ggcf.kr/,경기권 핵심
+백남준아트센터,경기,용인시,미술관,A,https://njp.ggcf.kr/,미디어아트 핵심
+실학박물관,경기,남양주시,박물관,B,https://silhak.ggcf.kr/,역사 후보
+전곡선사박물관,경기,연천군,박물관,B,https://jgpm.ggcf.kr/,경기문화재단 계열
+경기도어린이박물관,경기,용인시,박물관,B,https://gcm.ggcf.kr/,가족/교육 후보
+수원시립미술관,경기,수원시,미술관,A,https://suma.suwon.go.kr/,경기남부 핵심
+수원박물관,경기,수원시,박물관,B,https://swmuseum.suwon.go.kr/,지역사 후보
+수원화성박물관,경기,수원시,박물관,B,https://hsmuseum.suwon.go.kr/,역사 후보
+성남큐브미술관,경기,성남시,미술관,B,https://www.snart.or.kr/,전시 후보
+고양아람누리 아람미술관,경기,고양시,미술관,B,https://www.artgy.or.kr/,전시 후보
+부천시립박물관,경기,부천시,박물관,B,https://www.bcmuseum.or.kr/,지역 박물관
+부천아트벙커B39,경기,부천시,복합문화공간,B,https://artbunkerb39.org/,전시/프로그램 후보
+양평군립미술관,경기,양평군,미술관,B,https://www.ymuseum.org/,전시 후보
+영은미술관,경기,광주시,미술관,B,https://www.youngeunmuseum.org/,전시 후보
+모란미술관,경기,남양주시,미술관,C,https://www.moranmuseum.org/,전시 후보
+미메시스 아트 뮤지엄,경기,파주시,미술관,B,https://www.mimesisartmuseum.co.kr/,전시 후보
+CICA 미술관,경기,김포시,미술관,C,https://cicamuseum.com/,전시 후보
+아트센터 화이트블럭,경기,파주시,미술관,C,https://whiteblock.org/,전시 후보
+뮤지엄 산,강원,원주시,미술관,OUT,https://www.museumsan.org/,수도권 밖이라 제외 후보
+호암미술관,경기,용인시,미술관,A,https://www.leeumhoam.org/hoam/,전통미술/정원 후보
+남양주시립박물관,경기,남양주시,박물관,C,https://www.nyj.go.kr/museum/,지역사 후보
+용인시박물관,경기,용인시,박물관,C,https://www.yongin.go.kr/museum/,지역사 후보
+안산산업역사박물관,경기,안산시,박물관,C,https://www.ansan.go.kr/,산업사 후보
+안양박물관,경기,안양시,박물관,C,https://www.ayac.or.kr/museum/,지역사 후보
+안양파빌리온,경기,안양시,복합문화공간,C,https://www.apap.or.kr/,공공예술 후보
+오산시립미술관,경기,오산시,미술관,C,https://www.osan.go.kr/arts/,전시 후보
+김포아트빌리지 아트센터,경기,김포시,복합문화공간,C,https://www.gcf.or.kr/,전시 후보
+여주박물관,경기,여주시,박물관,C,https://www.yeoju.go.kr/museum/,지역사 후보
+이천시립박물관,경기,이천시,박물관,C,https://www.icheon.go.kr/museum/,지역사 후보
+이천시립월전미술관,경기,이천시,미술관,C,https://www.iwoljeon.org/,전시 후보
+인천광역시립박물관,인천,연수구,박물관,A,https://www.incheon.go.kr/museum,인천 시립 계열 중심
+송암미술관,인천,미추홀구,미술관,B,https://www.incheon.go.kr/museum,인천 시립 계열
+검단선사박물관,인천,서구,박물관,B,https://www.incheon.go.kr/museum,인천 시립 계열
+한국이민사박물관,인천,중구,박물관,B,https://www.incheon.go.kr/museum,인천 시립 계열
+인천도시역사관,인천,연수구,박물관,B,https://www.incheon.go.kr/museum,인천 시립 계열
+국립인천해양박물관,인천,중구,박물관,A,https://www.inmm.or.kr/,국립 해양 박물관
+인천아트플랫폼,인천,중구,복합문화공간,A,https://inartplatform.kr/,전시/프로그램 후보
+인천상륙작전기념관,인천,연수구,박물관,B,https://www.landing915.com/,근현대사 후보
+수도국산달동네박물관,인천,동구,박물관,B,https://www.icdonggu.go.kr/open_content/museum/,생활사 후보
+짜장면박물관,인천,중구,박물관,C,https://www.icjg.go.kr/museum/,생활문화 후보
+강화역사박물관,인천,강화군,박물관,B,https://www.ghss.or.kr/,역사 후보
+강화자연사박물관,인천,강화군,박물관,C,https://www.ghss.or.kr/,자연사 후보
+소래역사관,인천,남동구,박물관,C,https://www.namdong.go.kr/museum/,지역사 후보
+부평역사박물관,인천,부평구,박물관,C,https://portal.icbp.go.kr/bphm/,지역사 후보
+한국근대문학관,인천,중구,박물관,B,https://lit.ifac.or.kr/,문학/근대문화 후보
+겸재정선미술관,서울,강서구,미술관,C,https://culture.gangseo.seoul.kr/gsfc/main/contents.do?menuNo=800054,구립 소규모 확장 후보
+허준박물관,서울,강서구,박물관,C,https://culture.gangseo.seoul.kr/gsfc/education/hmuseum/list.do?menuNo=800077,구립 의학사 박물관
+성북구립미술관,서울,성북구,미술관,C,https://sma.sbculture.or.kr/,구립 미술관 확장 후보
+성북구립 최만린미술관,서울,성북구,미술관,C,https://sma.sbculture.or.kr/cml/index.do,구립 작가미술관 확장 후보
+성북선잠박물관,서울,성북구,박물관,C,https://museum.sb.go.kr/,구립 생활문화 박물관
+종로구립 박노수미술관,서울,종로구,미술관,C,https://www.jfac.or.kr/site/main/content/parkns01,구립 작가미술관 확장 후보
+종로구립 고희동미술관,서울,종로구,미술관,C,https://www.jfac.or.kr/site/main/content/gohd01,구립 작가미술관 확장 후보
+은평역사한옥박물관,서울,은평구,박물관,C,https://museum.ep.go.kr/,구립 역사한옥 박물관
+서대문자연사박물관,서울,서대문구,박물관,C,https://namu.sdm.go.kr/web/main/main,구립 자연사 박물관
+서소문성지 역사박물관,서울,중구,박물관,C,https://www.seosomun.org/main.do,소규모 역사 박물관
+김중업건축박물관,경기,안양시,박물관,C,https://ayac.or.kr/museum/contents/view?contentsNo=52&menuLevel=2&menuNo=46,건축 박물관 확장 후보
+과천시 추사박물관,경기,과천시,박물관,C,https://www.gccity.go.kr/chusamuseum/main.do,시립 역사미술 박물관
+양주시립회암사지박물관,경기,양주시,박물관,C,https://www.yangju.go.kr/museum/index.do,시립 유적 박물관
+인천개항박물관,인천,중구,박물관,C,https://ijcf.or.kr/main/space/museum2.jsp,구립 근대사 박물관
+인천개항장 근대건축전시관,인천,중구,박물관,C,https://www.icjg.go.kr/tour/cttu0101a03,구립 근대건축 전시관
+대불호텔전시관,인천,중구,박물관,C,https://ijcf.or.kr/main/space/museum6.jsp,구립 생활사 전시관
+둘리뮤지엄,서울,도봉구,박물관,C,https://www.doolymuseum.or.kr,서울 공립 소규모 확장 후보
+서대문형무소역사관,서울,서대문구,박물관,C,https://www.sphh.sscmc.or.kr,서울 공립 소규모 확장 후보
+서울상상나라,서울,광진구,박물관,C,https://www.seoulchildrensmuseum.org,서울 공립 소규모 확장 후보
+서울약령시한의약박물관,서울,동대문구,박물관,C,https://kmedi.ddm.go.kr,서울 공립 소규모 확장 후보
+손기정기념관,서울,중구,박물관,C,https://www.sonkeechung.com,서울 공립 소규모 확장 후보
+송파책박물관,서울,송파구,박물관,C,https://www.bookmuseum.go.kr,서울 공립 소규모 확장 후보
+수도박물관,서울,성동구,박물관,C,https://arisu.seoul.go.kr/arisumuseum,서울 공립 소규모 확장 후보
+암사동선사유적박물관,서울,강동구,박물관,C,https://sunsa.gangdong.go.kr,서울 공립 소규모 확장 후보
+용산역사박물관,서울,용산구,박물관,C,https://museum.yongsan.go.kr,서울 공립 소규모 확장 후보
+G밸리산업박물관,서울,구로구,박물관,C,https://www.seoul.go.kr/museumg/index.do,서울 공립 소규모 확장 후보
+성북근현대문학관,서울,성북구,박물관,C,https://www.instagram.com/.culturalspace264?igsh=YmtiZWwwZzg5NTN2,서울 공립 소규모 확장 후보
+DDP디자인뮤지엄,서울,중구,미술관,C,https://www.ddp.or.kr,서울 공립 소규모 확장 후보
+가회민화박물관,서울,종로구,박물관,C,https://www.gahoemuseum.org,서울 사립 미술관/박물관 확장 후보
+간송박물관,서울,성북구,박물관,C,https://kansong.org,서울 사립 미술관/박물관 확장 후보
+김달진미술자료박물관,서울,종로구,박물관,C,https://daljinmuseum.com,서울 사립 미술관/박물관 확장 후보
+목인박물관 목석원,서울,종로구,박물관,C,https://www.mokinmuseum.com,서울 사립 미술관/박물관 확장 후보
+뮤지엄김치간,서울,종로구,박물관,C,https://www.kimchikan.com,서울 사립 미술관/박물관 확장 후보
+불교중앙박물관,서울,종로구,박물관,C,https://museum.buddhism.or.kr,서울 사립 미술관/박물관 확장 후보
+세계장신구박물관,서울,종로구,박물관,C,https://www.wjm.or.kr,서울 사립 미술관/박물관 확장 후보
+우리옛돌박물관,서울,성북구,박물관,C,https://www.koreanstonemuseum.com,서울 사립 미술관/박물관 확장 후보
+혜곡최순우기념관,서울,성북구,박물관,C,https://ntculture.or.kr,서울 사립 미술관/박물관 확장 후보
+자하미술관,서울,종로구,미술관,C,https://www.zahamuseum.org,서울 사립 미술관/박물관 확장 후보
+토탈미술관,서울,종로구,미술관,C,https://totalmuseum.org,서울 사립 미술관/박물관 확장 후보
+OCI미술관,서울,종로구,미술관,C,https://ocimuseum.org,서울 사립 미술관/박물관 확장 후보
+K현대미술관,서울,강남구,미술관,C,https://www.kmcaseoul.org,서울 사립 미술관/박물관 확장 후보
+롯데뮤지엄,서울,송파구,미술관,C,https://www.lottemuseum.com,서울 사립 미술관/박물관 확장 후보
+세종문화회관 미술관,서울,종로구,미술관,C,https://www.sejongpac.or.kr,서울 사립 미술관/박물관 확장 후보
+세화미술관,서울,종로구,미술관,C,https://www.sehwamuseum.org,서울 사립 미술관/박물관 확장 후보
+아라리오뮤지엄 인 스페이스,서울,종로구,미술관,C,https://www.arariomuseum.org,서울 사립 미술관/박물관 확장 후보
+아트센터나비미술관,서울,종로구,미술관,C,https://www.nabi.or.kr,서울 사립 미술관/박물관 확장 후보
+김세중미술관,서울,용산구,미술관,C,https://www.kimsechoong.com,서울 사립 미술관/박물관 확장 후보
+헬로우뮤지움,서울,성동구,미술관,C,https://www.hellomuseum.com,서울 사립 미술관/박물관 확장 후보
+서울과학기술대학교 미술관,서울,노원구,미술관,C,https://art.seoultech.ac.kr,서울 대학 미술관/박물관 확장 후보
+숙명여자대학교문신미술관,서울,용산구,미술관,C,https://home.sookmyung.ac.kr/moonshin/index.do,서울 대학 미술관/박물관 확장 후보
+한양대학교박물관,서울,성동구,박물관,C,https://museumuf.hanyang.ac.kr,서울 대학 미술관/박물관 확장 후보
