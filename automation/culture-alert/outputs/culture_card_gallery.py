@@ -174,6 +174,64 @@ def keyword_chip_html(keyword):
     )
 
 
+def add_badge(badges, label, tone):
+    if any(badge["label"] == label for badge in badges):
+        return
+    badges.append({"label": label, "tone": tone})
+
+
+def occurrence_days_until(item):
+    occurrence = item.get("nextOccurrence")
+    if not occurrence:
+        return None
+    return days_until(occurrence.get("date"))
+
+
+def editorial_badges(item):
+    badges = []
+    remaining = item.get("remainingDays")
+    starts_in = item.get("startsInDays")
+    next_occurrence_days = occurrence_days_until(item)
+    score = float(item.get("score") or 0)
+    keywords = set(item.get("keywordList") or [])
+
+    if remaining is not None and 0 <= remaining <= 14:
+        add_badge(badges, "곧 종료", "deadline")
+    if (
+        (starts_in is not None and 0 <= starts_in <= 7)
+        or (next_occurrence_days is not None and 0 <= next_occurrence_days <= 7)
+    ):
+        add_badge(badges, "이번 주 추천", "gold")
+    if score >= 2:
+        add_badge(badges, "취향 적합", "gold")
+    if item.get("isMajorInstitution"):
+        add_badge(badges, "주요 기관", "gold")
+    if item.get("companionEvents"):
+        companion_label = (
+            "가족 동선 좋음"
+            if ({"가족", "어린이", "참여형"} & keywords)
+            or item.get("type") in {"교육", "행사"}
+            else "같이 보기 좋음"
+        )
+        add_badge(badges, companion_label, "gold")
+    if item.get("isPermanent"):
+        add_badge(badges, "상설로 여유롭게", "calm")
+    elif item.get("region") == "서울":
+        add_badge(badges, "서울권 접근성 좋음", "calm")
+    if not badges and item.get("eventNature") == "limited":
+        add_badge(badges, "기간한정", "gold")
+    return badges[:3]
+
+
+def editorial_badge_html(badge):
+    tone = badge.get("tone") or "gold"
+    label = badge.get("label") or ""
+    return (
+        f'<span class="editorial-badge badge-{html.escape(tone)}">'
+        f"{html.escape(label)}</span>"
+    )
+
+
 def usable_image_url(value):
     return display_image_url(value)
 
@@ -361,6 +419,7 @@ def attach_companion_events(items):
             )
         )
         item["companionEvents"] = companions
+        item["curationBadges"] = editorial_badges(item)
 
 
 def load_events(conn, person_name):
@@ -649,12 +708,21 @@ def render(person_name="가족"):
             filter_buttons.append(
                 f'<button class="filter-button" type="button" data-filter="{html.escape(item_type)}" aria-pressed="false">{html.escape(item_type)}</button>'
             )
+
     def render_card(index, item, class_name):
         image = item["imageUrl"]
         image_html = (
             f'<img src="{html.escape(image)}" alt="{html.escape(item["displayTitle"])}" loading="lazy">'
             if image
             else '<div class="poster-empty" aria-label="이미지 없음"></div>'
+        )
+        badges = "".join(
+            editorial_badge_html(badge) for badge in item.get("curationBadges", [])
+        )
+        badges_html = (
+            f'<div class="editorial-badges" aria-label="추천 배지">{badges}</div>'
+            if badges
+            else ""
         )
         keyword_chips = "".join(
             keyword_chip_html(keyword) for keyword in item["keywordList"][:4]
@@ -669,6 +737,7 @@ def render(person_name="가족"):
           <button class="card-button" type="button" data-index="{index}">
             <div class="poster">{image_html}</div>
             <div class="card-body">
+              {badges_html}
               <p class="card-place">{html.escape(item['displayVenue'])}</p>
               <h2>{html.escape(item['displayTitle'])}</h2>
               <p class="card-period">{html.escape(item['period'])}</p>
@@ -709,6 +778,9 @@ def render(person_name="가족"):
       --panel-2: #171717;
       --accent: #f0dfc2;
       --accent-ink: #11100d;
+      --badge-gold: #f4ce7a;
+      --badge-deadline: #ffb276;
+      --badge-calm: #d7c7ad;
       --shadow: 0 26px 70px rgba(0, 0, 0, 0.56);
     }}
     * {{ box-sizing: border-box; }}
@@ -1091,6 +1163,49 @@ def render(person_name="가족"):
       font-size: 15px;
       font-weight: 640;
     }}
+    .editorial-badges {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin-bottom: 2px;
+    }}
+    .feature-card.rank-even .editorial-badges {{
+      justify-content: flex-end;
+    }}
+    .editorial-badge {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      max-width: 100%;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }}
+    .feature-card .editorial-badge {{
+      min-height: 26px;
+      padding-inline: 10px;
+      font-size: 12px;
+    }}
+    .badge-deadline {{
+      border-color: rgba(255, 178, 118, 0.5);
+      background: rgba(255, 178, 118, 0.15);
+      color: #ffd0aa;
+    }}
+    .badge-gold {{
+      border-color: rgba(244, 206, 122, 0.52);
+      background: rgba(244, 206, 122, 0.14);
+      color: #f9df9b;
+    }}
+    .badge-calm {{
+      border-color: rgba(215, 199, 173, 0.3);
+      background: rgba(215, 199, 173, 0.1);
+      color: #d8ccbb;
+    }}
     .keyword-row,
     .tag-list {{
       display: flex;
@@ -1279,8 +1394,7 @@ def render(person_name="가족"):
       font-size: 15px;
     }}
     .detail-actions,
-    .related-list,
-    .companion-list {{
+    .related-list {{
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
@@ -1309,12 +1423,28 @@ def render(person_name="가족"):
       padding-top: 16px;
       border-top: 1px solid var(--line);
     }}
+    .companion-section {{
+      padding: 16px;
+      border: 1px solid rgba(240, 223, 194, 0.18);
+      border-radius: 8px;
+      background: rgba(240, 223, 194, 0.055);
+    }}
     .section-title,
     .related-title {{
       margin: 0 0 10px;
       color: var(--muted);
       font-size: 13px;
       font-weight: 800;
+    }}
+    .companion-section .section-title {{
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-size: 14px;
+    }}
+    .companion-note {{
+      margin: 0 0 12px;
+      color: #b9afa0;
+      font-size: 13px;
     }}
     .related-link {{
       border: 1px solid var(--line);
@@ -1355,25 +1485,39 @@ def render(person_name="가족"):
       color: var(--muted);
       font-size: 12px;
     }}
+    .companion-list {{
+      display: grid;
+      gap: 8px;
+    }}
     .companion-button {{
-      flex: 1 1 210px;
-      min-height: 74px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 78px;
       border: 1px solid var(--line);
       border-radius: 6px;
-      background: #121722;
+      background: #151515;
       color: var(--ink);
       padding: 10px;
       text-align: left;
       cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
     }}
     .companion-button:hover,
     .companion-button:focus-visible {{
       border-color: var(--accent);
+      background: #1b1a17;
+      transform: translateY(-1px);
       outline: none;
     }}
-    .companion-type {{
+    .companion-main {{
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }}
+    .companion-meta {{
       display: block;
-      margin-bottom: 4px;
       color: var(--muted);
       font-size: 11px;
       font-weight: 900;
@@ -1386,9 +1530,21 @@ def render(person_name="가족"):
     }}
     .companion-period {{
       display: block;
-      margin-top: 5px;
       color: var(--muted);
       font-size: 12px;
+    }}
+    .companion-action {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
     }}
     .modal-open {{
       overflow: hidden;
@@ -1464,6 +1620,9 @@ def render(person_name="가족"):
       .feature-card.rank-even .keyword-row {{
         justify-content: flex-start;
       }}
+      .feature-card.rank-even .editorial-badges {{
+        justify-content: flex-start;
+      }}
       .feature-card h2,
       .feature-card:first-child h2 {{
         font-size: 22px;
@@ -1508,7 +1667,11 @@ def render(person_name="가족"):
         gap: 4px;
       }}
       .companion-button {{
-        flex-basis: 100%;
+        grid-template-columns: 1fr;
+        align-items: start;
+      }}
+      .companion-action {{
+        width: fit-content;
       }}
     }}
   </style>
@@ -1922,7 +2085,12 @@ def render(person_name="가족"):
         fields.companions.hidden = true;
         return;
       }}
-      fields.companions.appendChild(makeSectionTitle("같은 실제 장소의 다른 일정 " + companions.length + "개"));
+      fields.companions.appendChild(makeSectionTitle("같은 장소에서 함께 볼 것"));
+      const note = document.createElement("p");
+      note.className = "companion-note";
+      note.textContent = (item.displayVenue || item.institution || "이 장소") +
+        " 방문 동선에 묶기 좋은 일정 " + companions.length + "개";
+      fields.companions.appendChild(note);
       const list = document.createElement("div");
       list.className = "companion-list";
       companions.forEach((event) => {{
@@ -1931,13 +2099,16 @@ def render(person_name="가족"):
         button.className = "companion-button";
         button.addEventListener("click", () => openDetail(event.index));
 
-        const type = document.createElement("span");
-        type.className = "companion-type";
-        type.textContent = event.type + " · " + event.displayVenue;
+        const main = document.createElement("span");
+        main.className = "companion-main";
+
+        const meta = document.createElement("span");
+        meta.className = "companion-meta";
+        meta.textContent = event.type + " · " + (event.status || "상태 확인");
 
         const title = document.createElement("span");
         title.className = "companion-title";
-        title.textContent = event.title;
+        title.textContent = event.displayTitle || event.title;
 
         const period = document.createElement("span");
         period.className = "companion-period";
@@ -1945,9 +2116,15 @@ def render(person_name="가족"):
           ? "다음 " + event.nextOccurrence.dateText + " " + event.nextOccurrence.time
           : event.period;
 
-        button.appendChild(type);
-        button.appendChild(title);
-        button.appendChild(period);
+        const action = document.createElement("span");
+        action.className = "companion-action";
+        action.textContent = "열기";
+
+        main.appendChild(meta);
+        main.appendChild(title);
+        main.appendChild(period);
+        button.appendChild(main);
+        button.appendChild(action);
         list.appendChild(button);
       }});
       fields.companions.appendChild(list);

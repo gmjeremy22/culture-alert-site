@@ -67,6 +67,20 @@ REQUIRED_IDS = {
 
 REQUIRED_VIEWS = {"featured", "all", "permanent"}
 
+EDITORIAL_BADGE_LABELS = {
+    "취향 적합",
+    "곧 종료",
+    "가족 동선 좋음",
+    "같이 보기 좋음",
+    "주요 기관",
+    "이번 주 추천",
+    "상설로 여유롭게",
+    "서울권 접근성 좋음",
+    "기간한정",
+}
+
+EDITORIAL_BADGE_TONES = {"deadline", "gold", "calm"}
+
 SCRIPT_FLOW_MARKERS = {
     "카드 클릭으로 세부창 열기": 'document.querySelectorAll("[data-index]")',
     "보기 전환 버튼": 'document.querySelectorAll("[data-view]")',
@@ -250,6 +264,8 @@ def iter_item_texts(item):
         yield f"event {item_id} {title} / keyword", str(keyword)
     for keyword in item.get("keywordMeta") or []:
         yield f"event {item_id} {title} / keywordMeta", str(keyword.get("label", ""))
+    for badge in item.get("curationBadges") or []:
+        yield f"event {item_id} {title} / curationBadge", str(badge.get("label", ""))
     for occurrence in item.get("occurrences") or []:
         for field in ("dateText", "time", "label", "note"):
             value = occurrence.get(field)
@@ -307,6 +323,21 @@ def check_html_structure(findings, parser, html_text, items):
             break
 
     scan_text_for_markers(findings, "화면에 보이는 HTML 텍스트", parser.visible_text)
+
+    if "editorial-badge" not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "추천 배지 UI 누락",
+            "추천 카드에서 클릭할 이유를 빠르게 보여주는 editorial badge가 렌더링되지 않았습니다.",
+        )
+    if "같은 장소에서 함께 볼 것" not in html_text or "companion-action" not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "같은 장소 큐레이션 UI 누락",
+            "세부창의 같은 장소 일정이 방문 동선 큐레이션 섹션으로 표시되지 않습니다.",
+        )
 
     total = len(items)
     timed = [item for item in items if not item.get("isPermanent")]
@@ -401,6 +432,8 @@ def check_items(findings, items):
     source_missing = []
     image_bad = []
     companion_bad = []
+    badge_bad = []
+    timed_badge_count = 0
 
     for index, item in enumerate(items):
         item_id = item.get("id")
@@ -424,6 +457,15 @@ def check_items(findings, items):
         image_url = item.get("imageUrl")
         if image_url and not valid_url(image_url):
             image_bad.append(f"{item_id} | {title} | {image_url}")
+
+        badges = item.get("curationBadges") or []
+        if badges and not item.get("isPermanent"):
+            timed_badge_count += 1
+        for badge in badges:
+            label = badge.get("label")
+            tone = badge.get("tone")
+            if label not in EDITORIAL_BADGE_LABELS or tone not in EDITORIAL_BADGE_TONES:
+                badge_bad.append(f"{item_id} | {title} | {label} | {tone}")
 
         description = item.get("description") or ""
         if len(description) > 700:
@@ -477,6 +519,21 @@ def check_items(findings, items):
             "이미지 감사에서 별도 확인할 이미지 URL 형식 문제가 있습니다.",
             "\n".join(image_bad[:20]),
         )
+    if not timed_badge_count:
+        add_finding(
+            findings,
+            "P2",
+            "추천 카드 배지 데이터 없음",
+            "기간 일정 추천 카드에 사람이 바로 이해할 수 있는 큐레이션 배지가 없습니다.",
+        )
+    if badge_bad:
+        add_finding(
+            findings,
+            "P2",
+            "추천 배지 값 오류",
+            "정의되지 않은 추천 배지 문구나 색상 톤이 카드 데이터에 들어 있습니다.",
+            "\n".join(badge_bad[:20]),
+        )
     if companion_bad:
         add_finding(
             findings,
@@ -510,11 +567,11 @@ def render_findings(lines, findings):
 
 def manual_review_checklist():
     return [
-        "추천 보기: 처음 보이는 카드 12개를 하나씩 열고 닫기 버튼, Esc, 바깥 클릭 닫기가 모두 되는지 확인",
+        "추천 보기: 처음 보이는 카드 12개에서 취향/마감/기관/동선 배지가 1-2초 안에 이해되는지 확인",
         "추천 조건: 관심 키워드, 지역, 일정, 우선순위, 초기화를 각각 눌러 카드 수와 요약 문구가 자연스럽게 바뀌는지 확인",
         "기간 일정: 전체/전시/강연/교육/행사 필터를 누르고 숨김 카드가 남거나 빈 공간이 어색하지 않은지 확인",
         "상설전: 상설전 탭의 첫 12개와 이미지 없는 카드 몇 개를 열어 기간/상태 문구가 기간 일정과 섞이지 않는지 확인",
-        "세부창: 원문 보기, 후기/검색 링크, 같은 실제 장소의 다른 일정 버튼, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
+        "세부창: 원문 보기, 후기/검색 링크, 같은 장소에서 함께 볼 것 섹션, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
         "문구 품질: 국립중앙박물관, 자동 모니터 출신 기관, 설명이 긴 카드에서 코드/푸터/깨진 글자가 보이지 않는지 확인",
         "화면 크기: 데스크톱 1366x900과 모바일 390x844에서 버튼, 카드 제목, 세부창 텍스트가 겹치거나 잘리지 않는지 확인",
     ]
