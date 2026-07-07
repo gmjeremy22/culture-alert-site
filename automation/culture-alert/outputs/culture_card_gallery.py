@@ -709,15 +709,24 @@ def render(person_name="가족"):
                 f'<button class="filter-button" type="button" data-filter="{html.escape(item_type)}" aria-pressed="false">{html.escape(item_type)}</button>'
             )
 
+    def poster_empty_html(item):
+        venue = html.escape(item.get("displayVenue") or item.get("institution") or "문화 일정")
+        item_type = html.escape(item.get("type") or "일정")
+        return (
+            '<div class="poster-empty" aria-label="이미지 없음">'
+            f"<span>{venue}</span><strong>{item_type}</strong><small>이미지 준비 중</small>"
+            "</div>"
+        )
+
     def render_card(index, item, class_name):
         image = item["imageUrl"]
         image_html = (
             f'<img src="{html.escape(image)}" alt="{html.escape(item["displayTitle"])}" loading="lazy">'
             if image
-            else '<div class="poster-empty" aria-label="이미지 없음"></div>'
+            else poster_empty_html(item)
         )
         badges = "".join(
-            editorial_badge_html(badge) for badge in item.get("curationBadges", [])
+            editorial_badge_html(badge) for badge in item.get("curationBadges", [])[:3]
         )
         badges_html = (
             f'<div class="editorial-badges" aria-label="추천 배지">{badges}</div>'
@@ -1674,58 +1683,688 @@ def render(person_name="가족"):
         width: fit-content;
       }}
     }}
+    /* Curation report home */
+    .page-header {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 28px;
+      align-items: start;
+      margin-bottom: 30px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid rgba(247, 244, 238, 0.1);
+    }}
+    .header-copy {{
+      min-width: 0;
+    }}
+    .header-actions {{
+      display: grid;
+      justify-items: end;
+      gap: 12px;
+    }}
+    .subcopy {{
+      max-width: 660px;
+      margin: 8px 0 0;
+      color: #c7c2b7;
+      font-size: 15px;
+      line-height: 1.55;
+    }}
+    .stat-pill {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 30px;
+      border: 1px solid rgba(240, 223, 194, 0.24);
+      border-radius: 999px;
+      background: rgba(240, 223, 194, 0.08);
+      color: var(--accent);
+      padding: 0 11px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }}
+    .featured-view {{
+      display: grid;
+      gap: 30px;
+    }}
+    .featured-view[hidden] {{
+      display: none;
+    }}
+    .section-heading {{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 12px;
+    }}
+    .section-heading p {{
+      margin: 0;
+      color: var(--ink);
+      font-size: 17px;
+      font-weight: 900;
+    }}
+    .section-heading span {{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 760;
+      text-align: right;
+    }}
+    .curation-board {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.72fr);
+      gap: 18px;
+      align-items: stretch;
+    }}
+    .curation-hero,
+    .mini-stack,
+    .venue-bundle-section,
+    .quick-filter-panel,
+    .recommendation-panel,
+    .recommendation-grid-section {{
+      min-width: 0;
+    }}
+    .hero-slot {{
+      min-height: 430px;
+    }}
+    .hero-button {{
+      display: grid;
+      grid-template-columns: minmax(240px, 0.92fr) minmax(0, 1fr);
+      width: 100%;
+      min-height: 430px;
+      padding: 0;
+      border: 1px solid rgba(240, 223, 194, 0.2);
+      border-radius: 8px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(240, 223, 194, 0.1), rgba(16, 16, 16, 0.96) 42%);
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.34);
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }}
+    .hero-button:hover,
+    .hero-button:focus-visible {{
+      transform: translateY(-2px);
+      border-color: rgba(240, 223, 194, 0.48);
+      box-shadow: 0 26px 90px rgba(0, 0, 0, 0.46);
+      outline: none;
+    }}
+    .hero-media {{
+      min-width: 0;
+      background: #0b0b0b;
+    }}
+    .hero-media img {{
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 430px;
+      object-fit: contain;
+      object-position: center top;
+      background: #0b0b0b;
+    }}
+    .hero-copy {{
+      display: grid;
+      align-content: end;
+      gap: 12px;
+      padding: 28px;
+    }}
+    .hero-label,
+    .mini-label {{
+      margin: 0;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 920;
+    }}
+    .hero-copy h2 {{
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.18;
+      font-weight: 900;
+    }}
+    .hero-meta,
+    .hero-reason,
+    .mini-meta,
+    .bundle-meta,
+    .bundle-companions {{
+      margin: 0;
+      color: #c7c2b7;
+      font-size: 13px;
+      line-height: 1.45;
+    }}
+    .hero-reason {{
+      max-width: 520px;
+      color: #e4dccd;
+      font-size: 14px;
+    }}
+    .hero-cta,
+    .mini-action,
+    .bundle-action {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: fit-content;
+      min-height: 34px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      padding: 0 13px;
+      font-size: 12px;
+      font-weight: 930;
+    }}
+    .curation-stacks {{
+      display: grid;
+      gap: 18px;
+    }}
+    .mini-stack {{
+      display: grid;
+      align-content: start;
+      border: 1px solid rgba(247, 244, 238, 0.11);
+      border-radius: 8px;
+      background: rgba(247, 244, 238, 0.035);
+      padding: 15px;
+    }}
+    .mini-list {{
+      display: grid;
+      gap: 8px;
+    }}
+    .mini-button {{
+      display: grid;
+      gap: 7px;
+      width: 100%;
+      border: 1px solid rgba(247, 244, 238, 0.11);
+      border-radius: 7px;
+      background: #111111;
+      color: inherit;
+      padding: 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+    }}
+    .mini-button:hover,
+    .mini-button:focus-visible {{
+      border-color: rgba(240, 223, 194, 0.46);
+      background: #171511;
+      transform: translateY(-1px);
+      outline: none;
+    }}
+    .mini-button h3,
+    .bundle-card h3 {{
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin: 0;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }}
+    .mini-topline {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }}
+    .deadline-pill {{
+      flex: 0 0 auto;
+      color: #ffd0aa;
+      font-size: 11px;
+      font-weight: 930;
+      white-space: nowrap;
+    }}
+    .venue-bundle-list {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }}
+    .bundle-card {{
+      display: grid;
+      gap: 9px;
+      min-height: 180px;
+      border: 1px solid rgba(240, 223, 194, 0.16);
+      border-radius: 8px;
+      background: rgba(240, 223, 194, 0.05);
+      color: inherit;
+      padding: 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+    }}
+    .bundle-card:hover,
+    .bundle-card:focus-visible {{
+      border-color: rgba(240, 223, 194, 0.46);
+      background: rgba(240, 223, 194, 0.085);
+      transform: translateY(-2px);
+      outline: none;
+    }}
+    .bundle-venue {{
+      margin: 0;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 930;
+    }}
+    .bundle-companions {{
+      color: var(--muted);
+    }}
+    .quick-filter-panel {{
+      overflow: hidden;
+    }}
+    .quick-filter-rail {{
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 3px;
+      scrollbar-width: thin;
+    }}
+    .quick-chip {{
+      flex: 0 0 auto;
+      min-height: 36px;
+      border: 1px solid rgba(247, 244, 238, 0.14);
+      border-radius: 999px;
+      background: #0d0d0d;
+      color: #d8d0c2;
+      padding: 0 13px;
+      font-size: 13px;
+      font-weight: 850;
+      cursor: pointer;
+      white-space: nowrap;
+    }}
+    .quick-chip[aria-pressed="true"] {{
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-ink);
+    }}
+    .recommendation-panel {{
+      display: grid;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      border-bottom: 0;
+    }}
+    .advanced-filter {{
+      border: 1px solid rgba(247, 244, 238, 0.12);
+      border-radius: 8px;
+      background: rgba(247, 244, 238, 0.035);
+    }}
+    .advanced-filter summary {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 50px;
+      padding: 0 15px;
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      list-style: none;
+    }}
+    .advanced-filter summary::-webkit-details-marker {{
+      display: none;
+    }}
+    .advanced-filter summary small {{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 740;
+      text-align: right;
+    }}
+    .advanced-filter-body {{
+      display: grid;
+      gap: 18px;
+      padding: 0 15px 15px;
+    }}
+    .reset-button.is-active {{
+      border-color: rgba(255, 178, 118, 0.5);
+      background: rgba(255, 178, 118, 0.15);
+      color: #ffd0aa;
+    }}
+    .recommendation-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      align-items: stretch;
+      width: 100%;
+      margin: 0;
+    }}
+    .recommendation-grid .feature-card,
+    .recommendation-grid .feature-card.rank-even,
+    .recommendation-grid .feature-card:first-child {{
+      width: 100%;
+      justify-self: stretch;
+      margin-top: 0;
+    }}
+    .recommendation-grid .feature-card .card-button,
+    .recommendation-grid .feature-card:first-child .card-button,
+    .recommendation-grid .feature-card.rank-even .card-button {{
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 0;
+      align-items: stretch;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.26);
+    }}
+    .recommendation-grid .feature-card.rank-even .poster,
+    .recommendation-grid .feature-card.rank-even .card-body {{
+      grid-column: auto;
+      grid-row: auto;
+    }}
+    .recommendation-grid .feature-card .poster {{
+      display: block;
+      aspect-ratio: 4 / 5;
+      background: #111111;
+      overflow: hidden;
+    }}
+    .recommendation-grid .feature-card .poster img {{
+      width: 100%;
+      height: 100%;
+      max-height: none;
+      object-fit: contain;
+      object-position: center top;
+      border-radius: 0;
+      background: #0b0b0b;
+      box-shadow: none;
+      transform: none;
+    }}
+    .recommendation-grid .feature-card .card-body,
+    .recommendation-grid .feature-card.rank-even .card-body {{
+      width: 100%;
+      max-width: none;
+      justify-items: start;
+      gap: 8px;
+      padding: 14px;
+      text-align: left;
+    }}
+    .recommendation-grid .feature-card h2,
+    .recommendation-grid .feature-card:first-child h2 {{
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 16px;
+      line-height: 1.32;
+    }}
+    .recommendation-grid .feature-card .editorial-badges,
+    .recommendation-grid .feature-card.rank-even .editorial-badges,
+    .recommendation-grid .feature-card.rank-even .keyword-row {{
+      justify-content: flex-start;
+    }}
+    .poster-empty {{
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 8px;
+      min-height: 100%;
+      padding: 18px;
+      border: 1px solid rgba(247, 244, 238, 0.1);
+      color: #cfc4b4;
+      text-align: center;
+      background:
+        linear-gradient(135deg, rgba(240, 223, 194, 0.1), rgba(255, 255, 255, 0) 42%),
+        #151515;
+    }}
+    .poster-empty::after {{
+      content: none;
+    }}
+    .poster-empty span {{
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }}
+    .poster-empty strong {{
+      color: var(--accent);
+      font-size: 22px;
+      font-weight: 930;
+    }}
+    .poster-empty small {{
+      color: #9ea4ad;
+      font-size: 12px;
+      font-weight: 760;
+    }}
+    .detail-info-grid {{
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }}
+    .detail-info-grid div {{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4px;
+      min-height: 62px;
+      padding: 10px;
+      border: 1px solid rgba(247, 244, 238, 0.1);
+      border-radius: 7px;
+      background: rgba(247, 244, 238, 0.035);
+    }}
+    .why-section {{
+      margin-top: 18px;
+      padding: 15px;
+      border: 1px solid rgba(244, 206, 122, 0.2);
+      border-radius: 8px;
+      background: rgba(244, 206, 122, 0.07);
+    }}
+    .why-section[hidden] {{
+      display: none;
+    }}
+    .why-list {{
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }}
+    .why-list li {{
+      color: #e5dac7;
+      font-size: 13px;
+      line-height: 1.5;
+    }}
+    @media (max-width: 1040px) {{
+      .curation-board {{
+        grid-template-columns: 1fr;
+      }}
+      .curation-stacks {{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+      .venue-bundle-list,
+      .recommendation-grid {{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+    }}
+    @media (max-width: 760px) {{
+      .page-header {{
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }}
+      .header-actions {{
+        justify-items: start;
+      }}
+      .subcopy {{
+        font-size: 14px;
+      }}
+      .curation-stacks,
+      .venue-bundle-list,
+      .recommendation-grid {{
+        grid-template-columns: 1fr;
+      }}
+      .hero-slot,
+      .hero-button {{
+        min-height: 0;
+      }}
+      .hero-button {{
+        grid-template-columns: 1fr;
+      }}
+      .hero-media img {{
+        min-height: 0;
+        max-height: 420px;
+      }}
+      .hero-copy {{
+        padding: 20px;
+      }}
+      .hero-copy h2 {{
+        font-size: 24px;
+      }}
+      .section-heading {{
+        align-items: flex-start;
+      }}
+      .section-heading span {{
+        max-width: 46%;
+      }}
+      .advanced-filter summary {{
+        align-items: flex-start;
+        flex-direction: column;
+        justify-content: center;
+        padding-block: 10px;
+      }}
+      .advanced-filter summary small {{
+        text-align: left;
+      }}
+      .detail-panel {{
+        width: 100%;
+        max-height: 100dvh;
+        height: 100dvh;
+        border-radius: 0;
+      }}
+      .overlay {{
+        place-items: stretch;
+        padding: 0;
+      }}
+      .detail-body {{
+        padding: 20px 16px 0;
+      }}
+      .detail-info-grid {{
+        grid-template-columns: 1fr;
+      }}
+      .detail-actions {{
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        margin: 18px -16px 0;
+        padding: 12px 16px 16px;
+        background: linear-gradient(180deg, rgba(16, 22, 32, 0), #101620 30%);
+      }}
+      .source-link {{
+        width: 100%;
+      }}
+    }}
   </style>
 </head>
 <body class="view-featured">
   <main>
-    <header>
-      <div>
-        <p class="eyebrow">관심 기반 추천</p>
-        <h1>{html.escape(person_name)} 관심 문화 일정</h1>
+    <header class="page-header">
+      <div class="header-copy">
+        <p class="eyebrow">관심 기반 문화 큐레이션</p>
+        <h1>오늘 고르기 좋은 문화 일정</h1>
+        <p class="subcopy">가족 관심사와 일정 조건을 바탕으로, 지금 눌러볼 만한 전시·교육·강연을 먼저 골랐어요.</p>
         <p class="summary">진행/예정 {len(items)}건 · {html.escape(count_text)}</p>
       </div>
-      <div class="toolbar" aria-label="보기 전환">
-        <button class="view-button" type="button" data-view="featured" aria-pressed="true">추천 보기</button>
-        <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 일정</button>
-        <button class="view-button" type="button" data-view="permanent" aria-pressed="false">상설전</button>
+      <div class="header-actions">
+        <span class="stat-pill" aria-label="전체 카드 수">{len(items)}개 카드</span>
+        <div class="toolbar" aria-label="보기 전환">
+          <button class="view-button" type="button" data-view="featured" aria-pressed="true">추천 보기</button>
+          <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 일정</button>
+          <button class="view-button" type="button" data-view="permanent" aria-pressed="false">상설전</button>
+        </div>
       </div>
     </header>
-    <section class="recommendation-panel" aria-label="관심 기반 추천 설정">
-      <div class="choice-group">
-        <p class="choice-title">관심 키워드</p>
-        <div class="keyword-stack" id="keywordChoices">
-          {keyword_buttons}
-        </div>
-      </div>
-      <div class="choice-grid">
-        <div class="choice-group">
-          <p class="choice-title">지역</p>
-          <div class="choice-row">
-            {region_buttons}
-          </div>
-        </div>
-        <div class="choice-group">
-          <p class="choice-title">일정</p>
-          <div class="choice-row">
-            {type_buttons}
-          </div>
-        </div>
-        <div class="choice-group">
-          <p class="choice-title">우선</p>
-          <div class="choice-row">
-            {priority_buttons}
-          </div>
-        </div>
-      </div>
-      <div class="recommendation-status">
-        <p id="recommendationSummary"></p>
-        <button class="reset-button" type="button" id="resetRecommendation">초기화</button>
-      </div>
-    </section>
     <section class="featured-view" id="featuredView" aria-label="추천 일정">
-      <div class="feature-feed" id="featureFeed">
-        {featured_cards}
-      </div>
+      <section class="curation-board" aria-label="오늘의 큐레이션">
+        <div class="curation-hero" id="curationHero">
+          <div class="section-heading">
+            <p>오늘의 대표 추천</p>
+            <span>가장 먼저 확인할 일정</span>
+          </div>
+          <div class="hero-slot" id="heroSlot"></div>
+        </div>
+        <div class="curation-stacks" aria-label="추천 묶음">
+          <section class="mini-stack" aria-label="오늘의 추천">
+            <div class="section-heading">
+              <p>오늘의 추천</p>
+              <span>취향과 접근성을 함께 본 순서</span>
+            </div>
+            <div class="mini-list" id="todayStack"></div>
+          </section>
+          <section class="mini-stack" aria-label="곧 끝나는 일정">
+            <div class="section-heading">
+              <p>곧 끝나요</p>
+              <span>놓치기 전에 볼 일정</span>
+            </div>
+            <div class="mini-list" id="endingStack"></div>
+          </section>
+        </div>
+      </section>
+      <section class="venue-bundle-section" id="venueBundleSection" aria-label="한 장소에서 묶어보기">
+        <div class="section-heading">
+          <p>한 장소에서 묶어보기</p>
+          <span>방문한다면 함께 확인할 것</span>
+        </div>
+        <div class="venue-bundle-list" id="venueBundleList"></div>
+      </section>
+      <section class="quick-filter-panel" aria-label="빠른 추천 필터">
+        <div class="quick-filter-rail" id="quickFilterRail">
+          <button class="quick-chip" type="button" data-quick-filter="free" aria-pressed="false">무료</button>
+          <button class="quick-chip" type="button" data-quick-filter="family" aria-pressed="false">가족</button>
+          <button class="quick-chip" type="button" data-quick-filter="week" aria-pressed="false">이번 주</button>
+          <button class="quick-chip" type="button" data-quick-filter="education" aria-pressed="false">교육</button>
+          <button class="quick-chip" type="button" data-quick-filter="exhibition" aria-pressed="false">전시</button>
+          <button class="quick-chip" type="button" data-quick-filter="seoul" aria-pressed="false">서울</button>
+          <button class="quick-chip" type="button" data-quick-filter="gyeonggi" aria-pressed="false">경기</button>
+          <button class="quick-chip" type="button" data-quick-filter="incheon" aria-pressed="false">인천</button>
+        </div>
+      </section>
+      <section class="recommendation-panel" aria-label="관심 기반 추천 설정">
+        <details class="advanced-filter" id="advancedFilter">
+          <summary>
+            <span id="advancedFilterLabel">상세 필터</span>
+            <small>관심 키워드와 우선순위 조정</small>
+          </summary>
+          <div class="advanced-filter-body">
+            <div class="choice-group">
+              <p class="choice-title">관심 키워드</p>
+              <div class="keyword-stack" id="keywordChoices">
+                {keyword_buttons}
+              </div>
+            </div>
+            <div class="choice-grid">
+              <div class="choice-group">
+                <p class="choice-title">지역</p>
+                <div class="choice-row">
+                  {region_buttons}
+                </div>
+              </div>
+              <div class="choice-group">
+                <p class="choice-title">일정</p>
+                <div class="choice-row">
+                  {type_buttons}
+                </div>
+              </div>
+              <div class="choice-group">
+                <p class="choice-title">우선</p>
+                <div class="choice-row">
+                  {priority_buttons}
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+        <div class="recommendation-status">
+          <p id="recommendationSummary"></p>
+          <button class="reset-button" type="button" id="resetRecommendation">초기화</button>
+        </div>
+      </section>
+      <section class="recommendation-grid-section" aria-label="추천 전체">
+        <div class="view-heading">
+          <p>추천 전체</p>
+          <span>조건에 맞는 카드</span>
+        </div>
+        <div class="feature-feed recommendation-grid" id="featureFeed">
+          {featured_cards}
+        </div>
+      </section>
       <div class="empty-state" id="emptyRecommendations" hidden>조건에 맞는 일정이 없어요.</div>
     </section>
     <section class="all-view" id="allView" aria-label="기간 일정" hidden>
@@ -1763,13 +2402,14 @@ def render(person_name="가족"):
             </div>
             <button class="close-button" type="button" id="detailClose" aria-label="닫기">×</button>
           </div>
-          <dl>
+          <dl class="detail-info-grid">
             <div><dt>기간</dt><dd id="detailPeriod"></dd></div>
             <div><dt>장소</dt><dd id="detailLocation"></dd></div>
             <div><dt>상태</dt><dd id="detailStatus"></dd></div>
             <div><dt>가격</dt><dd id="detailPrice"></dd></div>
           </dl>
           <p class="detail-description" id="detailDescription"></p>
+          <div class="why-section" id="detailWhy"></div>
           <div class="tag-section" id="detailTags"></div>
           <div class="schedule-section" id="detailSchedule"></div>
           <div class="companion-section" id="detailCompanions"></div>
@@ -1791,6 +2431,13 @@ def render(person_name="가족"):
     const allView = document.getElementById("allView");
     const permanentView = document.getElementById("permanentView");
     const featureFeed = document.getElementById("featureFeed");
+    const heroSlot = document.getElementById("heroSlot");
+    const todayStack = document.getElementById("todayStack");
+    const endingStack = document.getElementById("endingStack");
+    const venueBundleSection = document.getElementById("venueBundleSection");
+    const venueBundleList = document.getElementById("venueBundleList");
+    const quickFilterRail = document.getElementById("quickFilterRail");
+    const advancedFilterLabel = document.getElementById("advancedFilterLabel");
     const emptyRecommendations = document.getElementById("emptyRecommendations");
     const recommendationSummary = document.getElementById("recommendationSummary");
     const resetRecommendation = document.getElementById("resetRecommendation");
@@ -1804,6 +2451,7 @@ def render(person_name="가족"):
       type: "all",
       priority: "recommended"
     }};
+    const quickFilters = new Set();
     const fields = {{
       kicker: document.getElementById("detailKicker"),
       title: document.getElementById("detailTitle"),
@@ -1813,6 +2461,7 @@ def render(person_name="가족"):
       price: document.getElementById("detailPrice"),
       description: document.getElementById("detailDescription"),
       source: document.getElementById("detailSource"),
+      why: document.getElementById("detailWhy"),
       tags: document.getElementById("detailTags"),
       schedule: document.getElementById("detailSchedule"),
       companions: document.getElementById("detailCompanions"),
@@ -1821,6 +2470,72 @@ def render(person_name="가족"):
 
     function numeric(value) {{
       return typeof value === "number" && Number.isFinite(value) ? value : null;
+    }}
+
+    function escapeHtml(value) {{
+      return String(value || "").replace(/[&<>"']/g, (char) => ({{
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+      }}[char]));
+    }}
+
+    function badgesFor(item, limit = 3) {{
+      return (item.curationBadges || []).slice(0, limit);
+    }}
+
+    function badgeMarkup(item, limit = 3) {{
+      const badges = badgesFor(item, limit);
+      if (!badges.length) return "";
+      return '<div class="editorial-badges" aria-label="추천 배지">' +
+        badges.map((badge) =>
+          `<span class="editorial-badge badge-${{escapeHtml(badge.tone || "gold")}}">${{escapeHtml(badge.label)}}</span>`
+        ).join("") +
+        "</div>";
+    }}
+
+    function posterFallbackMarkup(item) {{
+      return `<div class="poster-empty" aria-label="이미지 없음"><span>${{escapeHtml(item.displayVenue || item.institution || "문화 일정")}}</span><strong>${{escapeHtml(item.type || "일정")}}</strong><small>이미지 준비 중</small></div>`;
+    }}
+
+    function imageMarkup(item) {{
+      if (item.imageUrl) {{
+        return `<img src="${{escapeHtml(item.imageUrl)}}" alt="${{escapeHtml(item.displayTitle || item.title)}}" loading="lazy">`;
+      }}
+      return posterFallbackMarkup(item);
+    }}
+
+    function recommendationSentence(item) {{
+      const labels = badgesFor(item, 3).map((badge) => badge.label);
+      if (labels.includes("곧 종료")) return "마감이 가까워 이번 방문 후보에서 먼저 확인하면 좋아요.";
+      if (labels.includes("가족 동선 좋음") || labels.includes("같이 보기 좋음")) return "같은 장소에 함께 볼 일정이 있어 한 번의 방문으로 묶기 좋아요.";
+      if (labels.includes("이번 주 추천")) return "이번 주 일정과 맞물려 바로 계획하기 좋은 카드입니다.";
+      if (labels.includes("주요 기관")) return "주요 기관 일정이라 전시 완성도와 방문 안정성을 기대하기 좋아요.";
+      if (labels.includes("서울권 접근성 좋음")) return "서울권 접근성이 좋아 부담 없이 다녀올 수 있는 후보예요.";
+      if (labels.includes("상설로 여유롭게")) return "상설 일정이라 날짜 압박 없이 천천히 고를 수 있어요.";
+      if (labels.includes("기간한정")) return "기간이 정해진 일정이라 놓치기 전에 살펴볼 만합니다.";
+      if (labels.includes("취향 적합")) return "선택한 관심 키워드와 잘 맞아 먼저 열어볼 만해요.";
+      return "관심 키워드와 일정 조건을 함께 봤을 때 확인할 만한 추천입니다.";
+    }}
+
+    function deadlineText(item) {{
+      const remaining = numeric(item.remainingDays);
+      if (remaining === 0) return "오늘 종료";
+      if (remaining !== null && remaining > 0 && remaining <= 30) return "D-" + remaining;
+      const startsIn = numeric(item.startsInDays);
+      if (startsIn === 0) return "오늘 시작";
+      if (startsIn !== null && startsIn > 0 && startsIn <= 7) return startsIn + "일 뒤 시작";
+      return item.status || item.period || "일정 확인";
+    }}
+
+    function isThisWeek(item) {{
+      const startsIn = numeric(item.startsInDays);
+      const remaining = numeric(item.remainingDays);
+      if (startsIn !== null && startsIn >= 0 && startsIn <= 7) return true;
+      if (remaining !== null && remaining >= 0 && remaining <= 7) return true;
+      return (item.curationBadges || []).some((badge) => badge.label === "이번 주 추천");
     }}
 
     function keywordMatches(item, keyword) {{
@@ -1856,6 +2571,9 @@ def render(person_name="가족"):
       }} else if (recommendationState.type !== "all" && item.type !== recommendationState.type) {{
         return false;
       }}
+      if (quickFilters.has("free") && !keywordMatches(item, "무료")) return false;
+      if (quickFilters.has("family") && !keywordMatches(item, "가족") && !keywordMatches(item, "어린이")) return false;
+      if (quickFilters.has("week") && !isThisWeek(item)) return false;
       return selectedKeywords.size === 0 || selectedKeywordCount(item) > 0;
     }}
 
@@ -1917,12 +2635,172 @@ def render(person_name="가족"):
       return "추천순";
     }}
 
+    function chooseHero(ranked) {{
+      if (!ranked.length) return null;
+      const withImage = ranked.find((entry) => entry.item.imageUrl && badgesFor(entry.item).length);
+      return withImage || ranked[0];
+    }}
+
+    function renderHero(ranked) {{
+      heroSlot.textContent = "";
+      const hero = chooseHero(ranked);
+      if (!hero) {{
+        heroSlot.innerHTML = '<div class="empty-state">조건에 맞는 대표 추천이 없어요.</div>';
+        return null;
+      }}
+      const item = hero.item;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "hero-button";
+      button.dataset.curationIndex = String(hero.index);
+      button.innerHTML = `
+        <div class="hero-media">${{imageMarkup(item)}}</div>
+        <div class="hero-copy">
+          <p class="hero-label">${{escapeHtml(item.type)}} · ${{escapeHtml(item.displayVenue || item.institution)}}</p>
+          <h2>${{escapeHtml(item.displayTitle || item.title)}}</h2>
+          <p class="hero-meta">${{escapeHtml(item.period)}} · ${{escapeHtml(item.status || "상태 확인")}}</p>
+          ${{badgeMarkup(item, 4)}}
+          <p class="hero-reason">${{escapeHtml(recommendationSentence(item))}}</p>
+          <span class="hero-cta">자세히 보기</span>
+        </div>
+      `;
+      heroSlot.appendChild(button);
+      return hero.index;
+    }}
+
+    function renderMiniStack(target, entries, emptyText) {{
+      target.textContent = "";
+      if (!entries.length) {{
+        const empty = document.createElement("p");
+        empty.className = "mini-meta";
+        empty.textContent = emptyText;
+        target.appendChild(empty);
+        return;
+      }}
+      entries.forEach((entry) => {{
+        const item = entry.item;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "mini-button";
+        button.dataset.curationIndex = String(entry.index);
+        button.innerHTML = `
+          <span class="mini-topline">
+            <span class="mini-label">${{escapeHtml(item.displayVenue || item.institution)}}</span>
+            <span class="deadline-pill">${{escapeHtml(deadlineText(item))}}</span>
+          </span>
+          <h3>${{escapeHtml(item.displayTitle || item.title)}}</h3>
+          <p class="mini-meta">${{escapeHtml(item.period)}} · ${{escapeHtml(item.status || "상태 확인")}}</p>
+          ${{badgeMarkup(item, 2)}}
+        `;
+        target.appendChild(button);
+      }});
+    }}
+
+    function venueKey(item) {{
+      return item.displayVenue || item.venueLabel || item.institution || "";
+    }}
+
+    function renderVenueBundles(ranked) {{
+      venueBundleList.textContent = "";
+      const groups = new Map();
+      ranked.forEach((entry) => {{
+        const key = venueKey(entry.item);
+        if (!key) return;
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(entry);
+      }});
+      const bundles = Array.from(groups.entries())
+        .map(([venue, entries]) => ({{ venue, entries }}))
+        .filter((group) => group.entries.length >= 2)
+        .sort((a, b) => b.entries.length - a.entries.length)
+        .slice(0, 3);
+
+      venueBundleSection.hidden = bundles.length === 0;
+      bundles.forEach((group) => {{
+        const representative = group.entries[0];
+        const companions = group.entries.slice(1, 3).map((entry) => entry.item.displayTitle || entry.item.title);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "bundle-card";
+        button.dataset.curationIndex = String(representative.index);
+        button.dataset.focusCompanions = "true";
+        button.innerHTML = `
+          <p class="bundle-venue">${{escapeHtml(group.venue)}} · ${{group.entries.length}}개 일정</p>
+          <h3>${{escapeHtml(representative.item.displayTitle || representative.item.title)}}</h3>
+          <p class="bundle-meta">${{escapeHtml(representative.item.period)}} · ${{escapeHtml(representative.item.status || "상태 확인")}}</p>
+          <p class="bundle-companions">${{companions.length ? "함께 보기: " + companions.map(escapeHtml).join(" / ") : "같은 장소의 다른 일정도 확인"}}</p>
+          <span class="bundle-action">동선 보기</span>
+        `;
+        venueBundleList.appendChild(button);
+      }});
+    }}
+
+    function renderCuration(ranked) {{
+      const heroIndex = renderHero(ranked);
+      const withoutHero = ranked.filter((entry) => entry.index !== heroIndex);
+      renderMiniStack(todayStack, withoutHero.slice(0, 3), "추천 조건에 맞는 추가 일정이 없어요.");
+      const endingSoon = ranked
+        .filter((entry) => entry.index !== heroIndex)
+        .filter((entry) => {{
+          const remaining = numeric(entry.item.remainingDays);
+          return remaining !== null && remaining >= 0 && remaining <= 30;
+        }})
+        .slice(0, 3);
+      renderMiniStack(endingStack, endingSoon, "30일 안에 끝나는 일정이 없어요.");
+      renderVenueBundles(ranked);
+    }}
+
+    function activeFilterCount() {{
+      let count = selectedKeywords.size + quickFilters.size;
+      if (recommendationState.region !== "all") count += 1;
+      if (recommendationState.type !== "all") count += 1;
+      if (recommendationState.priority !== "recommended") count += 1;
+      return count;
+    }}
+
+    function updateFilterChrome() {{
+      const count = activeFilterCount();
+      advancedFilterLabel.textContent = count ? "상세 필터 " + count : "상세 필터";
+      resetRecommendation.classList.toggle("is-active", count > 0);
+      document.querySelectorAll("[data-quick-filter]").forEach((button) => {{
+        const name = button.dataset.quickFilter;
+        const pressed =
+          quickFilters.has(name) ||
+          (name === "education" && recommendationState.type === "program") ||
+          (name === "exhibition" && recommendationState.type === "전시") ||
+          (name === "seoul" && recommendationState.region === "서울") ||
+          (name === "gyeonggi" && recommendationState.region === "경기") ||
+          (name === "incheon" && recommendationState.region === "인천");
+        button.setAttribute("aria-pressed", String(pressed));
+      }});
+    }}
+
+    function applyQuickFilter(name) {{
+      if (name === "education") {{
+        recommendationState.type = recommendationState.type === "program" ? "all" : "program";
+        setSingleChoice("[data-type-choice]", recommendationState.type);
+      }} else if (name === "exhibition") {{
+        recommendationState.type = recommendationState.type === "전시" ? "all" : "전시";
+        setSingleChoice("[data-type-choice]", recommendationState.type);
+      }} else if (name === "seoul" || name === "gyeonggi" || name === "incheon") {{
+        const region = name === "seoul" ? "서울" : name === "gyeonggi" ? "경기" : "인천";
+        recommendationState.region = recommendationState.region === region ? "all" : region;
+        setSingleChoice("[data-region-choice]", recommendationState.region);
+      }} else if (quickFilters.has(name)) {{
+        quickFilters.delete(name);
+      }} else {{
+        quickFilters.add(name);
+      }}
+      applyRecommendations();
+    }}
+
     function applyRecommendations() {{
       const ranked = items
         .map((item, index) => ({{ item, index, score: scoreRecommendation(item, index) }}))
         .filter((entry) => passesRecommendationFilters(entry.item))
         .sort((a, b) => b.score - a.score);
       const visible = ranked.slice(0, 12);
+      renderCuration(ranked);
 
       featureCards.forEach((card) => {{
         card.hidden = true;
@@ -1939,11 +2817,16 @@ def render(person_name="가족"):
 
       const basis = [];
       basis.push(selectedKeywords.size ? Array.from(selectedKeywords).join(", ") : "기본 추천");
+      if (quickFilters.size) {{
+        const quickLabels = {{ free: "무료", family: "가족", week: "이번 주" }};
+        basis.push(Array.from(quickFilters).map((name) => quickLabels[name] || name).join(", "));
+      }}
       basis.push(recommendationState.region === "all" ? "전체 지역" : recommendationState.region);
       basis.push(priorityLabel());
       recommendationSummary.textContent =
         ranked.length + "건 중 " + visible.length + "건 표시 · " + basis.join(" · ");
       emptyRecommendations.hidden = visible.length > 0;
+      updateFilterChrome();
     }}
 
     function setSingleChoice(selector, value) {{
@@ -1958,6 +2841,7 @@ def render(person_name="가족"):
 
     function resetRecommendationState() {{
       selectedKeywords.clear();
+      quickFilters.clear();
       recommendationState.region = "all";
       recommendationState.type = "all";
       recommendationState.priority = "recommended";
@@ -1980,6 +2864,15 @@ def render(person_name="가족"):
       }} else {{
         const empty = document.createElement("div");
         empty.className = "poster-empty";
+        const venue = document.createElement("span");
+        venue.textContent = item.displayVenue || item.institution || "문화 일정";
+        const type = document.createElement("strong");
+        type.textContent = item.type || "일정";
+        const note = document.createElement("small");
+        note.textContent = "이미지 준비 중";
+        empty.appendChild(venue);
+        empty.appendChild(type);
+        empty.appendChild(note);
         imageBox.appendChild(empty);
       }}
     }}
@@ -2014,6 +2907,25 @@ def render(person_name="가족"):
       title.className = "section-title";
       title.textContent = text;
       return title;
+    }}
+
+    function fillWhy(item) {{
+      fields.why.textContent = "";
+      const badges = badgesFor(item, 3);
+      if (!badges.length) {{
+        fields.why.hidden = true;
+        return;
+      }}
+      fields.why.appendChild(makeSectionTitle("왜 추천하나요"));
+      const list = document.createElement("ul");
+      list.className = "why-list";
+      badges.forEach((badge) => {{
+        const row = document.createElement("li");
+        row.textContent = badge.label + ": " + recommendationSentence({{ ...item, curationBadges: [badge] }});
+        list.appendChild(row);
+      }});
+      fields.why.appendChild(list);
+      fields.why.hidden = false;
     }}
 
     function fillTags(item) {{
@@ -2143,6 +3055,7 @@ def render(person_name="가족"):
       fields.price.textContent = item.price || "확인 필요";
       fields.description.textContent = item.description || "추가 설명은 원문에서 확인할 수 있습니다.";
       fields.source.href = item.sourceUrl;
+      fillWhy(item);
       fillTags(item);
       fillSchedule(item);
       fillCompanions(item);
@@ -2157,6 +3070,23 @@ def render(person_name="가족"):
       document.body.classList.remove("modal-open");
     }}
 
+    quickFilterRail.addEventListener("click", (event) => {{
+      const button = event.target.closest("[data-quick-filter]");
+      if (!button) return;
+      applyQuickFilter(button.dataset.quickFilter);
+    }});
+    featuredView.addEventListener("click", (event) => {{
+      const button = event.target.closest("[data-curation-index]");
+      if (!button) return;
+      openDetail(Number(button.dataset.curationIndex));
+      if (button.dataset.focusCompanions === "true") {{
+        window.setTimeout(() => {{
+          if (!fields.companions.hidden) {{
+            fields.companions.scrollIntoView({{ block: "nearest", behavior: "smooth" }});
+          }}
+        }}, 50);
+      }}
+    }});
     document.querySelectorAll("[data-index]").forEach((button) => {{
       button.addEventListener("click", () => openDetail(Number(button.dataset.index)));
     }});

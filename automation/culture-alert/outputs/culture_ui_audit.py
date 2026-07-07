@@ -57,10 +57,19 @@ REQUIRED_IDS = {
     "featuredView": "추천 보기 영역",
     "allView": "기간 일정 영역",
     "permanentView": "상설전 영역",
+    "curationHero": "대표 추천 영역",
+    "heroSlot": "대표 추천 카드",
+    "todayStack": "오늘의 추천 묶음",
+    "endingStack": "곧 종료 묶음",
+    "venueBundleList": "한 장소 묶음",
+    "quickFilterRail": "빠른 필터",
+    "advancedFilter": "상세 필터",
+    "advancedFilterLabel": "상세 필터 상태",
     "detailOverlay": "세부창",
     "detailClose": "세부창 닫기",
     "detailTitle": "세부창 제목",
     "detailSource": "원문 링크",
+    "detailWhy": "추천 판단 설명",
     "resetRecommendation": "추천 조건 초기화",
     "recommendationSummary": "추천 조건 요약",
 }
@@ -88,12 +97,16 @@ SCRIPT_FLOW_MARKERS = {
     "지역 선택": 'document.querySelectorAll("[data-region-choice]")',
     "일정 유형 선택": 'document.querySelectorAll("[data-type-choice]")',
     "우선순위 선택": 'document.querySelectorAll("[data-priority-choice]")',
+    "빠른 필터 선택": "function applyQuickFilter",
+    "첫 화면 큐레이션 렌더링": "function renderCuration",
+    "상세 필터 상태 표시": "advancedFilterLabel.textContent",
     "추천 초기화": "resetRecommendation.addEventListener",
     "기간 일정 필터": 'document.querySelectorAll("[data-filter]")',
     "닫기 버튼": "closeButton.addEventListener",
     "바깥 클릭 닫기": "overlay.addEventListener",
     "Esc 닫기": 'event.key === "Escape"',
     "세부 회차 표시": "function fillSchedule",
+    "추천 판단 설명 표시": "function fillWhy",
     "같은 장소 다른 일정 표시": "function fillCompanions",
     "후기/검색 링크 표시": "function fillRelated",
 }
@@ -331,6 +344,40 @@ def check_html_structure(findings, parser, html_text, items):
             "추천 배지 UI 누락",
             "추천 카드에서 클릭할 이유를 빠르게 보여주는 editorial badge가 렌더링되지 않았습니다.",
         )
+    for marker, label in [
+        ("오늘의 대표 추천", "대표 추천 헤딩"),
+        ("오늘의 추천", "오늘 추천 스택"),
+        ("곧 끝나요", "마감 임박 스택"),
+        ("한 장소에서 묶어보기", "장소 묶음 섹션"),
+        ("추천 전체", "추천 전체 그리드"),
+        ("왜 추천하나요", "세부창 추천 판단 설명"),
+    ]:
+        if marker not in parser.visible_text and marker not in html_text:
+            add_finding(
+                findings,
+                "P2",
+                "큐레이션 홈 문구 누락",
+                f"{label} 문구가 없어 첫 화면이 추천 리포트처럼 읽히기 어렵습니다.",
+                marker,
+            )
+    advanced_match = re.search(r"<details[^>]*id=\"advancedFilter\"[^>]*>", html_text)
+    if advanced_match and " open" in advanced_match.group(0):
+        add_finding(
+            findings,
+            "P2",
+            "상세 필터 기본 펼침",
+            "첫 화면에서는 상세 필터가 접힌 상태로 시작해야 합니다.",
+            advanced_match.group(0),
+        )
+    for marker in ("raw score", "추천 점수", "score:"):
+        if marker in parser.visible_text:
+            add_finding(
+                findings,
+                "P2",
+                "점수형 추천 정보 노출",
+                "추천 이유가 사용자 언어가 아니라 원시 점수처럼 보입니다.",
+                marker,
+            )
     if "같은 장소에서 함께 볼 것" not in html_text or "companion-action" not in html_text:
         add_finding(
             findings,
@@ -567,11 +614,13 @@ def render_findings(lines, findings):
 
 def manual_review_checklist():
     return [
-        "추천 보기: 처음 보이는 카드 12개에서 취향/마감/기관/동선 배지가 1-2초 안에 이해되는지 확인",
-        "추천 조건: 관심 키워드, 지역, 일정, 우선순위, 초기화를 각각 눌러 카드 수와 요약 문구가 자연스럽게 바뀌는지 확인",
+        "첫 화면: 대표 추천, 오늘의 추천, 곧 끝나요, 한 장소에서 묶어보기 순서가 추천 리포트처럼 읽히는지 확인",
+        "빠른 필터: 무료/가족/이번 주/교육/전시/서울/경기/인천을 각각 눌러 대표 추천과 추천 전체가 함께 바뀌는지 확인",
+        "상세 필터: 기본 접힘 상태에서 열기, 관심 키워드/지역/일정/우선순위/초기화를 눌러 요약 문구가 자연스럽게 바뀌는지 확인",
+        "추천 전체: 카드 제목이 2줄 안에서 정리되고 배지가 1-2초 안에 이해되는지 확인",
         "기간 일정: 전체/전시/강연/교육/행사 필터를 누르고 숨김 카드가 남거나 빈 공간이 어색하지 않은지 확인",
         "상설전: 상설전 탭의 첫 12개와 이미지 없는 카드 몇 개를 열어 기간/상태 문구가 기간 일정과 섞이지 않는지 확인",
-        "세부창: 원문 보기, 후기/검색 링크, 같은 장소에서 함께 볼 것 섹션, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
+        "세부창: 왜 추천하나요, 원문 보기, 후기/검색 링크, 같은 장소에서 함께 볼 것, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
         "문구 품질: 국립중앙박물관, 자동 모니터 출신 기관, 설명이 긴 카드에서 코드/푸터/깨진 글자가 보이지 않는지 확인",
         "화면 크기: 데스크톱 1366x900과 모바일 390x844에서 버튼, 카드 제목, 세부창 텍스트가 겹치거나 잘리지 않는지 확인",
     ]
