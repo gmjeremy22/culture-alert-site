@@ -1,0 +1,21 @@
+name: Schedule smoke test
+
+on:
+  schedule:
+    # Temporary test: checks whether GitHub scheduled workflows actually fire.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scheduled-trigger-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print trigger information
+        run: |
+          echo "event_name=${{ github.event_name }}"
+          echo "run_started_at=$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "repository=${{ github.repository }}"
+          echo "ref=${{ github.ref }}"
