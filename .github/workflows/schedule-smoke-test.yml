@@ -2,8 +2,8 @@ name: Schedule smoke test
 
 on:
   schedule:
-    # Temporary test: checks whether GitHub scheduled workflows actually fire.
-    - cron: "*/10 * * * *"
+    # Temporary test: avoid common :00/:10/:20 schedule minutes.
+    - cron: "7,17,27,37,47,57 * * * *"
   workflow_dispatch:
 
 permissions:

@@ -2,8 +2,8 @@ name: Daily protected report update
 
 on:
   schedule:
-    # 07:30 Asia/Seoul. GitHub cron uses UTC.
-    - cron: "30 22 * * *"
+    # 07:37 Asia/Seoul. GitHub cron uses UTC.
+    - cron: "37 22 * * *"
   workflow_dispatch:
 
 permissions:
