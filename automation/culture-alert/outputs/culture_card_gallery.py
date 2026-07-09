@@ -631,6 +631,7 @@ def render(person_name="가족"):
         f"{key} {value}건" for key, value in timed_counts.items()
     )
     permanent_count_text = f"상설전 {len(permanent_items)}건"
+    update_time_text = datetime.now().strftime("%Y.%m.%d %H:%M")
     keyword_groups = [
         (
             "주제",
@@ -2251,60 +2252,767 @@ def render(person_name="가족"):
         width: 100%;
       }}
     }}
+    /* Cinematic Journey refinement */
+    :root {{
+      --bg: #080A0E;
+      --bg-soft: #0D1116;
+      --surface: #11141A;
+      --surface-raised: #151922;
+      --surface-glass: rgba(18, 22, 28, 0.72);
+      --border: rgba(255, 255, 255, 0.10);
+      --border-strong: rgba(230, 194, 122, 0.34);
+      --text: #F7F1E6;
+      --text-soft: #B8C0CC;
+      --text-muted: #788390;
+      --accent: #E6C27A;
+      --accent-ivory: #F3DFC2;
+      --route-green: #7FA68D;
+      --urgent-amber: #D99B55;
+      --ink: var(--text);
+      --muted: var(--text-muted);
+      --line: var(--border);
+      --paper: var(--bg);
+      --panel: var(--surface);
+      --panel-2: var(--surface-raised);
+      --accent-ink: #101015;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+    }}
+    body {{
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 18% 2%, rgba(230, 194, 122, 0.12), transparent 34%),
+        radial-gradient(circle at 80% 8%, rgba(127, 166, 141, 0.13), transparent 28%),
+        linear-gradient(180deg, #080A0E 0%, #0A0D12 42%, #07090D 100%);
+      color: var(--text);
+    }}
+    main {{
+      width: min(1420px, calc(100% - 48px));
+      padding-top: 28px;
+    }}
+    .page-header {{
+      position: sticky;
+      top: 0;
+      z-index: 8;
+      grid-template-columns: minmax(190px, 0.7fr) auto minmax(220px, 0.8fr);
+      align-items: center;
+      margin-bottom: 34px;
+      padding: 12px 0 16px;
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(180deg, rgba(8, 10, 14, 0.96), rgba(8, 10, 14, 0.76));
+      backdrop-filter: blur(18px);
+    }}
+    .header-brand {{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-soft);
+      font-size: 13px;
+      font-weight: 880;
+      white-space: nowrap;
+    }}
+    .brand-mark {{
+      width: 13px;
+      height: 13px;
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 3px rgba(230, 194, 122, 0.12), 0 0 20px rgba(230, 194, 122, 0.18);
+    }}
+    .header-actions {{
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      color: var(--text-muted);
+    }}
+    .update-pill,
+    .refresh-button {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.035);
+      color: var(--text-soft);
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 800;
+    }}
+    .refresh-button {{
+      width: 30px;
+      padding: 0;
+      cursor: default;
+    }}
+    .toolbar {{
+      justify-content: center;
+      padding: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.035);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }}
+    .view-button,
+    .filter-button {{
+      border-radius: 999px;
+      border-color: transparent;
+      background: transparent;
+      color: var(--text-soft);
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+    }}
+    .view-button[aria-pressed="true"],
+    .filter-button[aria-pressed="true"] {{
+      border-color: var(--accent-ivory);
+      background: var(--accent-ivory);
+      color: var(--accent-ink);
+    }}
+    .cinematic-stage {{
+      grid-template-columns: minmax(220px, 0.75fr) minmax(420px, 1.45fr) minmax(300px, 1fr);
+      gap: 18px;
+      align-items: stretch;
+      min-height: 520px;
+      animation: stageIn 580ms ease both;
+    }}
+    .stage-intro {{
+      display: grid;
+      align-content: center;
+      min-width: 0;
+      padding: 26px 4px 26px 0;
+    }}
+    .stage-intro .eyebrow {{
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }}
+    .stage-intro h1 {{
+      margin: 0;
+      max-width: 420px;
+      font-size: clamp(44px, 4.4vw, 56px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      text-wrap: balance;
+    }}
+    .stage-intro .subcopy {{
+      max-width: 420px;
+      margin-top: 18px;
+      color: var(--text-soft);
+      font-size: 15px;
+    }}
+    .stage-intro .summary {{
+      margin-top: 18px;
+      color: var(--accent-ivory);
+      font-weight: 850;
+    }}
+    .curation-hero,
+    .urgent-panel,
+    .route-board,
+    .quick-filter-panel,
+    .advanced-filter,
+    .recommendation-shelf,
+    .recommendation-grid-section {{
+      border: 1px solid var(--border);
+      background: var(--surface-glass);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 18px 70px rgba(0, 0, 0, 0.22);
+    }}
+    .curation-hero {{
+      border-radius: 28px;
+      overflow: hidden;
+    }}
+    .hero-slot,
+    .hero-button {{
+      min-height: 520px;
+      height: 100%;
+    }}
+    .hero-button {{
+      position: relative;
+      display: block;
+      border: 0;
+      border-radius: 0;
+      background: #0B0E13;
+      box-shadow: none;
+      isolation: isolate;
+      animation: heroIn 680ms ease 80ms both;
+    }}
+    .hero-button::after {{
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background:
+        linear-gradient(180deg, rgba(8, 10, 14, 0.03), rgba(8, 10, 14, 0.72) 58%, rgba(8, 10, 14, 0.95)),
+        linear-gradient(90deg, rgba(8, 10, 14, 0.42), rgba(8, 10, 14, 0.08) 46%, rgba(8, 10, 14, 0.55));
+      pointer-events: none;
+    }}
+    .hero-media {{
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: #0B0E13;
+    }}
+    .hero-media img {{
+      min-height: 100%;
+      object-fit: cover;
+      opacity: 0.86;
+      transform: scale(1);
+      transition: transform 500ms ease, opacity 500ms ease;
+    }}
+    .hero-copy {{
+      position: absolute;
+      inset: auto 0 0;
+      z-index: 2;
+      max-width: 780px;
+      padding: 34px;
+      gap: 13px;
+      align-content: end;
+    }}
+    .hero-copy h2 {{
+      max-width: 680px;
+      font-size: clamp(30px, 3.1vw, 38px);
+      line-height: 1.18;
+      letter-spacing: -0.02em;
+    }}
+    .hero-label {{
+      color: var(--accent);
+      text-transform: none;
+    }}
+    .hero-actions {{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }}
+    .hero-button:hover .hero-media img,
+    .hero-button:focus-visible .hero-media img {{
+      transform: scale(1.035);
+      opacity: 0.98;
+    }}
+    .hero-button:hover,
+    .hero-button:focus-visible {{
+      transform: translateY(-5px);
+      border-color: var(--border-strong);
+      outline: none;
+    }}
+    .arrow-chip {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(243, 223, 194, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--accent-ivory);
+      font-size: 15px;
+      font-weight: 900;
+    }}
+    .urgent-panel {{
+      display: grid;
+      align-content: start;
+      border-radius: 24px;
+      padding: 18px;
+    }}
+    .urgent-list {{
+      gap: 10px;
+    }}
+    .urgent-card {{
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 12px;
+      align-items: stretch;
+      min-height: 116px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.035);
+    }}
+    .urgent-card:nth-child(1) {{ animation: cardIn 480ms ease 120ms both; }}
+    .urgent-card:nth-child(2) {{ animation: cardIn 480ms ease 200ms both; }}
+    .urgent-card:nth-child(3) {{ animation: cardIn 480ms ease 280ms both; }}
+    .thumb {{
+      display: block;
+      overflow: hidden;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(230, 194, 122, 0.22), rgba(127, 166, 141, 0.14)), #10141A;
+    }}
+    .thumb img {{
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 220ms ease;
+    }}
+    .thumb-fallback {{
+      display: grid;
+      place-items: center;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 900;
+    }}
+    .urgent-copy {{
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }}
+    .deadline-pill {{
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 24px;
+      border: 1px solid rgba(217, 155, 85, 0.44);
+      border-radius: 999px;
+      background: rgba(217, 155, 85, 0.14);
+      color: #F1C28C;
+      padding: 0 8px;
+    }}
+    .mini-button h3 {{
+      font-size: 14px;
+    }}
+    .route-board {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+      gap: 18px;
+      border-radius: 28px;
+      padding: 20px;
+    }}
+    .route-board-main {{
+      min-width: 0;
+    }}
+    .venue-bundle-list {{
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }}
+    .bundle-card {{
+      position: relative;
+      min-height: 220px;
+      border-radius: 22px;
+      background:
+        linear-gradient(135deg, rgba(127, 166, 141, 0.12), transparent 38%),
+        rgba(255, 255, 255, 0.035);
+    }}
+    .bundle-card::before {{
+      content: "";
+      width: 13px;
+      height: 13px;
+      border-radius: 999px;
+      background: var(--route-green);
+      box-shadow: 0 0 0 6px rgba(127, 166, 141, 0.13);
+    }}
+    .route-stepper {{
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--route-green);
+      font-size: 11px;
+      font-weight: 900;
+    }}
+    .route-stepper span {{
+      display: inline-grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(127, 166, 141, 0.52);
+      border-radius: 999px;
+      background: rgba(127, 166, 141, 0.12);
+    }}
+    .route-stepper i {{
+      width: 28px;
+      height: 1px;
+      background: rgba(127, 166, 141, 0.48);
+    }}
+    .route-map-panel {{
+      position: relative;
+      min-height: 260px;
+      overflow: hidden;
+      border: 1px solid rgba(127, 166, 141, 0.24);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(230, 194, 122, 0.14), transparent 22%),
+        radial-gradient(circle at 78% 70%, rgba(127, 166, 141, 0.18), transparent 24%),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
+    }}
+    .route-map-panel p {{
+      position: absolute;
+      left: 20px;
+      bottom: 18px;
+      margin: 0;
+      color: rgba(243, 223, 194, 0.72);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }}
+    .route-map-line {{
+      position: absolute;
+      inset: 36px 38px 54px 42px;
+      border-left: 2px solid rgba(127, 166, 141, 0.34);
+      border-bottom: 2px solid rgba(127, 166, 141, 0.34);
+      border-radius: 0 0 0 80px;
+      transform: rotate(-8deg);
+    }}
+    .route-node {{
+      position: absolute;
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(243, 223, 194, 0.46);
+      border-radius: 999px;
+      background: rgba(8, 10, 14, 0.82);
+      color: var(--accent-ivory);
+      font-size: 13px;
+      font-weight: 950;
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.34);
+    }}
+    .route-node-one {{ left: 44px; top: 36px; }}
+    .route-node-two {{ right: 68px; top: 96px; }}
+    .route-node-three {{ left: 46%; bottom: 58px; }}
+    .quick-filter-panel {{
+      border-radius: 22px;
+      padding: 16px;
+    }}
+    .quick-chip {{
+      background: rgba(255, 255, 255, 0.045);
+      border-color: rgba(255, 255, 255, 0.11);
+    }}
+    .quick-chip[aria-pressed="true"],
+    .choice-button[aria-pressed="true"] {{
+      border-color: var(--accent-ivory);
+      background: var(--accent-ivory);
+      color: var(--accent-ink);
+    }}
+    .recommendation-status {{
+      padding: 0 4px;
+    }}
+    .advanced-filter {{
+      border-radius: 22px;
+      overflow: hidden;
+    }}
+    .recommendation-shelves {{
+      display: grid;
+      gap: 18px;
+    }}
+    .recommendation-shelf {{
+      border-radius: 24px;
+      padding: 18px;
+    }}
+    .shelf-row {{
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(190px, 230px);
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scroll-snap-type: x proximity;
+      scrollbar-width: thin;
+    }}
+    .shelf-card {{
+      position: relative;
+      display: block;
+      min-height: 300px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: #10141A;
+      color: inherit;
+      padding: 0;
+      text-align: left;
+      cursor: pointer;
+      scroll-snap-align: start;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }}
+    .shelf-media {{
+      position: absolute;
+      inset: 0;
+      display: block;
+    }}
+    .shelf-media img,
+    .shelf-media .poster-empty {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 260ms ease;
+    }}
+    .shelf-overlay {{
+      position: absolute;
+      inset: auto 0 0;
+      display: grid;
+      gap: 6px;
+      padding: 58px 14px 14px;
+      background: linear-gradient(180deg, rgba(8, 10, 14, 0), rgba(8, 10, 14, 0.88) 42%, rgba(8, 10, 14, 0.96));
+    }}
+    .shelf-overlay strong {{
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      font-size: 16px;
+      line-height: 1.35;
+    }}
+    .shelf-overlay span,
+    .shelf-overlay small {{
+      overflow: hidden;
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 780;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .shelf-card:hover,
+    .shelf-card:focus-visible,
+    .card-button:hover,
+    .card-button:focus-visible,
+    .bundle-card:hover,
+    .bundle-card:focus-visible {{
+      transform: translateY(-5px);
+      border-color: var(--border-strong);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.34);
+      outline: none;
+    }}
+    .shelf-card:hover .shelf-media img,
+    .shelf-card:focus-visible .shelf-media img,
+    .urgent-card:hover .thumb img,
+    .urgent-card:focus-visible .thumb img {{
+      transform: scale(1.035);
+    }}
+    .recommendation-grid-section {{
+      border-radius: 26px;
+      padding: 20px;
+    }}
+    .recommendation-grid {{
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }}
+    .recommendation-grid .feature-card .card-button,
+    .list-card .card-button {{
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.038);
+    }}
+    .recommendation-grid .feature-card .poster {{
+      aspect-ratio: 3 / 4;
+    }}
+    .card-place {{
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .overlay {{
+      background: rgba(0, 0, 0, 0.58);
+      backdrop-filter: blur(8px);
+      animation: overlayIn 180ms ease both;
+    }}
+    .detail-panel {{
+      border-radius: 26px;
+      background: #10141C;
+      animation: drawerIn 240ms ease both;
+    }}
+    .companion-section.is-route-focused {{
+      border-color: rgba(127, 166, 141, 0.82);
+      box-shadow: 0 0 0 4px rgba(127, 166, 141, 0.14);
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }}
+    .is-filtering .recommendation-shelves,
+    .is-filtering .recommendation-grid-section,
+    .is-filtering .curation-board,
+    .is-filtering .route-board {{
+      opacity: 0.35;
+      transform: translateY(6px);
+      transition: opacity 140ms ease, transform 140ms ease;
+    }}
+    @keyframes stageIn {{
+      from {{ opacity: 0; transform: translateY(12px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    @keyframes heroIn {{
+      from {{ opacity: 0; transform: scale(0.985); }}
+      to {{ opacity: 1; transform: scale(1); }}
+    }}
+    @keyframes cardIn {{
+      from {{ opacity: 0; transform: translateY(8px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
+    @keyframes overlayIn {{
+      from {{ opacity: 0; }}
+      to {{ opacity: 1; }}
+    }}
+    @keyframes drawerIn {{
+      from {{ opacity: 0; transform: translateX(18px); }}
+      to {{ opacity: 1; transform: translateX(0); }}
+    }}
+    @media (max-width: 1179px) {{
+      .page-header {{
+        grid-template-columns: 1fr;
+        position: static;
+      }}
+      .toolbar,
+      .header-actions {{
+        justify-content: flex-start;
+      }}
+      .cinematic-stage {{
+        grid-template-columns: 1fr 1fr;
+      }}
+      .stage-intro {{
+        grid-column: 1 / -1;
+        padding-bottom: 4px;
+      }}
+      .route-board {{
+        grid-template-columns: 1fr;
+      }}
+      .venue-bundle-list {{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+    }}
+    @media (max-width: 767px) {{
+      main {{
+        width: min(100% - 24px, 1420px);
+        padding-top: 18px;
+      }}
+      .page-header {{
+        gap: 12px;
+        padding-bottom: 12px;
+      }}
+      .toolbar {{
+        width: 100%;
+        justify-content: stretch;
+      }}
+      .view-button {{
+        flex: 1 1 0;
+        padding-inline: 8px;
+      }}
+      .header-actions {{
+        width: 100%;
+        flex-wrap: wrap;
+      }}
+      .cinematic-stage {{
+        grid-template-columns: 1fr;
+        min-height: 0;
+      }}
+      .stage-intro h1 {{
+        font-size: clamp(32px, 10vw, 38px);
+      }}
+      .stage-intro {{
+        order: 0;
+        padding: 4px 0;
+      }}
+      .curation-hero {{
+        order: 1;
+      }}
+      .urgent-panel {{
+        order: 2;
+      }}
+      .hero-slot,
+      .hero-button {{
+        min-height: 460px;
+      }}
+      .hero-copy {{
+        padding: 22px;
+      }}
+      .hero-copy h2 {{
+        font-size: clamp(24px, 7.5vw, 30px);
+      }}
+      .urgent-list {{
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(260px, 84vw);
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+      }}
+      .urgent-card {{
+        scroll-snap-align: start;
+      }}
+      .venue-bundle-list,
+      .recommendation-grid {{
+        grid-template-columns: 1fr;
+      }}
+      .route-map-panel {{
+        min-height: 190px;
+      }}
+      .quick-filter-rail {{
+        margin-inline: -16px;
+        padding-inline: 16px;
+      }}
+      .shelf-row {{
+        grid-auto-columns: minmax(190px, 76vw);
+        margin-inline: -18px;
+        padding-inline: 18px;
+      }}
+      .advanced-filter[open] {{
+        position: relative;
+      }}
+      .detail-panel {{
+        width: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
+        border-radius: 24px 24px 0 0;
+        animation-name: drawerUp;
+      }}
+      @keyframes drawerUp {{
+        from {{ opacity: 0; transform: translateY(26px); }}
+        to {{ opacity: 1; transform: translateY(0); }}
+      }}
+    }}
+    @media (prefers-reduced-motion: reduce) {{
+      *,
+      *::before,
+      *::after {{
+        scroll-behavior: auto !important;
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 1ms !important;
+      }}
+    }}
   </style>
 </head>
 <body class="view-featured">
   <main>
     <header class="page-header">
-      <div class="header-copy">
-        <p class="eyebrow">관심 기반 문화 큐레이션</p>
-        <h1>오늘 고르기 좋은 문화 일정</h1>
-        <p class="subcopy">가족 관심사와 일정 조건을 바탕으로, 지금 눌러볼 만한 전시·교육·강연을 먼저 골랐어요.</p>
-        <p class="summary">진행/예정 {len(items)}건 · {html.escape(count_text)}</p>
+      <div class="header-brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>관심 기반 문화 큐레이션 리포트</span>
+      </div>
+      <div class="toolbar" aria-label="보기 전환">
+        <button class="view-button" type="button" data-view="featured" aria-pressed="true">추천 보기</button>
+        <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 일정</button>
+        <button class="view-button" type="button" data-view="permanent" aria-pressed="false">상설전</button>
       </div>
       <div class="header-actions">
         <span class="stat-pill" aria-label="전체 카드 수">{len(items)}개 카드</span>
-        <div class="toolbar" aria-label="보기 전환">
-          <button class="view-button" type="button" data-view="featured" aria-pressed="true">추천 보기</button>
-          <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 일정</button>
-          <button class="view-button" type="button" data-view="permanent" aria-pressed="false">상설전</button>
-        </div>
+        <span class="update-pill">업데이트 {html.escape(update_time_text)}</span>
+        <button class="refresh-button" type="button" aria-label="업데이트는 매일 자동 실행됩니다">↻</button>
       </div>
     </header>
     <section class="featured-view" id="featuredView" aria-label="추천 일정">
-      <section class="curation-board" aria-label="오늘의 큐레이션">
-        <div class="curation-hero" id="curationHero">
-          <div class="section-heading">
-            <p>오늘의 대표 추천</p>
-            <span>가장 먼저 확인할 일정</span>
-          </div>
+      <section class="curation-board cinematic-stage" aria-label="오늘의 큐레이션">
+        <section class="stage-intro" aria-label="리포트 소개">
+          <p class="eyebrow">관심 기반 문화 큐레이션 리포트</p>
+          <h1>오늘 고르기 좋은 문화 일정</h1>
+          <p class="subcopy">가족 관심사와 일정 조건을 바탕으로 지금 둘러볼 만한 전시·교육·강연을 먼저 골랐어요.</p>
+          <p class="summary">진행/예정 {len(items)}건 · {html.escape(count_text)}</p>
+        </section>
+        <section class="curation-hero" id="curationHero" aria-label="오늘의 대표 추천">
           <div class="hero-slot" id="heroSlot"></div>
-        </div>
-        <div class="curation-stacks" aria-label="추천 묶음">
-          <section class="mini-stack" aria-label="오늘의 추천">
-            <div class="section-heading">
-              <p>오늘의 추천</p>
-              <span>취향과 접근성을 함께 본 순서</span>
-            </div>
-            <div class="mini-list" id="todayStack"></div>
-          </section>
-          <section class="mini-stack" aria-label="곧 끝나는 일정">
-            <div class="section-heading">
-              <p>곧 끝나요</p>
-              <span>놓치기 전에 볼 일정</span>
-            </div>
-            <div class="mini-list" id="endingStack"></div>
-          </section>
-        </div>
+        </section>
+        <aside class="urgent-panel" id="urgentPanel" aria-label="놓치지 말아야 할 일정">
+          <div class="section-heading">
+            <p>놓치지 말아야 할 일정</p>
+            <span>마감 가까운 순</span>
+          </div>
+          <div class="mini-list urgent-list" id="endingStack"></div>
+        </aside>
       </section>
-      <section class="venue-bundle-section" id="venueBundleSection" aria-label="한 장소에서 묶어보기">
-        <div class="section-heading">
-          <p>한 장소에서 묶어보기</p>
-          <span>방문한다면 함께 확인할 것</span>
+      <section class="venue-bundle-section route-board" id="venueBundleSection" aria-label="한 장소에서 묶어보기">
+        <div class="route-board-main">
+          <div class="section-heading">
+            <p>한 장소에서 묶어보기</p>
+            <span>동선까지 생각한 오늘의 문화 코스</span>
+          </div>
+          <div class="venue-bundle-list" id="venueBundleList"></div>
         </div>
-        <div class="venue-bundle-list" id="venueBundleList"></div>
+        <div class="route-map-panel" id="routeMapPanel" aria-hidden="true">
+          <div class="route-map-line"></div>
+          <span class="route-node route-node-one">1</span>
+          <span class="route-node route-node-two">2</span>
+          <span class="route-node route-node-three">3</span>
+          <p>Route curation</p>
+        </div>
       </section>
       <section class="quick-filter-panel" aria-label="빠른 추천 필터">
+        <div class="section-heading compact-heading">
+          <p>빠른 필터</p>
+          <span>보고 싶은 조건만 가볍게</span>
+        </div>
         <div class="quick-filter-rail" id="quickFilterRail">
           <button class="quick-chip" type="button" data-quick-filter="free" aria-pressed="false">무료</button>
           <button class="quick-chip" type="button" data-quick-filter="family" aria-pressed="false">가족</button>
@@ -2319,7 +3027,7 @@ def render(person_name="가족"):
       <section class="recommendation-panel" aria-label="관심 기반 추천 설정">
         <details class="advanced-filter" id="advancedFilter">
           <summary>
-            <span id="advancedFilterLabel">상세 필터</span>
+            <span id="advancedFilterLabel">상세 필터 열기</span>
             <small>관심 키워드와 우선순위 조정</small>
           </summary>
           <div class="advanced-filter-body">
@@ -2355,6 +3063,29 @@ def render(person_name="가족"):
           <p id="recommendationSummary"></p>
           <button class="reset-button" type="button" id="resetRecommendation">초기화</button>
         </div>
+      </section>
+      <section class="recommendation-shelves" id="recommendationShelves" aria-label="추천 선반">
+        <section class="recommendation-shelf" aria-label="오늘의 추천">
+          <div class="section-heading">
+            <p>오늘의 추천</p>
+            <span>취향과 접근성을 함께 본 순서</span>
+          </div>
+          <div class="shelf-row" id="todayStack"></div>
+        </section>
+        <section class="recommendation-shelf" aria-label="곧 끝나요">
+          <div class="section-heading">
+            <p>곧 끝나요</p>
+            <span>놓치기 전에 볼 일정</span>
+          </div>
+          <div class="shelf-row" id="endingShelf"></div>
+        </section>
+        <section class="recommendation-shelf" aria-label="이번 주 추천">
+          <div class="section-heading">
+            <p>이번 주 추천</p>
+            <span>가까운 일정부터</span>
+          </div>
+          <div class="shelf-row" id="weekShelf"></div>
+        </section>
       </section>
       <section class="recommendation-grid-section" aria-label="추천 전체">
         <div class="view-heading">
@@ -2412,8 +3143,8 @@ def render(person_name="가족"):
           <div class="why-section" id="detailWhy"></div>
           <div class="tag-section" id="detailTags"></div>
           <div class="schedule-section" id="detailSchedule"></div>
-          <div class="companion-section" id="detailCompanions"></div>
-          <div class="detail-actions">
+          <div class="companion-section same-venue-section" id="detailCompanions" data-focus-target="sameVenueSection"></div>
+          <div class="detail-actions mobile-source-actions">
             <a class="source-link" id="detailSource" href="#" target="_blank" rel="noopener">원문 보기</a>
           </div>
           <div class="related-links" id="detailRelated"></div>
@@ -2434,6 +3165,9 @@ def render(person_name="가족"):
     const heroSlot = document.getElementById("heroSlot");
     const todayStack = document.getElementById("todayStack");
     const endingStack = document.getElementById("endingStack");
+    const endingShelf = document.getElementById("endingShelf");
+    const weekShelf = document.getElementById("weekShelf");
+    const recommendationShelves = document.getElementById("recommendationShelves");
     const venueBundleSection = document.getElementById("venueBundleSection");
     const venueBundleList = document.getElementById("venueBundleList");
     const quickFilterRail = document.getElementById("quickFilterRail");
@@ -2452,6 +3186,7 @@ def render(person_name="가족"):
       priority: "recommended"
     }};
     const quickFilters = new Set();
+    let filteringTimer = null;
     const fields = {{
       kicker: document.getElementById("detailKicker"),
       title: document.getElementById("detailTitle"),
@@ -2505,6 +3240,17 @@ def render(person_name="가족"):
         return `<img src="${{escapeHtml(item.imageUrl)}}" alt="${{escapeHtml(item.displayTitle || item.title)}}" loading="lazy">`;
       }}
       return posterFallbackMarkup(item);
+    }}
+
+    function thumbnailMarkup(item) {{
+      if (item.imageUrl) {{
+        return `<span class="thumb"><img src="${{escapeHtml(item.imageUrl)}}" alt="${{escapeHtml(item.displayTitle || item.title)}}" loading="lazy"></span>`;
+      }}
+      return `<span class="thumb thumb-fallback"><span>${{escapeHtml(item.type || "일정")}}</span></span>`;
+    }}
+
+    function arrowMarkup() {{
+      return '<span class="arrow-chip" aria-hidden="true">↗</span>';
     }}
 
     function recommendationSentence(item) {{
@@ -2656,12 +3402,12 @@ def render(person_name="가족"):
       button.innerHTML = `
         <div class="hero-media">${{imageMarkup(item)}}</div>
         <div class="hero-copy">
-          <p class="hero-label">${{escapeHtml(item.type)}} · ${{escapeHtml(item.displayVenue || item.institution)}}</p>
+          <p class="hero-label">오늘의 대표 추천</p>
           <h2>${{escapeHtml(item.displayTitle || item.title)}}</h2>
-          <p class="hero-meta">${{escapeHtml(item.period)}} · ${{escapeHtml(item.status || "상태 확인")}}</p>
-          ${{badgeMarkup(item, 4)}}
+          <p class="hero-meta">${{escapeHtml(item.displayVenue || item.institution)}} · ${{escapeHtml(item.period)}} · ${{escapeHtml(item.status || "상태 확인")}}</p>
+          ${{badgeMarkup(item, 3)}}
           <p class="hero-reason">${{escapeHtml(recommendationSentence(item))}}</p>
-          <span class="hero-cta">자세히 보기</span>
+          <span class="hero-actions"><span class="hero-cta">자세히 보기</span>${{arrowMarkup()}}</span>
         </div>
       `;
       heroSlot.appendChild(button);
@@ -2681,16 +3427,48 @@ def render(person_name="가족"):
         const item = entry.item;
         const button = document.createElement("button");
         button.type = "button";
-        button.className = "mini-button";
+        button.className = "mini-button urgent-card";
         button.dataset.curationIndex = String(entry.index);
         button.innerHTML = `
-          <span class="mini-topline">
+          ${{thumbnailMarkup(item)}}
+          <span class="urgent-copy">
+            <span class="mini-topline">
+              <span class="deadline-pill">${{escapeHtml(deadlineText(item))}}</span>
+              ${{arrowMarkup()}}
+            </span>
             <span class="mini-label">${{escapeHtml(item.displayVenue || item.institution)}}</span>
-            <span class="deadline-pill">${{escapeHtml(deadlineText(item))}}</span>
+            <h3>${{escapeHtml(item.displayTitle || item.title)}}</h3>
+            <span class="mini-meta">${{escapeHtml(item.period)}} · ${{escapeHtml(item.status || "상태 확인")}}</span>
+            ${{badgeMarkup(item, 2)}}
           </span>
-          <h3>${{escapeHtml(item.displayTitle || item.title)}}</h3>
-          <p class="mini-meta">${{escapeHtml(item.period)}} · ${{escapeHtml(item.status || "상태 확인")}}</p>
-          ${{badgeMarkup(item, 2)}}
+        `;
+        target.appendChild(button);
+      }});
+    }}
+
+    function renderShelf(target, entries, emptyText) {{
+      target.textContent = "";
+      if (!entries.length) {{
+        const empty = document.createElement("p");
+        empty.className = "mini-meta";
+        empty.textContent = emptyText;
+        target.appendChild(empty);
+        return;
+      }}
+      entries.slice(0, 8).forEach((entry) => {{
+        const item = entry.item;
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "shelf-card";
+        button.dataset.curationIndex = String(entry.index);
+        button.innerHTML = `
+          <span class="shelf-media">${{imageMarkup(item)}}</span>
+          <span class="shelf-overlay">
+            <span class="deadline-pill">${{escapeHtml(deadlineText(item))}}</span>
+            <strong>${{escapeHtml(item.displayTitle || item.title)}}</strong>
+            <span>${{escapeHtml(item.displayVenue || item.institution)}}</span>
+            <small>${{escapeHtml(item.period)}}</small>
+          </span>
         `;
         target.appendChild(button);
       }});
@@ -2729,6 +3507,7 @@ def render(person_name="가족"):
           <h3>${{escapeHtml(representative.item.displayTitle || representative.item.title)}}</h3>
           <p class="bundle-meta">${{escapeHtml(representative.item.period)}} · ${{escapeHtml(representative.item.status || "상태 확인")}}</p>
           <p class="bundle-companions">${{companions.length ? "함께 보기: " + companions.map(escapeHtml).join(" / ") : "같은 장소의 다른 일정도 확인"}}</p>
+          <span class="route-stepper" aria-hidden="true"><span>1</span><i></i><span>2</span><i></i><span>3</span></span>
           <span class="bundle-action">동선 보기</span>
         `;
         venueBundleList.appendChild(button);
@@ -2738,15 +3517,21 @@ def render(person_name="가족"):
     function renderCuration(ranked) {{
       const heroIndex = renderHero(ranked);
       const withoutHero = ranked.filter((entry) => entry.index !== heroIndex);
-      renderMiniStack(todayStack, withoutHero.slice(0, 3), "추천 조건에 맞는 추가 일정이 없어요.");
       const endingSoon = ranked
         .filter((entry) => entry.index !== heroIndex)
         .filter((entry) => {{
           const remaining = numeric(entry.item.remainingDays);
           return remaining !== null && remaining >= 0 && remaining <= 30;
         }})
-        .slice(0, 3);
-      renderMiniStack(endingStack, endingSoon, "30일 안에 끝나는 일정이 없어요.");
+        .slice(0, 8);
+      const weekPicks = ranked
+        .filter((entry) => entry.index !== heroIndex)
+        .filter((entry) => isThisWeek(entry.item))
+        .slice(0, 8);
+      renderMiniStack(endingStack, endingSoon.slice(0, 3), "30일 안에 끝나는 일정이 없어요.");
+      renderShelf(todayStack, withoutHero.slice(0, 8), "추천 조건에 맞는 추가 일정이 없어요.");
+      renderShelf(endingShelf, endingSoon, "30일 안에 끝나는 일정이 없어요.");
+      renderShelf(weekShelf, weekPicks, "이번 주 조건에 맞는 일정이 없어요.");
       renderVenueBundles(ranked);
     }}
 
@@ -2760,7 +3545,7 @@ def render(person_name="가족"):
 
     function updateFilterChrome() {{
       const count = activeFilterCount();
-      advancedFilterLabel.textContent = count ? "상세 필터 " + count : "상세 필터";
+      advancedFilterLabel.textContent = count ? "상세 필터 " + count : "상세 필터 열기";
       resetRecommendation.classList.toggle("is-active", count > 0);
       document.querySelectorAll("[data-quick-filter]").forEach((button) => {{
         const name = button.dataset.quickFilter;
@@ -2795,6 +3580,8 @@ def render(person_name="가족"):
     }}
 
     function applyRecommendations() {{
+      document.body.classList.add("is-filtering");
+      window.clearTimeout(filteringTimer);
       const ranked = items
         .map((item, index) => ({{ item, index, score: scoreRecommendation(item, index) }}))
         .filter((entry) => passesRecommendationFilters(entry.item))
@@ -2827,6 +3614,7 @@ def render(person_name="가족"):
         ranked.length + "건 중 " + visible.length + "건 표시 · " + basis.join(" · ");
       emptyRecommendations.hidden = visible.length > 0;
       updateFilterChrome();
+      filteringTimer = window.setTimeout(() => document.body.classList.remove("is-filtering"), 160);
     }}
 
     function setSingleChoice(selector, value) {{
@@ -2997,7 +3785,7 @@ def render(person_name="가족"):
         fields.companions.hidden = true;
         return;
       }}
-      fields.companions.appendChild(makeSectionTitle("같은 장소에서 함께 볼 것"));
+      fields.companions.appendChild(makeSectionTitle("이 장소에서 같이 묶어볼 일정"));
       const note = document.createElement("p");
       note.className = "companion-note";
       note.textContent = (item.displayVenue || item.institution || "이 장소") +
@@ -3082,7 +3870,9 @@ def render(person_name="가족"):
       if (button.dataset.focusCompanions === "true") {{
         window.setTimeout(() => {{
           if (!fields.companions.hidden) {{
+            fields.companions.classList.add("is-route-focused");
             fields.companions.scrollIntoView({{ block: "nearest", behavior: "smooth" }});
+            window.setTimeout(() => fields.companions.classList.remove("is-route-focused"), 1200);
           }}
         }}, 50);
       }}

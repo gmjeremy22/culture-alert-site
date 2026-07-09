@@ -59,9 +59,14 @@ REQUIRED_IDS = {
     "permanentView": "상설전 영역",
     "curationHero": "대표 추천 영역",
     "heroSlot": "대표 추천 카드",
+    "urgentPanel": "마감 임박 패널",
     "todayStack": "오늘의 추천 묶음",
     "endingStack": "곧 종료 묶음",
+    "endingShelf": "곧 종료 선반",
+    "weekShelf": "이번 주 추천 선반",
     "venueBundleList": "한 장소 묶음",
+    "routeMapPanel": "동선 지도 패널",
+    "recommendationShelves": "추천 선반",
     "quickFilterRail": "빠른 필터",
     "advancedFilter": "상세 필터",
     "advancedFilterLabel": "상세 필터 상태",
@@ -99,6 +104,7 @@ SCRIPT_FLOW_MARKERS = {
     "우선순위 선택": 'document.querySelectorAll("[data-priority-choice]")',
     "빠른 필터 선택": "function applyQuickFilter",
     "첫 화면 큐레이션 렌더링": "function renderCuration",
+    "추천 선반 렌더링": "function renderShelf",
     "상세 필터 상태 표시": "advancedFilterLabel.textContent",
     "추천 초기화": "resetRecommendation.addEventListener",
     "기간 일정 필터": 'document.querySelectorAll("[data-filter]")',
@@ -107,6 +113,9 @@ SCRIPT_FLOW_MARKERS = {
     "Esc 닫기": 'event.key === "Escape"',
     "세부 회차 표시": "function fillSchedule",
     "추천 판단 설명 표시": "function fillWhy",
+    "동선 포커스 표시": "is-route-focused",
+    "동선 포커스 대상": 'data-focus-target="sameVenueSection"',
+    "모바일 원문 보기 고정": "mobile-source-actions",
     "같은 장소 다른 일정 표시": "function fillCompanions",
     "후기/검색 링크 표시": "function fillRelated",
 }
@@ -345,10 +354,14 @@ def check_html_structure(findings, parser, html_text, items):
             "추천 카드에서 클릭할 이유를 빠르게 보여주는 editorial badge가 렌더링되지 않았습니다.",
         )
     for marker, label in [
+        ("관심 기반 문화 큐레이션 리포트", "슬림 헤더/리포트 소개"),
         ("오늘의 대표 추천", "대표 추천 헤딩"),
+        ("놓치지 말아야 할 일정", "마감 임박 패널"),
         ("오늘의 추천", "오늘 추천 스택"),
         ("곧 끝나요", "마감 임박 스택"),
         ("한 장소에서 묶어보기", "장소 묶음 섹션"),
+        ("동선까지 생각한 오늘의 문화 코스", "동선 코스 설명"),
+        ("이번 주 추천", "이번 주 추천 선반"),
         ("추천 전체", "추천 전체 그리드"),
         ("왜 추천하나요", "세부창 추천 판단 설명"),
     ]:
@@ -378,12 +391,33 @@ def check_html_structure(findings, parser, html_text, items):
                 "추천 이유가 사용자 언어가 아니라 원시 점수처럼 보입니다.",
                 marker,
             )
-    if "같은 장소에서 함께 볼 것" not in html_text or "companion-action" not in html_text:
+    if "이 장소에서 같이 묶어볼 일정" not in html_text or "companion-action" not in html_text:
         add_finding(
             findings,
             "P2",
             "같은 장소 큐레이션 UI 누락",
             "세부창의 같은 장소 일정이 방문 동선 큐레이션 섹션으로 표시되지 않습니다.",
+        )
+    if 'data-focus-target="sameVenueSection"' not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "동선 묶기 포커스 대상 누락",
+            "장소 묶음 카드에서 상세창의 같은 장소 섹션으로 이동할 대상을 명시해야 합니다.",
+        )
+    if "mobile-source-actions" not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "모바일 원문 보기 고정 영역 누락",
+            "모바일 상세창에서 원문 보기 버튼을 하단 고정 영역으로 유지하는 표식이 없습니다.",
+        )
+    if "prefers-reduced-motion" not in html_text or "@media (max-width: 767px)" not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "반응형/모션 안전장치 누락",
+            "모바일 반응형 또는 모션 감소 설정이 Cinematic Journey UI에 반영되지 않았습니다.",
         )
 
     total = len(items)
@@ -614,13 +648,16 @@ def render_findings(lines, findings):
 
 def manual_review_checklist():
     return [
-        "첫 화면: 대표 추천, 오늘의 추천, 곧 끝나요, 한 장소에서 묶어보기 순서가 추천 리포트처럼 읽히는지 확인",
+        "첫 화면: editorial intro, cinematic hero, 놓치지 말아야 할 일정 패널이 첫 viewport에서 균형 있게 보이는지 확인",
+        "동선 보드: 한 장소에서 묶어보기 카드와 route map panel이 long filter보다 먼저 보이고 동선 보기 버튼이 자연스럽게 느껴지는지 확인",
         "빠른 필터: 무료/가족/이번 주/교육/전시/서울/경기/인천을 각각 눌러 대표 추천과 추천 전체가 함께 바뀌는지 확인",
         "상세 필터: 기본 접힘 상태에서 열기, 관심 키워드/지역/일정/우선순위/초기화를 눌러 요약 문구가 자연스럽게 바뀌는지 확인",
+        "추천 선반: 오늘의 추천/곧 끝나요/이번 주 추천이 데스크톱에서는 가로 shelf, 모바일에서는 swipe처럼 동작하는지 확인",
         "추천 전체: 카드 제목이 2줄 안에서 정리되고 배지가 1-2초 안에 이해되는지 확인",
         "기간 일정: 전체/전시/강연/교육/행사 필터를 누르고 숨김 카드가 남거나 빈 공간이 어색하지 않은지 확인",
         "상설전: 상설전 탭의 첫 12개와 이미지 없는 카드 몇 개를 열어 기간/상태 문구가 기간 일정과 섞이지 않는지 확인",
-        "세부창: 왜 추천하나요, 원문 보기, 후기/검색 링크, 같은 장소에서 함께 볼 것, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
+        "세부창: 왜 추천하나요, 원문 보기, 후기/검색 링크, 이 장소에서 같이 묶어볼 일정, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
+        "동선 포커스: 동선 보기 클릭 후 drawer가 열리고 같은 장소 섹션이 1200ms 정도 강조되는지 확인",
         "문구 품질: 국립중앙박물관, 자동 모니터 출신 기관, 설명이 긴 카드에서 코드/푸터/깨진 글자가 보이지 않는지 확인",
         "화면 크기: 데스크톱 1366x900과 모바일 390x844에서 버튼, 카드 제목, 세부창 텍스트가 겹치거나 잘리지 않는지 확인",
     ]
