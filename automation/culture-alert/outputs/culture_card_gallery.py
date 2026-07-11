@@ -2811,6 +2811,320 @@ def render(person_name="가족"):
       transform: translateY(6px);
       transition: opacity 140ms ease, transform 140ms ease;
     }}
+    /* Nocturne gallery refinement: keep the dark room, remove the flat dashboard feel. */
+    :root {{
+      --bg: #090B0A;
+      --bg-soft: #0E1110;
+      --surface: #111412;
+      --surface-raised: #171A18;
+      --surface-glass: rgba(17, 20, 18, 0.84);
+      --surface-olive: #121811;
+      --surface-navy: #0C1117;
+      --surface-warm: #17130F;
+      --border: rgba(236, 229, 216, 0.13);
+      --border-strong: rgba(184, 147, 99, 0.48);
+      --text: #EFE8DA;
+      --text-soft: #C7BDAE;
+      --text-muted: #837B70;
+      --accent: #B89363;
+      --accent-ivory: #E8DFD0;
+      --route-green: #7D9278;
+      --urgent-amber: #A7604F;
+      --brick: #9C5B4B;
+      --ink: var(--text);
+      --muted: var(--text-muted);
+      --line: var(--border);
+      --paper: var(--bg);
+      --panel: var(--surface);
+      --panel-2: var(--surface-raised);
+      --accent-ink: #0D0E0B;
+      --shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
+      --font-body: "Pretendard", "SUIT", "Inter", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      --font-display: "Noto Serif KR", "Nanum Myeongjo", "Source Serif 4", Georgia, "Malgun Gothic", serif;
+    }}
+    body {{
+      position: relative;
+      overflow-x: hidden;
+      background:
+        linear-gradient(135deg, #070908 0%, #10120E 44%, #071017 100%),
+        linear-gradient(180deg, rgba(184, 147, 99, 0.08), transparent 36%);
+      color: var(--text);
+      font-family: var(--font-body);
+    }}
+    body::before {{
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, rgba(232, 223, 208, 0.028) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(232, 223, 208, 0.018) 1px, transparent 1px);
+      background-size: 88px 88px, 88px 88px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.8), transparent 72%);
+    }}
+    main {{
+      position: relative;
+      z-index: 1;
+    }}
+    .page-header {{
+      border-bottom: 1px solid rgba(232, 223, 208, 0.12);
+      background: linear-gradient(180deg, rgba(9, 11, 10, 0.96), rgba(9, 11, 10, 0.68));
+    }}
+    .header-brand {{
+      color: var(--text-soft);
+      font-weight: 720;
+      letter-spacing: 0.01em;
+    }}
+    .brand-mark {{
+      border-radius: 2px;
+      border-color: rgba(184, 147, 99, 0.74);
+      box-shadow: inset 0 0 0 3px rgba(184, 147, 99, 0.08);
+      transform: rotate(45deg);
+    }}
+    .toolbar {{
+      border-color: rgba(232, 223, 208, 0.13);
+      border-radius: 6px;
+      background: rgba(232, 223, 208, 0.035);
+      box-shadow: none;
+    }}
+    .view-button,
+    .filter-button,
+    .quick-chip,
+    .choice-button,
+    .update-pill,
+    .refresh-button {{
+      border-radius: 4px;
+      font-weight: 760;
+    }}
+    .view-button[aria-pressed="true"],
+    .filter-button[aria-pressed="true"],
+    .quick-chip[aria-pressed="true"],
+    .choice-button[aria-pressed="true"] {{
+      border-color: rgba(184, 147, 99, 0.58);
+      background: rgba(184, 147, 99, 0.16);
+      color: var(--accent-ivory);
+      box-shadow: inset 0 -1px 0 rgba(232, 223, 208, 0.12);
+    }}
+    .update-pill,
+    .refresh-button {{
+      border-color: rgba(232, 223, 208, 0.12);
+      background: rgba(232, 223, 208, 0.035);
+      color: var(--text-soft);
+    }}
+    .cinematic-stage {{
+      grid-template-columns: minmax(210px, 0.66fr) minmax(520px, 1.65fr) minmax(300px, 0.88fr);
+      gap: 16px;
+    }}
+    .stage-intro {{
+      padding-right: 16px;
+    }}
+    .stage-intro .eyebrow,
+    .hero-label {{
+      color: #BFA078;
+      letter-spacing: 0.12em;
+      font-size: 11px;
+      font-weight: 820;
+      text-transform: uppercase;
+    }}
+    .stage-intro h1,
+    .hero-copy h2,
+    .recommendation-shelf h2,
+    .section-heading h2,
+    .detail-title {{
+      font-family: var(--font-display);
+      font-weight: 680;
+      letter-spacing: -0.018em;
+    }}
+    .stage-intro h1 {{
+      font-size: clamp(42px, 4.8vw, 64px);
+      line-height: 1.02;
+      max-width: 460px;
+    }}
+    .stage-intro .subcopy {{
+      color: rgba(232, 223, 208, 0.78);
+      line-height: 1.78;
+    }}
+    .stage-intro .summary {{
+      color: rgba(232, 223, 208, 0.88);
+      font-weight: 720;
+    }}
+    .curation-hero,
+    .urgent-panel,
+    .route-board,
+    .quick-filter-panel,
+    .advanced-filter,
+    .recommendation-shelf,
+    .recommendation-grid-section {{
+      border-color: var(--border);
+      border-radius: 8px;
+      background: var(--surface-glass);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+    }}
+    .curation-hero {{
+      background: var(--surface-navy);
+    }}
+    .hero-slot,
+    .hero-button {{
+      min-height: 570px;
+    }}
+    .hero-button {{
+      background: #0B0F10;
+    }}
+    .hero-button::after {{
+      background:
+        linear-gradient(180deg, rgba(8, 11, 10, 0.00), rgba(8, 11, 10, 0.38) 42%, rgba(8, 11, 10, 0.94)),
+        linear-gradient(90deg, rgba(8, 11, 10, 0.26), rgba(8, 11, 10, 0.04) 46%, rgba(8, 11, 10, 0.58));
+    }}
+    .hero-media img {{
+      opacity: 0.92;
+      filter: saturate(0.94) contrast(1.04);
+    }}
+    .hero-copy {{
+      padding: 42px;
+    }}
+    .hero-copy h2 {{
+      max-width: 760px;
+      font-size: clamp(34px, 3.45vw, 48px);
+      line-height: 1.12;
+      text-shadow: 0 2px 28px rgba(0, 0, 0, 0.46);
+    }}
+    .arrow-chip {{
+      border-radius: 4px;
+      border-color: rgba(232, 223, 208, 0.28);
+      background: rgba(9, 11, 10, 0.42);
+    }}
+    .urgent-panel {{
+      background: linear-gradient(180deg, rgba(23, 19, 15, 0.9), rgba(13, 17, 16, 0.86));
+    }}
+    .urgent-card,
+    .mini-button {{
+      border-radius: 6px;
+      background: rgba(232, 223, 208, 0.032);
+      border-color: rgba(232, 223, 208, 0.11);
+    }}
+    .thumb {{
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(184, 147, 99, 0.15), rgba(125, 146, 120, 0.12)), #101412;
+    }}
+    .deadline-pill {{
+      border-radius: 3px;
+      border-color: rgba(156, 91, 75, 0.58);
+      background: rgba(156, 91, 75, 0.14);
+      color: #D9A08F;
+    }}
+    .editorial-badge,
+    .tag-chip,
+    .keyword-row span {{
+      border-radius: 3px;
+      font-weight: 760;
+      letter-spacing: 0.01em;
+    }}
+    .badge-deadline {{
+      border-color: rgba(156, 91, 75, 0.58);
+      background: rgba(156, 91, 75, 0.13);
+      color: #DDA996;
+    }}
+    .badge-gold {{
+      border-color: rgba(184, 147, 99, 0.52);
+      background: rgba(184, 147, 99, 0.12);
+      color: #D9C09B;
+    }}
+    .badge-calm {{
+      border-color: rgba(125, 146, 120, 0.40);
+      background: rgba(125, 146, 120, 0.11);
+      color: #BBCAB7;
+    }}
+    .route-board {{
+      background: linear-gradient(135deg, rgba(18, 24, 17, 0.92), rgba(12, 17, 23, 0.82));
+    }}
+    .bundle-card,
+    .route-map-panel {{
+      border-radius: 6px;
+      background:
+        linear-gradient(135deg, rgba(125, 146, 120, 0.11), transparent 42%),
+        rgba(232, 223, 208, 0.026);
+    }}
+    .route-map-panel {{
+      border-color: rgba(125, 146, 120, 0.30);
+    }}
+    .route-node,
+    .route-stepper span {{
+      border-radius: 4px;
+    }}
+    .route-node {{
+      background: rgba(9, 11, 10, 0.88);
+      color: #D8E0D4;
+    }}
+    .quick-filter-panel {{
+      background: rgba(14, 17, 16, 0.74);
+    }}
+    .quick-chip {{
+      background: rgba(232, 223, 208, 0.026);
+      border-color: rgba(232, 223, 208, 0.12);
+      color: var(--text-soft);
+    }}
+    .advanced-filter {{
+      background: rgba(14, 17, 16, 0.70);
+    }}
+    .recommendation-shelf {{
+      background: linear-gradient(180deg, rgba(17, 20, 18, 0.84), rgba(12, 17, 23, 0.72));
+    }}
+    .shelf-row {{
+      grid-auto-columns: minmax(220px, 270px);
+      gap: 14px;
+    }}
+    .shelf-card {{
+      min-height: 360px;
+      border-radius: 6px;
+      background: #101412;
+    }}
+    .shelf-overlay {{
+      padding: 84px 16px 16px;
+      background: linear-gradient(180deg, rgba(9, 11, 10, 0), rgba(9, 11, 10, 0.78) 38%, rgba(9, 11, 10, 0.96));
+    }}
+    .shelf-overlay strong {{
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 680;
+      line-height: 1.32;
+    }}
+    .recommendation-grid-section {{
+      background: rgba(12, 17, 23, 0.68);
+    }}
+    .recommendation-grid .feature-card .card-button,
+    .list-card .card-button {{
+      border-radius: 6px;
+      background: rgba(232, 223, 208, 0.028);
+      border-color: rgba(232, 223, 208, 0.11);
+      box-shadow: none;
+    }}
+    .recommendation-grid .feature-card .poster {{
+      aspect-ratio: 4 / 5;
+      border-radius: 4px;
+    }}
+    .recommendation-grid .feature-card h2,
+    .recommendation-grid .feature-card:first-child h2 {{
+      font-family: var(--font-display);
+      font-weight: 650;
+      letter-spacing: -0.012em;
+    }}
+    .card-button:hover,
+    .card-button:focus-visible,
+    .shelf-card:hover,
+    .shelf-card:focus-visible,
+    .bundle-card:hover,
+    .bundle-card:focus-visible {{
+      border-color: var(--border-strong);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.42);
+    }}
+    .overlay {{
+      background: rgba(5, 7, 7, 0.68);
+    }}
+    .detail-panel {{
+      border-radius: 8px;
+      background: linear-gradient(135deg, #111412, #0C1117);
+    }}
     @keyframes stageIn {{
       from {{ opacity: 0; transform: translateY(12px); }}
       to {{ opacity: 1; transform: translateY(0); }}
@@ -2951,6 +3265,159 @@ def render(person_name="가족"):
         animation-duration: 1ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 1ms !important;
+      }}
+    }}
+    /* Layout safety pass for the nocturne theme. */
+    html,
+    body {{
+      max-width: 100%;
+      overflow-x: hidden;
+    }}
+    .featured-view,
+    .recommendation-panel,
+    .recommendation-grid-section,
+    .route-board {{
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+    }}
+    .cinematic-stage {{
+      display: flex;
+      align-items: stretch;
+      gap: 16px;
+      grid-template-columns: none;
+      min-width: 0;
+      width: min(100%, calc(100vw - 48px)) !important;
+      max-width: calc(100vw - 48px) !important;
+      overflow: hidden;
+    }}
+    .curation-hero,
+    .urgent-panel,
+    .hero-slot,
+    .hero-button,
+    .hero-copy,
+    .stage-intro {{
+      min-width: 0;
+    }}
+    .hero-copy {{
+      width: 100%;
+      max-width: 100%;
+    }}
+    .stage-intro h1,
+    .hero-copy h2 {{
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: keep-all;
+    }}
+    .stage-intro {{
+      flex: 0 0 280px;
+    }}
+    .curation-hero {{
+      flex: 1 1 0;
+      width: 0;
+    }}
+    .urgent-panel {{
+      flex: 0 0 300px;
+    }}
+    @media (max-width: 1179px) {{
+      .cinematic-stage {{
+        flex-wrap: wrap;
+        grid-template-columns: none;
+      }}
+      .stage-intro {{
+        flex: 0 0 100%;
+      }}
+      .curation-hero {{
+        flex: 1 1 min(620px, 100%);
+        width: auto;
+      }}
+      .urgent-panel {{
+        flex: 1 1 300px;
+      }}
+    }}
+    @media (max-width: 767px) {{
+      main {{
+        width: min(370px, calc(100% - 20px));
+        margin-inline: 10px auto;
+      }}
+      .page-header {{
+        overflow: hidden;
+      }}
+      .toolbar {{
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 4px;
+      }}
+      .view-button {{
+        min-width: 0;
+        padding-inline: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+      }}
+      .header-actions {{
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) 32px;
+        align-items: center;
+      }}
+      .update-pill {{
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }}
+      .cinematic-stage {{
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: none;
+        width: 100% !important;
+        max-width: 100% !important;
+      }}
+      .stage-intro,
+      .curation-hero,
+      .urgent-panel {{
+        flex: 0 0 auto;
+        width: 100%;
+      }}
+      .stage-intro h1 {{
+        font-size: clamp(27px, 8vw, 31px);
+        line-height: 1.16;
+      }}
+      .stage-intro .subcopy {{
+        font-size: 14px;
+        line-height: 1.65;
+      }}
+      .hero-slot,
+      .hero-button {{
+        min-height: 430px;
+      }}
+      .hero-copy {{
+        inset-inline: 0;
+        padding: 20px;
+      }}
+      .hero-copy h2 {{
+        display: block;
+        max-width: min(100%, 300px);
+        font-size: clamp(21px, 6vw, 24px);
+        line-height: 1.16;
+        -webkit-line-clamp: unset;
+        -webkit-box-orient: unset;
+        word-break: break-all;
+        overflow-wrap: anywhere;
+      }}
+      .hero-meta,
+      .hero-reason {{
+        max-width: min(100%, 310px);
+        font-size: 12px;
+        line-height: 1.45;
+      }}
+      .editorial-badges {{
+        max-width: 100%;
+      }}
+      .urgent-card {{
+        grid-template-columns: 82px minmax(0, 1fr);
+      }}
+      .detail-panel {{
+        border-radius: 8px 8px 0 0;
       }}
     }}
   </style>

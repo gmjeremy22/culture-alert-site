@@ -419,6 +419,25 @@ def check_html_structure(findings, parser, html_text, items):
             "반응형/모션 안전장치 누락",
             "모바일 반응형 또는 모션 감소 설정이 Cinematic Journey UI에 반영되지 않았습니다.",
         )
+    nocturne_markers = [
+        "Nocturne gallery refinement",
+        "--surface-navy: #0C1117",
+        "--surface-olive: #121811",
+        "--brick: #9C5B4B",
+        "--font-display",
+        "Noto Serif KR",
+        "min-height: 570px",
+        "font-size: clamp(34px, 3.45vw, 48px)",
+    ]
+    missing_nocturne = [marker for marker in nocturne_markers if marker not in html_text]
+    if missing_nocturne:
+        add_finding(
+            findings,
+            "P2",
+            "야간 갤러리 디자인 기준 누락",
+            "순검정 대시보드 느낌을 줄이는 새 다크 팔레트, 제목 글꼴, 큰 포스터 히어로 기준이 빠졌습니다.",
+            "\n".join(missing_nocturne),
+        )
 
     total = len(items)
     timed = [item for item in items if not item.get("isPermanent")]
