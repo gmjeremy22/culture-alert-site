@@ -5454,9 +5454,19 @@ def render(person_name="가족"):
       fields.companions.hidden = false;
     }}
 
-    function openDetail(index) {{
+    function detailHistoryState(index) {{
+      const existing = history.state && typeof history.state === "object" ? history.state : {{}};
+      return {{
+        ...existing,
+        cultureAlertDetail: true,
+        cultureAlertDetailIndex: index
+      }};
+    }}
+
+    function openDetail(index, options = {{}}) {{
       const item = items[index];
       if (!item) return;
+      const wasOpen = !overlay.hidden;
       fillImage(item);
       fields.kicker.textContent = `${{item.type}} · ${{item.displayVenue}}`;
       fields.title.textContent = item.displayTitle || item.title;
@@ -5476,12 +5486,32 @@ def render(person_name="가족"):
       fillRelated(item);
       overlay.hidden = false;
       document.body.classList.add("modal-open");
+      if (!options.fromHistory) {{
+        try {{
+          const state = detailHistoryState(index);
+          if (wasOpen || (history.state && history.state.cultureAlertDetail)) {{
+            history.replaceState(state, "");
+          }} else {{
+            history.pushState(state, "");
+          }}
+        }} catch (error) {{
+          // The detail still opens when a browser blocks History API updates.
+        }}
+      }}
       closeButton.focus();
     }}
 
     function closeDetail() {{
       overlay.hidden = true;
       document.body.classList.remove("modal-open");
+    }}
+
+    function requestCloseDetail() {{
+      if (!overlay.hidden && history.state && history.state.cultureAlertDetail) {{
+        history.back();
+      }} else {{
+        closeDetail();
+      }}
     }}
 
     function switchView(view) {{
@@ -5618,12 +5648,22 @@ def render(person_name="가족"):
       }});
     }});
     resetRecommendation.addEventListener("click", resetRecommendationState);
-    closeButton.addEventListener("click", closeDetail);
+    closeButton.addEventListener("click", requestCloseDetail);
     overlay.addEventListener("click", (event) => {{
-      if (event.target === overlay) closeDetail();
+      if (event.target === overlay) requestCloseDetail();
+    }});
+    window.addEventListener("popstate", (event) => {{
+      if (!overlay.hidden) {{
+        closeDetail();
+        return;
+      }}
+      const detailIndex = Number(event.state && event.state.cultureAlertDetailIndex);
+      if (event.state && event.state.cultureAlertDetail && Number.isInteger(detailIndex)) {{
+        openDetail(detailIndex, {{ fromHistory: true }});
+      }}
     }});
     document.addEventListener("keydown", (event) => {{
-      if (event.key === "Escape" && !overlay.hidden) closeDetail();
+      if (event.key === "Escape" && !overlay.hidden) requestCloseDetail();
       else if (event.key === "Escape" && !preferenceOverlay.hidden && activeProfileId) closePreferencePanel();
     }});
 
