@@ -56,14 +56,19 @@ STALE_REASON_MARKERS = (
 REQUIRED_IDS = {
     "featuredView": "추천 보기 영역",
     "allView": "기간 일정 영역",
+    "programView": "강연·교육 전용 영역",
+    "programViewButton": "강연·교육 전용 탭",
+    "programGrid": "강연·교육 카드 목록",
+    "programSummary": "강연·교육 표시 건수",
+    "programLoadMore": "강연·교육 더 보기",
     "permanentView": "상설전 영역",
     "curationHero": "대표 추천 영역",
     "heroSlot": "대표 추천 카드",
     "urgentPanel": "마감 임박 패널",
-    "todayStack": "오늘의 추천 묶음",
+    "todayStack": "취향에 맞는 다음 일정 묶음",
     "endingStack": "곧 종료 묶음",
-    "endingShelf": "곧 종료 선반",
-    "weekShelf": "이번 주 추천 선반",
+    "weekShelf": "이번 주 새 시작 선반",
+    "weekShelfSection": "조건부 이번 주 시작 선반",
     "venueBundleList": "한 장소 묶음",
     "routeMapPanel": "동선 지도 패널",
     "recommendationShelves": "추천 선반",
@@ -79,7 +84,7 @@ REQUIRED_IDS = {
     "recommendationSummary": "추천 조건 요약",
 }
 
-REQUIRED_VIEWS = {"featured", "all", "permanent"}
+REQUIRED_VIEWS = {"featured", "all", "program", "permanent"}
 
 EDITORIAL_BADGE_LABELS = {
     "취향 적합",
@@ -96,6 +101,8 @@ EDITORIAL_BADGE_LABELS = {
 EDITORIAL_BADGE_TONES = {"deadline", "gold", "calm"}
 
 SCRIPT_FLOW_MARKERS = {
+    "관심 분야 원형 이미지": "function hydrateInterestArtwork",
+    "단계별 등장 애니메이션": "function startCurationReveal",
     "카드 클릭으로 세부창 열기": 'document.querySelectorAll("[data-index]")',
     "보기 전환 버튼": 'document.querySelectorAll("[data-view]")',
     "관심 키워드 선택": 'document.querySelectorAll("[data-keyword-choice]")',
@@ -149,6 +156,7 @@ class CardHtmlParser(HTMLParser):
         self.feature_indexes = []
         self.feature_cards = 0
         self.list_cards = 0
+        self.program_cards = 0
         self.visible_text_parts = []
         self.skip_stack = []
 
@@ -175,6 +183,8 @@ class CardHtmlParser(HTMLParser):
                 self.feature_indexes.append(attrs["data-feature-index"])
         if {"card", "list-card"} <= classes:
             self.list_cards += 1
+        if {"card", "program-card"} <= classes:
+            self.program_cards += 1
 
     def handle_endtag(self, tag):
         tag = tag.lower()
@@ -354,16 +364,22 @@ def check_html_structure(findings, parser, html_text, items):
             "추천 카드에서 클릭할 이유를 빠르게 보여주는 editorial badge가 렌더링되지 않았습니다.",
         )
     for marker, label in [
-        ("관심 기반 문화 큐레이션 리포트", "슬림 헤더/리포트 소개"),
+        ("CULTURE EDIT", "슬림 헤더 브랜드"),
+        ("이번 주, 마음이 가는 곳", "첫 화면 큐레이션 제목"),
+        ("어떻게 골랐나요", "추천 선정 기준 안내"),
         ("오늘의 대표 추천", "대표 추천 헤딩"),
         ("놓치지 말아야 할 일정", "마감 임박 패널"),
-        ("오늘의 추천", "오늘 추천 스택"),
-        ("곧 끝나요", "마감 임박 스택"),
+        ("취향에 맞는 다음 일정", "중복 없는 다음 추천 선반"),
         ("한 장소에서 묶어보기", "장소 묶음 섹션"),
         ("동선까지 생각한 오늘의 문화 코스", "동선 코스 설명"),
-        ("이번 주 추천", "이번 주 추천 선반"),
+        ("이번 주 새로 시작해요", "조건부 이번 주 시작 선반"),
         ("추천 전체", "추천 전체 그리드"),
         ("왜 추천하나요", "세부창 추천 판단 설명"),
+        ("어떤 이야기에 끌리나요?", "프로필별 취향 선택 화면"),
+        ("본인 기기에만 저장됩니다.", "프로필 로컬 저장 안내"),
+        ("강연·교육 탭 표시", "프로그램 전용 탭 선택"),
+        ("취향과 가까운 프로그램부터 따로 모았어요.", "프로그램 전용 화면"),
+        ("지도 보기", "상세창 지도 연결"),
     ]:
         if marker not in parser.visible_text and marker not in html_text:
             add_finding(
@@ -412,6 +428,27 @@ def check_html_structure(findings, parser, html_text, items):
             "모바일 원문 보기 고정 영역 누락",
             "모바일 상세창에서 원문 보기 버튼을 하단 고정 영역으로 유지하는 표식이 없습니다.",
         )
+    if "cultureAlertProfilesV1" not in html_text or "data-interest" not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "프로필별 취향 저장 기능 누락",
+            "로그인 없이 이 기기에 프로필과 관심 분야를 저장하는 기능이 없습니다.",
+        )
+    if ".interest-orb.has-image" not in html_text or "background-size: cover" not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "관심 분야 이미지 스타일 누락",
+            "관심 분야 원형 선택지에 실제 전시 이미지를 채우는 스타일이 없습니다.",
+        )
+    if "https://map.kakao.com/link/search/" not in html_text or 'id="detailMap"' not in html_text:
+        add_finding(
+            findings,
+            "P2",
+            "지도 보기 연결 누락",
+            "상세창에서 기관을 카카오맵으로 검색하는 연결이 없습니다.",
+        )
     if "prefers-reduced-motion" not in html_text or "@media (max-width: 767px)" not in html_text:
         add_finding(
             findings,
@@ -425,7 +462,7 @@ def check_html_structure(findings, parser, html_text, items):
         "--surface-olive: #121811",
         "--brick: #9C5B4B",
         "--font-display",
-        "Noto Serif KR",
+        "Pretendard Variable",
         "min-height: 570px",
         "font-size: clamp(34px, 3.45vw, 48px)",
     ]
@@ -441,29 +478,40 @@ def check_html_structure(findings, parser, html_text, items):
 
     total = len(items)
     timed = [item for item in items if not item.get("isPermanent")]
+    exhibitions = [item for item in timed if item.get("type") == "전시"]
+    programs = [item for item in timed if item.get("type") in {"강연", "교육", "행사"}]
     permanent = [item for item in items if item.get("isPermanent")]
     if total == 0:
         add_finding(findings, "P1", "카드 없음", "최종 리포트에 표시할 카드 데이터가 없습니다.")
         return
 
-    if parser.feature_cards != len(timed):
+    if parser.feature_cards != len(exhibitions):
         add_finding(
             findings,
             "P2",
             "추천 보기 카드 수 불일치",
-            "추천 보기 영역의 카드 수와 기간 일정 데이터 수가 다릅니다.",
-            f"feature_cards={parser.feature_cards}, timed_items={len(timed)}",
+            "추천 보기 영역의 카드 수와 기간 전시 데이터 수가 다릅니다.",
+            f"feature_cards={parser.feature_cards}, exhibitions={len(exhibitions)}",
         )
-    if parser.list_cards != total:
+    expected_list_cards = len(exhibitions) + len(permanent)
+    if parser.list_cards != expected_list_cards:
         add_finding(
             findings,
             "P2",
             "목록 카드 수 불일치",
-            "기간 일정/상설전 목록 카드 수와 전체 카드 데이터 수가 다릅니다.",
-            f"list_cards={parser.list_cards}, total_items={total}",
+            "기간 전시/상설전 목록 카드 수가 데이터와 다릅니다.",
+            f"list_cards={parser.list_cards}, expected={expected_list_cards}",
+        )
+    if parser.program_cards != len(programs):
+        add_finding(
+            findings,
+            "P2",
+            "강연·교육 카드 수 불일치",
+            "강연·교육 전용 탭의 카드 수가 프로그램 데이터와 다릅니다.",
+            f"program_cards={parser.program_cards}, programs={len(programs)}",
         )
 
-    expected_static_card_buttons = len(timed) * 2 + len(permanent)
+    expected_static_card_buttons = len(exhibitions) * 2 + len(programs) + len(permanent)
     if len(parser.data_indexes) != expected_static_card_buttons:
         add_finding(
             findings,
@@ -505,12 +553,14 @@ def check_html_structure(findings, parser, html_text, items):
             index = int(raw)
         except ValueError:
             continue
-        if 0 <= index < total and items[index].get("isPermanent"):
+        if 0 <= index < total and (
+            items[index].get("isPermanent") or items[index].get("type") != "전시"
+        ):
             add_finding(
                 findings,
                 "P1",
                 "상설전이 추천 보기 영역에 섞임",
-                "추천 보기는 기간 일정만 보여야 하는데 상설전 카드가 포함됐습니다.",
+                "추천 보기는 기간 전시만 보여야 하는데 강연·교육 또는 상설전 카드가 포함됐습니다.",
                 f"index={index}, title={items[index].get('displayTitle')}",
             )
             break
@@ -667,15 +717,20 @@ def render_findings(lines, findings):
 
 def manual_review_checklist():
     return [
-        "첫 화면: editorial intro, cinematic hero, 놓치지 말아야 할 일정 패널이 첫 viewport에서 균형 있게 보이는지 확인",
+        "관심 분야 이미지: 12개 원형 선택지에 분야별 전시 사진이 채워지고 글자가 읽히며, 이미지가 없는 경우 색상 원형으로 자연스럽게 대체되는지 확인",
+        "첫 화면 등장: 대표 추천, 오른쪽 마감 일정, 장소 묶음, 필터, 추천 선반, 전체 카드가 짧은 간격으로 자연스럽게 나타나며 설정창 뒤에서 먼저 재생되지 않는지 확인",
+        "프로필: 첫 접속에서 이름/관심 분야 3개/강연·교육 여부를 저장하고, 두 번째 프로필을 추가한 뒤 서로 전환되는지 확인",
+        "개인화 추천: 모든 기본 추천은 전시만 포함하고, 강연·교육을 켠 프로필에만 전용 탭이 나타나는지 확인",
+        "강연·교육 탭: 전용 탭을 누르기 전에는 프로그램이 보이지 않고, 탭 안에서만 취향순 24건/필터/더 보기가 동작하는지 확인",
+        "첫 화면: 전체 폭 큐레이션 제목, 선정 기준 안내, 대표 추천, 놓치지 말아야 할 일정 패널이 첫 viewport에서 균형 있게 보이는지 확인",
         "동선 보드: 한 장소에서 묶어보기 카드와 route map panel이 long filter보다 먼저 보이고 동선 보기 버튼이 자연스럽게 느껴지는지 확인",
-        "빠른 필터: 무료/가족/이번 주/교육/전시/서울/경기/인천을 각각 눌러 대표 추천과 추천 전체가 함께 바뀌는지 확인",
+        "빠른 필터: 무료/가족/이번 주/전시/서울/경기/인천을 각각 눌러 대표 추천과 추천 전체가 함께 바뀌는지 확인",
         "상세 필터: 기본 접힘 상태에서 열기, 관심 키워드/지역/일정/우선순위/초기화를 눌러 요약 문구가 자연스럽게 바뀌는지 확인",
-        "추천 선반: 오늘의 추천/곧 끝나요/이번 주 추천이 데스크톱에서는 가로 shelf, 모바일에서는 swipe처럼 동작하는지 확인",
+        "추천 선반: 취향에 맞는 다음 일정은 대표/마감 패널과 중복되지 않고, 이번 주 새 시작 일정은 고유 후보가 3건 이상일 때만 나타나는지 확인",
         "추천 전체: 카드 제목이 2줄 안에서 정리되고 배지가 1-2초 안에 이해되는지 확인",
-        "기간 일정: 전체/전시/강연/교육/행사 필터를 누르고 숨김 카드가 남거나 빈 공간이 어색하지 않은지 확인",
+        "기간 전시: 강연/교육/행사 카드가 섞이지 않고 기간 전시만 표시되는지 확인",
         "상설전: 상설전 탭의 첫 12개와 이미지 없는 카드 몇 개를 열어 기간/상태 문구가 기간 일정과 섞이지 않는지 확인",
-        "세부창: 왜 추천하나요, 원문 보기, 후기/검색 링크, 이 장소에서 같이 묶어볼 일정, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
+        "세부창: 왜 추천하나요, 원문 보기, 지도 보기, 후기/검색 링크, 이 장소에서 같이 묶어볼 일정, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인",
         "동선 포커스: 동선 보기 클릭 후 drawer가 열리고 같은 장소 섹션이 1200ms 정도 강조되는지 확인",
         "문구 품질: 국립중앙박물관, 자동 모니터 출신 기관, 설명이 긴 카드에서 코드/푸터/깨진 글자가 보이지 않는지 확인",
         "화면 크기: 데스크톱 1366x900과 모바일 390x844에서 버튼, 카드 제목, 세부창 텍스트가 겹치거나 잘리지 않는지 확인",
@@ -684,6 +739,8 @@ def manual_review_checklist():
 
 def write_report(report_path, html_path, parser, items, findings):
     timed = [item for item in items if not item.get("isPermanent")]
+    exhibitions = [item for item in timed if item.get("type") == "전시"]
+    programs = [item for item in timed if item.get("type") in {"강연", "교육", "행사"}]
     permanent = [item for item in items if item.get("isPermanent")]
     priorities = Counter(item["priority"] for item in findings)
     lines = [
@@ -693,9 +750,11 @@ def write_report(report_path, html_path, parser, items, findings):
         f"- 실행 시각: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         f"- 대상 HTML: {html_path}",
         f"- 전체 카드: {len(items)}건",
-        f"- 기간 일정: {len(timed)}건",
+        f"- 기간 전시: {len(exhibitions)}건",
+        f"- 강연·교육·행사: {len(programs)}건",
         f"- 상설전: {len(permanent)}건",
         f"- 추천 보기 카드 DOM: {parser.feature_cards}개",
+        f"- 강연·교육 카드 DOM: {parser.program_cards}개",
         f"- 목록 카드 DOM: {parser.list_cards}개",
         f"- 확인 필요: P1 {priorities['P1']}건, P2 {priorities['P2']}건, P3 {priorities['P3']}건",
         "",

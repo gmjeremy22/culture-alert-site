@@ -618,10 +618,20 @@ def render(person_name="가족"):
     timed_indexed_items = [
         (index, item) for index, item in indexed_items if not is_permanent_item(item)
     ]
+    exhibition_indexed_items = [
+        (index, item) for index, item in timed_indexed_items if item.get("type") == "전시"
+    ]
+    program_indexed_items = [
+        (index, item)
+        for index, item in timed_indexed_items
+        if item.get("type") in {"강연", "교육", "행사"}
+    ]
     permanent_indexed_items = [
         (index, item) for index, item in indexed_items if is_permanent_item(item)
     ]
     timed_items = [item for _, item in timed_indexed_items]
+    exhibition_items = [item for _, item in exhibition_indexed_items]
+    program_items = [item for _, item in program_indexed_items]
     permanent_items = [item for _, item in permanent_indexed_items]
     counts = type_counts(items)
     timed_counts = type_counts(timed_items)
@@ -629,6 +639,11 @@ def render(person_name="가족"):
     count_text = " · ".join(f"{key} {value}건" for key, value in counts.items())
     timed_count_text = " · ".join(
         f"{key} {value}건" for key, value in timed_counts.items()
+    )
+    exhibition_count_text = f"전시 {len(exhibition_items)}건"
+    program_counts = type_counts(program_items)
+    program_count_text = " · ".join(
+        f"{key} {value}건" for key, value in program_counts.items()
     )
     permanent_count_text = f"상설전 {len(permanent_items)}건"
     update_time_text = datetime.now().strftime("%Y.%m.%d %H:%M")
@@ -688,7 +703,6 @@ def render(person_name="가족"):
         for value, label in [
             ("all", "전체"),
             ("전시", "전시"),
-            ("program", "강연/교육"),
         ]
     )
     priority_buttons = "".join(
@@ -708,6 +722,14 @@ def render(person_name="가족"):
         if item_type in timed_counts:
             filter_buttons.append(
                 f'<button class="filter-button" type="button" data-filter="{html.escape(item_type)}" aria-pressed="false">{html.escape(item_type)}</button>'
+            )
+    program_filter_buttons = [
+        '<button class="filter-button" type="button" data-program-filter="all" aria-pressed="true">전체</button>'
+    ]
+    for item_type in ["강연", "교육", "행사"]:
+        if item_type in program_counts:
+            program_filter_buttons.append(
+                f'<button class="filter-button" type="button" data-program-filter="{html.escape(item_type)}" aria-pressed="false">{html.escape(item_type)}</button>'
             )
 
     def poster_empty_html(item):
@@ -759,11 +781,15 @@ def render(person_name="가족"):
 
     featured_cards = "".join(
         render_card(index, item, "card feature-card")
-        for index, item in timed_indexed_items
+        for index, item in exhibition_indexed_items
     )
     all_cards = "".join(
         render_card(index, item, "card list-card")
-        for index, item in timed_indexed_items
+        for index, item in exhibition_indexed_items
+    )
+    program_cards = "".join(
+        render_card(index, item, "card program-card")
+        for index, item in program_indexed_items
     )
     permanent_cards = "".join(
         render_card(index, item, "card list-card")
@@ -943,11 +969,13 @@ def render(person_name="가족"):
     }}
     .featured-view,
     .all-view,
+    .program-view,
     .permanent-view {{
       width: 100%;
     }}
     .featured-view[hidden],
     .all-view[hidden],
+    .program-view[hidden],
     .permanent-view[hidden] {{
       display: none;
     }}
@@ -1556,7 +1584,8 @@ def render(person_name="가족"):
       font-weight: 900;
       white-space: nowrap;
     }}
-    .modal-open {{
+    .modal-open,
+    .preference-open {{
       overflow: hidden;
     }}
     @media (max-width: 760px) {{
@@ -2178,7 +2207,7 @@ def render(person_name="가족"):
     }}
     @media (max-width: 760px) {{
       .page-header {{
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr) auto;
         gap: 16px;
       }}
       .header-actions {{
@@ -2684,8 +2713,14 @@ def render(person_name="가족"):
     .recommendation-shelves {{
       display: grid;
       gap: 18px;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
     }}
     .recommendation-shelf {{
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
       border-radius: 24px;
       padding: 18px;
     }}
@@ -2839,8 +2874,8 @@ def render(person_name="가족"):
       --panel-2: var(--surface-raised);
       --accent-ink: #0D0E0B;
       --shadow: 0 28px 90px rgba(0, 0, 0, 0.46);
-      --font-body: "Pretendard", "SUIT", "Inter", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-      --font-display: "Noto Serif KR", "Nanum Myeongjo", "Source Serif 4", Georgia, "Malgun Gothic", serif;
+      --font-body: "Pretendard Variable", Pretendard, "SUIT", "Inter", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      --font-display: "Pretendard Variable", Pretendard, "SUIT", "Inter", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     }}
     body {{
       position: relative;
@@ -2866,6 +2901,28 @@ def render(person_name="가족"):
     main {{
       position: relative;
       z-index: 1;
+    }}
+    body.reveal-pending [data-reveal-step] {{
+      opacity: 0;
+      transform: translateY(18px);
+    }}
+    body.curation-revealing [data-reveal-step] {{
+      animation: curationStepIn 760ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      animation-delay: var(--reveal-delay, 0ms);
+      will-change: opacity, transform;
+    }}
+    body.preference-open.curation-revealing [data-reveal-step] {{
+      animation-play-state: paused;
+    }}
+    @keyframes curationStepIn {{
+      from {{
+        opacity: 0;
+        transform: translateY(18px);
+      }}
+      to {{
+        opacity: 1;
+        transform: translateY(0);
+      }}
     }}
     .page-header {{
       border-bottom: 1px solid rgba(232, 223, 208, 0.12);
@@ -2933,8 +2990,8 @@ def render(person_name="가족"):
     .section-heading h2,
     .detail-title {{
       font-family: var(--font-display);
-      font-weight: 680;
-      letter-spacing: -0.018em;
+      font-weight: 740;
+      letter-spacing: 0;
     }}
     .stage-intro h1 {{
       font-size: clamp(42px, 4.8vw, 64px);
@@ -3258,6 +3315,11 @@ def render(person_name="가족"):
       }}
     }}
     @media (prefers-reduced-motion: reduce) {{
+      [data-reveal-step] {{
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }}
       *,
       *::before,
       *::after {{
@@ -3280,6 +3342,9 @@ def render(person_name="가족"):
       min-width: 0;
       width: 100%;
       max-width: 100%;
+    }}
+    .featured-view {{
+      grid-template-columns: minmax(0, 1fr);
     }}
     .cinematic-stage {{
       display: flex;
@@ -3319,13 +3384,594 @@ def render(person_name="가족"):
     .urgent-panel {{
       flex: 0 0 300px;
     }}
+    .curation-masthead {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+      gap: 48px;
+      align-items: end;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+      margin-bottom: 22px;
+      padding: 18px 0 26px;
+      border-bottom: 1px solid rgba(232, 223, 208, 0.14);
+    }}
+    .masthead-title {{
+      min-width: 0;
+    }}
+    .masthead-title .eyebrow {{
+      margin-bottom: 12px;
+      color: #BFA078;
+      font-size: 11px;
+      font-weight: 820;
+      letter-spacing: 0.12em;
+    }}
+    .masthead-title h1 {{
+      margin: 0;
+      max-width: none;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: clamp(42px, 5vw, 66px);
+      font-weight: 760;
+      line-height: 1.05;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }}
+    .selection-note {{
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 8px 16px;
+      align-items: baseline;
+      padding-left: 22px;
+      border-left: 1px solid rgba(232, 223, 208, 0.14);
+    }}
+    .selection-note .note-label {{
+      color: #BFA078;
+      font-size: 11px;
+      font-weight: 820;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }}
+    .selection-note p {{
+      margin: 0;
+      color: rgba(232, 223, 208, 0.78);
+      font-size: 14px;
+      line-height: 1.7;
+      word-break: keep-all;
+    }}
+    .selection-note .summary {{
+      grid-column: 2;
+      color: rgba(232, 223, 208, 0.52);
+      font-size: 12px;
+      line-height: 1.45;
+    }}
+    .cinematic-stage {{
+      width: 100% !important;
+      max-width: 100% !important;
+    }}
+    .cinematic-stage .curation-hero {{
+      flex: 1 1 0;
+      width: 0;
+    }}
+    .cinematic-stage .urgent-panel {{
+      flex: 0 0 340px;
+    }}
+    .program-view {{
+      display: grid;
+      gap: 18px;
+    }}
+    .program-view-heading {{
+      align-items: end;
+    }}
+    .program-view-heading > div > span {{
+      display: block;
+      margin-top: 5px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }}
+    .program-summary {{
+      margin: -4px 0 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }}
+    .program-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }}
+    .program-card {{
+      min-width: 0;
+    }}
+    .program-card[hidden] {{
+      display: none;
+    }}
+    .program-card .card-button {{
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr);
+      width: 100%;
+      min-height: 150px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: rgba(14, 17, 16, 0.86);
+      text-align: left;
+    }}
+    .program-card .poster {{
+      width: 108px;
+      height: 100%;
+      min-height: 150px;
+      overflow: hidden;
+      background: #0C1117;
+    }}
+    .program-card .poster img {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }}
+    .program-card .poster-empty {{
+      min-height: 150px;
+      padding: 12px 8px;
+      border: 0;
+      border-radius: 0;
+      background:
+        linear-gradient(145deg, rgba(125, 146, 120, 0.2), transparent 62%),
+        #111714;
+    }}
+    .program-card .poster-empty span,
+    .program-card .poster-empty small {{
+      font-size: 9px;
+    }}
+    .program-card .poster-empty strong {{
+      font-size: 16px;
+    }}
+    .program-card .card-body {{
+      display: grid;
+      align-content: center;
+      gap: 7px;
+      min-width: 0;
+      padding: 15px;
+    }}
+    .program-card .card-place,
+    .program-card .card-period {{
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 11px;
+    }}
+    .program-card h2 {{
+      display: -webkit-box;
+      margin: 0;
+      overflow: hidden;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 760;
+      line-height: 1.35;
+      word-break: keep-all;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }}
+    .program-card .editorial-badges,
+    .program-card .keyword-row {{
+      gap: 5px;
+    }}
+    .program-card .editorial-badge,
+    .program-card .keyword-chip {{
+      min-height: 20px;
+      padding: 2px 6px;
+      font-size: 9px;
+    }}
+    .program-load-more {{
+      justify-self: center;
+      min-height: 42px;
+      border: 1px solid rgba(232, 223, 208, 0.17);
+      border-radius: 4px;
+      padding: 0 20px;
+      background: rgba(232, 223, 208, 0.045);
+      color: var(--text);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }}
+    .program-load-more[hidden] {{
+      display: none;
+    }}
+    .profile-button {{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      border: 1px solid rgba(232, 223, 208, 0.16);
+      border-radius: 4px;
+      padding: 4px 10px 4px 5px;
+      background: rgba(232, 223, 208, 0.045);
+      color: var(--text);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }}
+    .profile-button:hover,
+    .profile-button:focus-visible {{
+      border-color: rgba(184, 147, 99, 0.62);
+      background: rgba(184, 147, 99, 0.13);
+      outline: none;
+    }}
+    .profile-avatar {{
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #B89363;
+      color: #0D0E0B;
+      font-size: 11px;
+      font-weight: 900;
+    }}
+    .preference-overlay {{
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(2, 4, 4, 0.88);
+      backdrop-filter: blur(18px);
+    }}
+    .preference-overlay[hidden] {{
+      display: none;
+    }}
+    .preference-panel {{
+      position: relative;
+      width: min(820px, 100%);
+      max-height: min(860px, calc(100dvh - 48px));
+      overflow-y: auto;
+      border: 1px solid rgba(232, 223, 208, 0.16);
+      border-radius: 8px;
+      padding: 34px;
+      background:
+        linear-gradient(145deg, rgba(18, 24, 17, 0.98), rgba(9, 14, 18, 0.98) 58%, rgba(21, 16, 13, 0.98));
+      box-shadow: 0 36px 120px rgba(0, 0, 0, 0.62);
+    }}
+    .preference-close {{
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(232, 223, 208, 0.16);
+      border-radius: 50%;
+      background: rgba(232, 223, 208, 0.04);
+      color: var(--text);
+      font-size: 20px;
+      cursor: pointer;
+    }}
+    .preference-close[hidden] {{
+      display: none;
+    }}
+    .preference-kicker {{
+      margin: 0 0 8px;
+      color: #BFA078;
+      font-size: 11px;
+      font-weight: 820;
+      letter-spacing: 0.1em;
+    }}
+    .preference-panel h2 {{
+      max-width: 620px;
+      margin: 0;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-size: clamp(30px, 4vw, 46px);
+      font-weight: 780;
+      line-height: 1.12;
+      word-break: keep-all;
+    }}
+    .preference-lead {{
+      max-width: 620px;
+      margin: 12px 0 24px;
+      color: var(--text-soft);
+      font-size: 14px;
+      line-height: 1.65;
+    }}
+    .profile-switcher {{
+      display: grid;
+      gap: 10px;
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(232, 223, 208, 0.12);
+    }}
+    .profile-switcher[hidden] {{
+      display: none;
+    }}
+    .profile-switcher-head {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }}
+    .profile-switcher-head p {{
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 760;
+    }}
+    .new-profile-button {{
+      border: 0;
+      padding: 4px 0;
+      background: transparent;
+      color: #D4B387;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }}
+    .profile-list {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }}
+    .saved-profile-button {{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      border: 1px solid rgba(232, 223, 208, 0.14);
+      border-radius: 999px;
+      padding: 5px 11px 5px 6px;
+      background: rgba(232, 223, 208, 0.035);
+      color: var(--text-soft);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }}
+    .saved-profile-button[aria-pressed="true"] {{
+      border-color: rgba(184, 147, 99, 0.64);
+      background: rgba(184, 147, 99, 0.15);
+      color: var(--text);
+    }}
+    .profile-name-field {{
+      display: grid;
+      gap: 7px;
+      margin-bottom: 22px;
+    }}
+    .profile-name-field span,
+    .preference-section-label {{
+      color: var(--text-soft);
+      font-size: 12px;
+      font-weight: 760;
+    }}
+    .profile-name-field input {{
+      width: min(360px, 100%);
+      min-height: 44px;
+      border: 1px solid rgba(232, 223, 208, 0.17);
+      border-radius: 4px;
+      padding: 0 13px;
+      background: rgba(232, 223, 208, 0.045);
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+    }}
+    .profile-name-field input:focus {{
+      border-color: rgba(184, 147, 99, 0.72);
+      outline: 2px solid rgba(184, 147, 99, 0.15);
+    }}
+    .interest-grid {{
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 18px 12px;
+      margin: 12px 0 26px;
+    }}
+    .interest-button {{
+      display: grid;
+      justify-items: center;
+      gap: 8px;
+      min-width: 0;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: var(--text-soft);
+      font: inherit;
+      font-size: 11px;
+      font-weight: 720;
+      cursor: pointer;
+    }}
+    .interest-orb {{
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      width: 88px;
+      max-width: 100%;
+      aspect-ratio: 1;
+      border: 2px solid rgba(232, 223, 208, 0.1);
+      border-radius: 50%;
+      background-color: var(--interest-color, #27352D);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      color: #F0E9DE;
+      font-size: 16px;
+      font-weight: 820;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.92), 0 2px 18px rgba(0, 0, 0, 0.72);
+      box-shadow: inset 0 0 34px rgba(255, 255, 255, 0.04), 0 10px 24px rgba(0, 0, 0, 0.24);
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }}
+    .interest-orb.has-image {{
+      border-color: rgba(232, 223, 208, 0.22);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 10px 26px rgba(0, 0, 0, 0.32);
+    }}
+    .interest-button:hover .interest-orb,
+    .interest-button:focus-visible .interest-orb {{
+      transform: translateY(-3px);
+      border-color: rgba(232, 223, 208, 0.38);
+    }}
+    .interest-button:focus-visible {{
+      outline: none;
+    }}
+    .interest-button[aria-pressed="true"] {{
+      color: var(--text);
+    }}
+    .interest-button[aria-pressed="true"] .interest-orb {{
+      border-color: #D4B387;
+      box-shadow: 0 0 0 4px rgba(184, 147, 99, 0.16), 0 14px 34px rgba(0, 0, 0, 0.34);
+      transform: translateY(-2px);
+    }}
+    .interest-button[aria-pressed="true"] .interest-orb::after {{
+      content: "✓";
+      position: absolute;
+      right: 2px;
+      bottom: 2px;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #D4B387;
+      color: #10110E;
+      font-size: 13px;
+      font-weight: 900;
+    }}
+    .program-preference {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 8px;
+      border-top: 1px solid rgba(232, 223, 208, 0.12);
+      border-bottom: 1px solid rgba(232, 223, 208, 0.12);
+      padding: 18px 0;
+    }}
+    .program-preference strong {{
+      display: block;
+      margin-bottom: 3px;
+      color: var(--text);
+      font-size: 14px;
+    }}
+    .program-preference small {{
+      display: block;
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }}
+    .preference-toggle {{
+      position: relative;
+      flex: 0 0 auto;
+      width: 48px;
+      height: 28px;
+    }}
+    .preference-toggle input {{
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }}
+    .toggle-track {{
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(232, 223, 208, 0.22);
+      border-radius: 999px;
+      background: rgba(232, 223, 208, 0.1);
+      cursor: pointer;
+    }}
+    .toggle-track::after {{
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #D8D3C9;
+      transition: transform 160ms ease, background 160ms ease;
+    }}
+    .preference-toggle input:checked + .toggle-track {{
+      border-color: rgba(125, 146, 120, 0.72);
+      background: rgba(125, 146, 120, 0.42);
+    }}
+    .preference-toggle input:checked + .toggle-track::after {{
+      transform: translateX(20px);
+      background: #E3E8DF;
+    }}
+    .preference-toggle input:focus-visible + .toggle-track {{
+      outline: 2px solid rgba(184, 147, 99, 0.56);
+      outline-offset: 3px;
+    }}
+    .preference-footer {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 22px;
+    }}
+    .preference-count {{
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 12px;
+    }}
+    .preference-count.is-ready {{
+      color: #BFD0B9;
+    }}
+    .save-profile-button {{
+      min-height: 44px;
+      border: 1px solid rgba(184, 147, 99, 0.72);
+      border-radius: 4px;
+      padding: 0 18px;
+      background: #D4B387;
+      color: #11120F;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 820;
+      cursor: pointer;
+    }}
+    .save-profile-button:disabled {{
+      border-color: rgba(232, 223, 208, 0.08);
+      background: rgba(232, 223, 208, 0.07);
+      color: rgba(232, 223, 208, 0.34);
+      cursor: not-allowed;
+    }}
+    .local-profile-note {{
+      margin: 12px 0 0;
+      color: rgba(232, 223, 208, 0.42);
+      font-size: 11px;
+      text-align: right;
+    }}
+    .source-link,
+    .map-link {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      border-radius: 4px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+    }}
+    .map-link {{
+      border: 1px solid rgba(125, 146, 120, 0.48);
+      background: rgba(125, 146, 120, 0.12);
+      color: #DCE6D9;
+    }}
+    .map-link:hover,
+    .map-link:focus-visible {{
+      border-color: rgba(125, 146, 120, 0.86);
+      background: rgba(125, 146, 120, 0.2);
+      outline: none;
+    }}
     @media (max-width: 1179px) {{
+      .curation-masthead {{
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }}
+      .selection-note {{
+        grid-template-columns: auto minmax(0, 1fr);
+        max-width: 720px;
+        padding-left: 0;
+        border-left: 0;
+      }}
       .cinematic-stage {{
         flex-wrap: wrap;
         grid-template-columns: none;
-      }}
-      .stage-intro {{
-        flex: 0 0 100%;
       }}
       .curation-hero {{
         flex: 1 1 min(620px, 100%);
@@ -3339,30 +3985,61 @@ def render(person_name="가족"):
       main {{
         width: min(370px, calc(100% - 20px));
         margin-inline: 10px auto;
+        padding-top: 10px;
       }}
       .page-header {{
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        margin-bottom: 18px;
+        padding: 10px 0 12px;
         overflow: hidden;
+        background: rgba(9, 11, 10, 0.96);
+        backdrop-filter: blur(14px);
+      }}
+      .header-brand {{
+        min-height: 28px;
+        font-size: 11px;
+      }}
+      .header-actions {{
+        display: flex;
+        justify-content: flex-end;
+        width: auto;
+      }}
+      .header-actions .stat-pill,
+      .header-actions .update-pill,
+      .header-actions .refresh-button {{
+        display: none;
+      }}
+      .profile-button {{
+        min-height: 32px;
+        max-width: 132px;
+        padding-right: 8px;
+      }}
+      #profileButtonLabel {{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }}
       .toolbar {{
+        grid-column: 1 / -1;
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 4px;
+        width: 100%;
+        padding: 3px;
+      }}
+      .toolbar.has-program-view {{
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }}
       .view-button {{
         min-width: 0;
-        padding-inline: 6px;
-        font-size: 12px;
-        white-space: nowrap;
-      }}
-      .header-actions {{
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) 32px;
-        align-items: center;
-      }}
-      .update-pill {{
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        min-height: 40px;
+        padding: 8px 5px;
+        font-size: 11px;
         white-space: nowrap;
       }}
       .cinematic-stage {{
@@ -3372,37 +4049,61 @@ def render(person_name="가족"):
         width: 100% !important;
         max-width: 100% !important;
       }}
-      .stage-intro,
       .curation-hero,
       .urgent-panel {{
         flex: 0 0 auto;
         width: 100%;
       }}
-      .stage-intro h1 {{
-        font-size: clamp(27px, 8vw, 31px);
+      .cinematic-stage .curation-hero,
+      .cinematic-stage .urgent-panel {{
+        flex: 0 0 auto;
+        width: 100%;
+      }}
+      .curation-masthead {{
+        gap: 12px;
+        margin-bottom: 14px;
+        padding: 2px 0 16px;
+      }}
+      .masthead-title h1 {{
+        font-size: clamp(26px, 7.4vw, 30px);
+        font-weight: 760;
         line-height: 1.16;
       }}
-      .stage-intro .subcopy {{
-        font-size: 14px;
-        line-height: 1.65;
+      .selection-note {{
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 8px 12px;
+        align-items: center;
+        width: 100%;
+        max-width: 100%;
+      }}
+      .selection-note > p:not(.summary) {{
+        display: none;
+      }}
+      .selection-note .summary {{
+        grid-column: 2;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+        overflow-wrap: anywhere;
       }}
       .hero-slot,
       .hero-button {{
-        min-height: 430px;
+        min-height: 390px;
       }}
       .hero-copy {{
         inset-inline: 0;
-        padding: 20px;
+        padding: 18px;
       }}
       .hero-copy h2 {{
         display: block;
         max-width: min(100%, 300px);
-        font-size: clamp(21px, 6vw, 24px);
-        line-height: 1.16;
+        font-size: clamp(20px, 5.8vw, 23px);
+        font-weight: 760;
+        line-height: 1.22;
         -webkit-line-clamp: unset;
         -webkit-box-orient: unset;
-        word-break: break-all;
-        overflow-wrap: anywhere;
+        word-break: keep-all;
+        overflow-wrap: break-word;
       }}
       .hero-meta,
       .hero-reason {{
@@ -3416,42 +4117,165 @@ def render(person_name="가족"):
       .urgent-card {{
         grid-template-columns: 82px minmax(0, 1fr);
       }}
+      .urgent-panel {{
+        padding: 14px;
+      }}
+      .urgent-list {{
+        grid-auto-columns: minmax(272px, 86vw);
+      }}
+      .route-board {{
+        padding: 14px;
+      }}
+      .route-map-panel {{
+        display: none;
+      }}
+      .venue-bundle-list {{
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(270px, 86vw);
+        grid-template-columns: none;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        scrollbar-width: thin;
+      }}
+      .bundle-card {{
+        scroll-snap-align: start;
+      }}
+      .quick-filter-panel {{
+        padding: 14px;
+      }}
+      .quick-chip {{
+        min-height: 40px;
+      }}
+      .shelf-row {{
+        grid-auto-columns: minmax(210px, 76vw);
+        width: 100%;
+        max-width: 100%;
+        margin-inline: 0;
+        padding-inline: 0;
+      }}
       .detail-panel {{
         border-radius: 8px 8px 0 0;
+      }}
+      .program-grid {{
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }}
+      .program-card .card-button {{
+        grid-template-columns: 88px minmax(0, 1fr);
+        min-height: 132px;
+      }}
+      .program-card .poster {{
+        width: 88px;
+        min-height: 132px;
+      }}
+      .program-card .poster-empty {{
+        min-height: 132px;
+      }}
+      .program-card .card-body {{
+        padding: 12px;
+      }}
+      .mobile-source-actions {{
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }}
+      .mobile-source-actions .source-link,
+      .mobile-source-actions .map-link {{
+        width: auto;
+        min-width: 0;
+      }}
+      .preference-overlay {{
+        align-items: stretch;
+        padding: 0;
+      }}
+      .preference-panel {{
+        width: 100%;
+        max-height: 100dvh;
+        border-width: 0;
+        border-radius: 0;
+        padding: 24px 18px 28px;
+      }}
+      .preference-panel h2 {{
+        max-width: 310px;
+        padding-right: 30px;
+        font-size: clamp(28px, 8.2vw, 34px);
+      }}
+      .preference-lead {{
+        margin-bottom: 20px;
+        font-size: 13px;
+      }}
+      .preference-close {{
+        top: 14px;
+        right: 14px;
+      }}
+      .interest-grid {{
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px 8px;
+      }}
+      .interest-orb {{
+        width: min(82px, 23vw);
+        font-size: 14px;
+      }}
+      .program-preference {{
+        gap: 14px;
+      }}
+      .preference-footer {{
+        position: sticky;
+        bottom: -28px;
+        margin-inline: -18px;
+        padding: 14px 18px 18px;
+        background: linear-gradient(180deg, rgba(10, 14, 15, 0), rgba(10, 14, 15, 0.98) 28%);
+      }}
+      .save-profile-button {{
+        padding-inline: 14px;
+      }}
+      .local-profile-note {{
+        text-align: left;
       }}
     }}
   </style>
 </head>
-<body class="view-featured">
+<body class="view-featured preference-open reveal-pending">
   <main>
     <header class="page-header">
       <div class="header-brand">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span>관심 기반 문화 큐레이션 리포트</span>
+        <span>CULTURE EDIT</span>
       </div>
       <div class="toolbar" aria-label="보기 전환">
         <button class="view-button" type="button" data-view="featured" aria-pressed="true">추천 보기</button>
-        <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 일정</button>
+        <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 전시</button>
+        <button class="view-button" id="programViewButton" type="button" data-view="program" aria-pressed="false" hidden>강연·교육</button>
         <button class="view-button" type="button" data-view="permanent" aria-pressed="false">상설전</button>
       </div>
       <div class="header-actions">
+        <button class="profile-button" id="profileButton" type="button" aria-haspopup="dialog" aria-controls="preferenceOverlay">
+          <span class="profile-avatar" id="profileAvatar" aria-hidden="true">?</span>
+          <span id="profileButtonLabel">취향 설정</span>
+        </button>
         <span class="stat-pill" aria-label="전체 카드 수">{len(items)}개 카드</span>
         <span class="update-pill">업데이트 {html.escape(update_time_text)}</span>
         <button class="refresh-button" type="button" aria-label="업데이트는 매일 자동 실행됩니다">↻</button>
       </div>
     </header>
     <section class="featured-view" id="featuredView" aria-label="추천 일정">
-      <section class="curation-board cinematic-stage" aria-label="오늘의 큐레이션">
-        <section class="stage-intro" aria-label="리포트 소개">
-          <p class="eyebrow">관심 기반 문화 큐레이션 리포트</p>
-          <h1>오늘 고르기 좋은 문화 일정</h1>
-          <p class="subcopy">가족 관심사와 일정 조건을 바탕으로 지금 둘러볼 만한 전시·교육·강연을 먼저 골랐어요.</p>
+      <section class="curation-masthead" aria-labelledby="curationTitle">
+        <div class="masthead-title">
+          <p class="eyebrow">WEEKLY CULTURE EDIT</p>
+          <h1 id="curationTitle">이번 주, 마음이 가는 곳</h1>
+        </div>
+        <aside class="selection-note" aria-label="추천 선정 기준">
+          <span class="note-label">어떻게 골랐나요</span>
+          <p>취향과 일정이 잘 맞는지 먼저 보고, 곧 끝나는 일정과 한 번에 묶기 좋은 동선을 함께 살폈어요.</p>
           <p class="summary">진행/예정 {len(items)}건 · {html.escape(count_text)}</p>
-        </section>
-        <section class="curation-hero" id="curationHero" aria-label="오늘의 대표 추천">
+        </aside>
+      </section>
+      <section class="curation-board cinematic-stage" aria-label="오늘의 큐레이션">
+        <section class="curation-hero" id="curationHero" data-reveal-step style="--reveal-delay:0ms" aria-label="오늘의 대표 추천">
           <div class="hero-slot" id="heroSlot"></div>
         </section>
-        <aside class="urgent-panel" id="urgentPanel" aria-label="놓치지 말아야 할 일정">
+        <aside class="urgent-panel" id="urgentPanel" data-reveal-step style="--reveal-delay:240ms" aria-label="놓치지 말아야 할 일정">
           <div class="section-heading">
             <p>놓치지 말아야 할 일정</p>
             <span>마감 가까운 순</span>
@@ -3459,7 +4283,7 @@ def render(person_name="가족"):
           <div class="mini-list urgent-list" id="endingStack"></div>
         </aside>
       </section>
-      <section class="venue-bundle-section route-board" id="venueBundleSection" aria-label="한 장소에서 묶어보기">
+      <section class="venue-bundle-section route-board" id="venueBundleSection" data-reveal-step style="--reveal-delay:480ms" aria-label="한 장소에서 묶어보기">
         <div class="route-board-main">
           <div class="section-heading">
             <p>한 장소에서 묶어보기</p>
@@ -3475,7 +4299,7 @@ def render(person_name="가족"):
           <p>Route curation</p>
         </div>
       </section>
-      <section class="quick-filter-panel" aria-label="빠른 추천 필터">
+      <section class="quick-filter-panel" data-reveal-step style="--reveal-delay:700ms" aria-label="빠른 추천 필터">
         <div class="section-heading compact-heading">
           <p>빠른 필터</p>
           <span>보고 싶은 조건만 가볍게</span>
@@ -3484,14 +4308,13 @@ def render(person_name="가족"):
           <button class="quick-chip" type="button" data-quick-filter="free" aria-pressed="false">무료</button>
           <button class="quick-chip" type="button" data-quick-filter="family" aria-pressed="false">가족</button>
           <button class="quick-chip" type="button" data-quick-filter="week" aria-pressed="false">이번 주</button>
-          <button class="quick-chip" type="button" data-quick-filter="education" aria-pressed="false">교육</button>
           <button class="quick-chip" type="button" data-quick-filter="exhibition" aria-pressed="false">전시</button>
           <button class="quick-chip" type="button" data-quick-filter="seoul" aria-pressed="false">서울</button>
           <button class="quick-chip" type="button" data-quick-filter="gyeonggi" aria-pressed="false">경기</button>
           <button class="quick-chip" type="button" data-quick-filter="incheon" aria-pressed="false">인천</button>
         </div>
       </section>
-      <section class="recommendation-panel" aria-label="관심 기반 추천 설정">
+      <section class="recommendation-panel" data-reveal-step style="--reveal-delay:780ms" aria-label="관심 기반 추천 설정">
         <details class="advanced-filter" id="advancedFilter">
           <summary>
             <span id="advancedFilterLabel">상세 필터 열기</span>
@@ -3531,30 +4354,23 @@ def render(person_name="가족"):
           <button class="reset-button" type="button" id="resetRecommendation">초기화</button>
         </div>
       </section>
-      <section class="recommendation-shelves" id="recommendationShelves" aria-label="추천 선반">
-        <section class="recommendation-shelf" aria-label="오늘의 추천">
+      <section class="recommendation-shelves" id="recommendationShelves" data-reveal-step style="--reveal-delay:920ms" aria-label="추천 선반">
+        <section class="recommendation-shelf" aria-label="취향에 맞는 다음 일정">
           <div class="section-heading">
-            <p>오늘의 추천</p>
-            <span>취향과 접근성을 함께 본 순서</span>
+            <p>취향에 맞는 다음 일정</p>
+            <span>대표 추천과 마감 일정에 나오지 않은 후보</span>
           </div>
           <div class="shelf-row" id="todayStack"></div>
         </section>
-        <section class="recommendation-shelf" aria-label="곧 끝나요">
+        <section class="recommendation-shelf" id="weekShelfSection" aria-label="이번 주 새로 시작해요" hidden>
           <div class="section-heading">
-            <p>곧 끝나요</p>
-            <span>놓치기 전에 볼 일정</span>
-          </div>
-          <div class="shelf-row" id="endingShelf"></div>
-        </section>
-        <section class="recommendation-shelf" aria-label="이번 주 추천">
-          <div class="section-heading">
-            <p>이번 주 추천</p>
-            <span>가까운 일정부터</span>
+            <p>이번 주 새로 시작해요</p>
+            <span>7일 안에 시작하는 일정</span>
           </div>
           <div class="shelf-row" id="weekShelf"></div>
         </section>
       </section>
-      <section class="recommendation-grid-section" aria-label="추천 전체">
+      <section class="recommendation-grid-section" data-reveal-step style="--reveal-delay:1100ms" aria-label="추천 전체">
         <div class="view-heading">
           <p>추천 전체</p>
           <span>조건에 맞는 카드</span>
@@ -3565,17 +4381,31 @@ def render(person_name="가족"):
       </section>
       <div class="empty-state" id="emptyRecommendations" hidden>조건에 맞는 일정이 없어요.</div>
     </section>
-    <section class="all-view" id="allView" aria-label="기간 일정" hidden>
+    <section class="all-view" id="allView" aria-label="기간 전시" hidden>
       <div class="view-heading">
-        <p>기간 일정</p>
-        <span>{html.escape(timed_count_text or "0건")}</span>
-      </div>
-      <div class="list-toolbar" aria-label="일정 필터">
-        {"".join(filter_buttons)}
+        <p>기간 전시</p>
+        <span>{html.escape(exhibition_count_text)}</span>
       </div>
       <div class="grid" id="cardGrid">
         {all_cards}
       </div>
+    </section>
+    <section class="program-view" id="programView" aria-label="강연과 교육" hidden>
+      <div class="view-heading program-view-heading">
+        <div>
+          <p>강연·교육</p>
+          <span>취향과 가까운 프로그램부터 따로 모았어요.</span>
+        </div>
+        <span>{html.escape(program_count_text or "0건")}</span>
+      </div>
+      <div class="list-toolbar" aria-label="강연과 교육 필터">
+        {"".join(program_filter_buttons)}
+      </div>
+      <p class="program-summary" id="programSummary"></p>
+      <div class="program-grid" id="programGrid">
+        {program_cards}
+      </div>
+      <button class="program-load-more" id="programLoadMore" type="button">더 보기</button>
     </section>
     <section class="permanent-view" id="permanentView" aria-label="상설전" hidden>
       <div class="view-heading">
@@ -3587,6 +4417,56 @@ def render(person_name="가족"):
       </div>
     </section>
   </main>
+
+  <div class="preference-overlay" id="preferenceOverlay" hidden>
+    <section class="preference-panel" role="dialog" aria-modal="true" aria-labelledby="preferenceTitle">
+      <button class="preference-close" id="preferenceClose" type="button" aria-label="취향 설정 닫기" hidden>×</button>
+      <div class="profile-switcher" id="profileSwitcher" hidden>
+        <div class="profile-switcher-head">
+          <p>이 기기의 프로필</p>
+          <button class="new-profile-button" id="newProfileButton" type="button">새 프로필</button>
+        </div>
+        <div class="profile-list" id="profileList"></div>
+      </div>
+      <p class="preference-kicker">PERSONAL CULTURE PICK</p>
+      <h2 id="preferenceTitle">어떤 이야기에 끌리나요?</h2>
+      <p class="preference-lead">관심 분야를 3개 이상 골라주세요. 이 선택을 바탕으로 첫 화면의 추천 순서가 달라집니다.</p>
+      <label class="profile-name-field">
+        <span>프로필 이름</span>
+        <input id="profileName" type="text" maxlength="16" autocomplete="off" placeholder="이름이나 별칭을 입력해주세요">
+      </label>
+      <p class="preference-section-label">관심 분야</p>
+      <div class="interest-grid" id="interestGrid" aria-label="관심 분야 선택">
+        <button class="interest-button" type="button" data-interest="현대미술" aria-pressed="false"><span class="interest-orb" style="--interest-color:#234B53">현대</span><span>현대미술</span></button>
+        <button class="interest-button" type="button" data-interest="한국미술" aria-pressed="false"><span class="interest-orb" style="--interest-color:#694B3F">한국</span><span>한국미술</span></button>
+        <button class="interest-button" type="button" data-interest="역사" aria-pressed="false"><span class="interest-orb" style="--interest-color:#514936">역사</span><span>역사</span></button>
+        <button class="interest-button" type="button" data-interest="공예" aria-pressed="false"><span class="interest-orb" style="--interest-color:#3E5A46">공예</span><span>공예</span></button>
+        <button class="interest-button" type="button" data-interest="디자인" aria-pressed="false"><span class="interest-orb" style="--interest-color:#6B4147">디자인</span><span>디자인</span></button>
+        <button class="interest-button" type="button" data-interest="미디어아트" aria-pressed="false"><span class="interest-orb" style="--interest-color:#3F476D">미디어</span><span>미디어아트</span></button>
+        <button class="interest-button" type="button" data-interest="사진" aria-pressed="false"><span class="interest-orb" style="--interest-color:#38434A">사진</span><span>사진</span></button>
+        <button class="interest-button" type="button" data-interest="건축" aria-pressed="false"><span class="interest-orb" style="--interest-color:#4E514B">건축</span><span>건축</span></button>
+        <button class="interest-button" type="button" data-interest="한글" aria-pressed="false"><span class="interest-orb" style="--interest-color:#604558">한글</span><span>한글</span></button>
+        <button class="interest-button" type="button" data-interest="가족" aria-pressed="false"><span class="interest-orb" style="--interest-color:#5E5138">가족</span><span>가족</span></button>
+        <button class="interest-button" type="button" data-interest="어린이" aria-pressed="false"><span class="interest-orb" style="--interest-color:#365B5A">어린이</span><span>어린이</span></button>
+        <button class="interest-button" type="button" data-interest="참여형" aria-pressed="false"><span class="interest-orb" style="--interest-color:#5A493A">참여</span><span>참여형</span></button>
+      </div>
+      <div class="program-preference">
+        <div>
+          <strong>강연·교육 탭 표시</strong>
+          <small>켜면 전시와 섞지 않고 별도 탭에서만 보여드려요.</small>
+        </div>
+        <label class="preference-toggle">
+          <input id="programPreference" type="checkbox" checked aria-label="강연과 교육도 추천받기">
+          <span class="toggle-track" aria-hidden="true"></span>
+        </label>
+      </div>
+      <div class="preference-footer">
+        <p class="preference-count" id="preferenceCount">0개 선택 · 3개 이상 필요</p>
+        <button class="save-profile-button" id="saveProfileButton" type="button" disabled>이 취향으로 추천 보기</button>
+      </div>
+      <p class="local-profile-note">본인 기기에만 저장됩니다.</p>
+    </section>
+  </div>
 
   <div class="overlay" id="detailOverlay" hidden>
     <section class="detail-panel" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
@@ -3613,6 +4493,7 @@ def render(person_name="가족"):
           <div class="companion-section same-venue-section" id="detailCompanions" data-focus-target="sameVenueSection"></div>
           <div class="detail-actions mobile-source-actions">
             <a class="source-link" id="detailSource" href="#" target="_blank" rel="noopener">원문 보기</a>
+            <a class="map-link" id="detailMap" href="#" target="_blank" rel="noopener">지도 보기</a>
           </div>
           <div class="related-links" id="detailRelated"></div>
         </div>
@@ -3627,13 +4508,18 @@ def render(person_name="가족"):
     const closeButton = document.getElementById("detailClose");
     const featuredView = document.getElementById("featuredView");
     const allView = document.getElementById("allView");
+    const programView = document.getElementById("programView");
     const permanentView = document.getElementById("permanentView");
+    const programViewButton = document.getElementById("programViewButton");
+    const programGrid = document.getElementById("programGrid");
+    const programSummary = document.getElementById("programSummary");
+    const programLoadMore = document.getElementById("programLoadMore");
     const featureFeed = document.getElementById("featureFeed");
     const heroSlot = document.getElementById("heroSlot");
     const todayStack = document.getElementById("todayStack");
     const endingStack = document.getElementById("endingStack");
-    const endingShelf = document.getElementById("endingShelf");
     const weekShelf = document.getElementById("weekShelf");
+    const weekShelfSection = document.getElementById("weekShelfSection");
     const recommendationShelves = document.getElementById("recommendationShelves");
     const venueBundleSection = document.getElementById("venueBundleSection");
     const venueBundleList = document.getElementById("venueBundleList");
@@ -3642,9 +4528,26 @@ def render(person_name="가족"):
     const emptyRecommendations = document.getElementById("emptyRecommendations");
     const recommendationSummary = document.getElementById("recommendationSummary");
     const resetRecommendation = document.getElementById("resetRecommendation");
+    const profileButton = document.getElementById("profileButton");
+    const profileAvatar = document.getElementById("profileAvatar");
+    const profileButtonLabel = document.getElementById("profileButtonLabel");
+    const preferenceOverlay = document.getElementById("preferenceOverlay");
+    const preferenceClose = document.getElementById("preferenceClose");
+    const profileSwitcher = document.getElementById("profileSwitcher");
+    const profileList = document.getElementById("profileList");
+    const newProfileButton = document.getElementById("newProfileButton");
+    const profileNameInput = document.getElementById("profileName");
+    const interestGrid = document.getElementById("interestGrid");
+    const programPreference = document.getElementById("programPreference");
+    const preferenceCount = document.getElementById("preferenceCount");
+    const saveProfileButton = document.getElementById("saveProfileButton");
     const featureCards = Array.from(document.querySelectorAll("#featuredView .feature-card"));
     const featureCardByIndex = new Map(
       featureCards.map((card) => [Number(card.dataset.featureIndex), card])
+    );
+    const programCards = Array.from(document.querySelectorAll("#programView .program-card"));
+    const programCardByIndex = new Map(
+      programCards.map((card) => [Number(card.dataset.featureIndex), card])
     );
     const selectedKeywords = new Set();
     const recommendationState = {{
@@ -3653,7 +4556,18 @@ def render(person_name="가족"):
       priority: "recommended"
     }};
     const quickFilters = new Set();
+    const profileInterestDraft = new Set();
+    const PROFILE_STORAGE_KEY = "cultureAlertProfilesV1";
+    const ACTIVE_PROFILE_KEY = "cultureAlertActiveProfileV1";
+    let profileMemory = [];
+    let activeProfileId = null;
+    let profileDraftId = null;
+    let includeProgramsInRecommendations = true;
+    let programFilter = "all";
+    let programVisibleLimit = 24;
     let filteringTimer = null;
+    let curationRevealStarted = false;
+    let curationRevealBegan = false;
     const fields = {{
       kicker: document.getElementById("detailKicker"),
       title: document.getElementById("detailTitle"),
@@ -3663,6 +4577,7 @@ def render(person_name="가족"):
       price: document.getElementById("detailPrice"),
       description: document.getElementById("detailDescription"),
       source: document.getElementById("detailSource"),
+      map: document.getElementById("detailMap"),
       why: document.getElementById("detailWhy"),
       tags: document.getElementById("detailTags"),
       schedule: document.getElementById("detailSchedule"),
@@ -3682,6 +4597,182 @@ def render(person_name="가족"):
         '"': "&quot;",
         "'": "&#39;"
       }}[char]));
+    }}
+
+    function readProfiles() {{
+      try {{
+        const parsed = JSON.parse(window.localStorage.getItem(PROFILE_STORAGE_KEY) || "[]");
+        if (Array.isArray(parsed)) {{
+          profileMemory = parsed.filter((profile) => profile && profile.id && profile.name);
+        }}
+      }} catch (error) {{
+        profileMemory = profileMemory || [];
+      }}
+      return profileMemory.slice();
+    }}
+
+    function writeProfiles(profiles) {{
+      profileMemory = profiles.slice();
+      try {{
+        window.localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileMemory));
+      }} catch (error) {{
+        // The profile still works for this open page when browser storage is unavailable.
+      }}
+    }}
+
+    function readActiveProfileId() {{
+      try {{
+        return window.localStorage.getItem(ACTIVE_PROFILE_KEY);
+      }} catch (error) {{
+        return activeProfileId;
+      }}
+    }}
+
+    function writeActiveProfileId(profileId) {{
+      activeProfileId = profileId;
+      try {{
+        window.localStorage.setItem(ACTIVE_PROFILE_KEY, profileId);
+      }} catch (error) {{
+        // Keep the active id in memory for this page.
+      }}
+    }}
+
+    function profileInitial(name) {{
+      return String(name || "?").trim().slice(0, 1).toUpperCase() || "?";
+    }}
+
+    function updatePreferenceCount() {{
+      const count = profileInterestDraft.size;
+      const hasName = profileNameInput.value.trim().length > 0;
+      const ready = count >= 3 && hasName;
+      preferenceCount.textContent = count >= 3
+        ? count + "개 선택 · 추천 준비 완료"
+        : count + "개 선택 · " + (3 - count) + "개 더 골라주세요";
+      preferenceCount.classList.toggle("is-ready", ready);
+      saveProfileButton.disabled = !ready;
+    }}
+
+    function syncInterestDraft() {{
+      interestGrid.querySelectorAll("[data-interest]").forEach((button) => {{
+        button.setAttribute("aria-pressed", String(profileInterestDraft.has(button.dataset.interest)));
+      }});
+      updatePreferenceCount();
+    }}
+
+    function renderProfileSwitcher() {{
+      const profiles = readProfiles();
+      profileList.textContent = "";
+      profiles.forEach((profile) => {{
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "saved-profile-button";
+        button.dataset.profileId = profile.id;
+        button.setAttribute("aria-pressed", String(profile.id === activeProfileId));
+        const avatar = document.createElement("span");
+        avatar.className = "profile-avatar";
+        avatar.textContent = profileInitial(profile.name);
+        const label = document.createElement("span");
+        label.textContent = profile.name;
+        button.appendChild(avatar);
+        button.appendChild(label);
+        button.addEventListener("click", () => {{
+          applyProfile(profile);
+          closePreferencePanel();
+        }});
+        profileList.appendChild(button);
+      }});
+      profileSwitcher.hidden = profiles.length === 0;
+    }}
+
+    function fillProfileDraft(profile) {{
+      profileDraftId = profile ? profile.id : null;
+      profileNameInput.value = profile ? profile.name : "";
+      profileInterestDraft.clear();
+      (profile && Array.isArray(profile.interests) ? profile.interests : []).forEach((keyword) => {{
+        profileInterestDraft.add(keyword);
+      }});
+      programPreference.checked = profile ? profile.includePrograms !== false : true;
+      syncInterestDraft();
+    }}
+
+    function openPreferencePanel(profile) {{
+      const profiles = readProfiles();
+      const selected = profile || profiles.find((entry) => entry.id === activeProfileId) || null;
+      fillProfileDraft(selected);
+      renderProfileSwitcher();
+      preferenceClose.hidden = !activeProfileId;
+      preferenceOverlay.hidden = false;
+      document.body.classList.add("preference-open");
+      window.setTimeout(() => profileNameInput.focus(), 0);
+    }}
+
+    function closePreferencePanel() {{
+      if (!activeProfileId) return;
+      preferenceOverlay.hidden = true;
+      document.body.classList.remove("preference-open");
+      startCurationReveal();
+      profileButton.focus();
+    }}
+
+    function startCurationReveal() {{
+      if (curationRevealStarted) return;
+      curationRevealStarted = true;
+      const beginReveal = () => {{
+        if (curationRevealBegan) return;
+        curationRevealBegan = true;
+        document.body.classList.add("curation-revealing");
+        document.body.classList.remove("reveal-pending");
+        window.setTimeout(() => {{
+          document.body.classList.remove("curation-revealing");
+          document.body.classList.add("curation-revealed");
+        }}, 2100);
+      }};
+      window.requestAnimationFrame(() => {{
+        window.requestAnimationFrame(() => window.setTimeout(beginReveal, 420));
+      }});
+      window.setTimeout(beginReveal, 700);
+    }}
+
+    function syncKeywordButtons() {{
+      document.querySelectorAll("[data-keyword-choice]").forEach((button) => {{
+        button.setAttribute("aria-pressed", String(selectedKeywords.has(button.dataset.keywordChoice)));
+      }});
+    }}
+
+    function applyProfile(profile, shouldRender = true) {{
+      if (!profile) return;
+      writeActiveProfileId(profile.id);
+      selectedKeywords.clear();
+      (profile.interests || []).forEach((keyword) => selectedKeywords.add(keyword));
+      includeProgramsInRecommendations = profile.includePrograms !== false;
+      recommendationState.type = "all";
+      setSingleChoice("[data-type-choice]", "all");
+      syncKeywordButtons();
+      profileAvatar.textContent = profileInitial(profile.name);
+      profileButtonLabel.textContent = profile.name;
+      profileButton.setAttribute("aria-label", profile.name + " 프로필 취향 설정");
+      programViewButton.hidden = !includeProgramsInRecommendations;
+      programViewButton.parentElement.classList.toggle("has-program-view", includeProgramsInRecommendations);
+      programVisibleLimit = 24;
+      if (!includeProgramsInRecommendations && !programView.hidden) switchView("featured");
+      renderProfileSwitcher();
+      if (shouldRender) applyRecommendations();
+    }}
+
+    function initializeProfiles() {{
+      const profiles = readProfiles();
+      const storedId = readActiveProfileId();
+      const active = profiles.find((profile) => profile.id === storedId) || profiles[0] || null;
+      if (active) {{
+        applyProfile(active, false);
+        preferenceOverlay.hidden = true;
+        document.body.classList.remove("preference-open");
+      }} else {{
+        fillProfileDraft(null);
+        preferenceOverlay.hidden = false;
+        preferenceClose.hidden = true;
+        document.body.classList.add("preference-open");
+      }}
     }}
 
     function badgesFor(item, limit = 3) {{
@@ -3751,6 +4842,11 @@ def render(person_name="가족"):
       return (item.curationBadges || []).some((badge) => badge.label === "이번 주 추천");
     }}
 
+    function startsThisWeek(item) {{
+      const startsIn = numeric(item.startsInDays);
+      return startsIn !== null && startsIn >= 0 && startsIn <= 7;
+    }}
+
     function keywordMatches(item, keyword) {{
       const keywords = item.keywordList || [];
       if (keywords.includes(keyword)) return true;
@@ -3762,6 +4858,33 @@ def render(person_name="가족"):
         item.institution
       ].filter(Boolean).join(" ");
       return text.includes(keyword);
+    }}
+
+    function stableStringSeed(value) {{
+      return Array.from(String(value || "")).reduce(
+        (total, character) => total + (character.codePointAt(0) || 0),
+        0
+      );
+    }}
+
+    function cssImageValue(imageUrl, darkness = 0.48) {{
+      const safeUrl = JSON.stringify(String(imageUrl || ""));
+      return `linear-gradient(rgba(4, 6, 6, ${{darkness}}), rgba(4, 6, 6, ${{Math.min(0.82, darkness + 0.18)}})), url(${{safeUrl}})`;
+    }}
+
+    function hydrateInterestArtwork() {{
+      const exhibitionImages = items.filter((item) => item.type === "전시" && item.imageUrl);
+      if (!exhibitionImages.length) return;
+      interestGrid.querySelectorAll("[data-interest]").forEach((button) => {{
+        const keyword = button.dataset.interest || "";
+        const matches = exhibitionImages.filter((item) => keywordMatches(item, keyword));
+        const pool = matches.length ? matches : exhibitionImages;
+        const chosen = pool[stableStringSeed(keyword) % pool.length];
+        const orb = button.querySelector(".interest-orb");
+        if (!chosen || !orb) return;
+        orb.style.backgroundImage = cssImageValue(chosen.imageUrl, 0.38);
+        orb.classList.add("has-image");
+      }});
     }}
 
     function selectedKeywordCount(item) {{
@@ -3776,12 +4899,11 @@ def render(person_name="가족"):
       if (item.isPermanent) {{
         return false;
       }}
+      if (item.type !== "전시") return false;
       if (recommendationState.region !== "all" && item.region !== recommendationState.region) {{
         return false;
       }}
-      if (recommendationState.type === "program") {{
-        if (!["강연", "교육", "행사"].includes(item.type)) return false;
-      }} else if (recommendationState.type !== "all" && item.type !== recommendationState.type) {{
+      if (recommendationState.type !== "all" && item.type !== recommendationState.type) {{
         return false;
       }}
       if (quickFilters.has("free") && !keywordMatches(item, "무료")) return false;
@@ -3983,7 +5105,6 @@ def render(person_name="가족"):
 
     function renderCuration(ranked) {{
       const heroIndex = renderHero(ranked);
-      const withoutHero = ranked.filter((entry) => entry.index !== heroIndex);
       const endingSoon = ranked
         .filter((entry) => entry.index !== heroIndex)
         .filter((entry) => {{
@@ -3991,14 +5112,20 @@ def render(person_name="가족"):
           return remaining !== null && remaining >= 0 && remaining <= 30;
         }})
         .slice(0, 8);
-      const weekPicks = ranked
-        .filter((entry) => entry.index !== heroIndex)
-        .filter((entry) => isThisWeek(entry.item))
+      const urgentEntries = endingSoon.slice(0, 3);
+      const occupiedIndexes = new Set([heroIndex, ...urgentEntries.map((entry) => entry.index)]);
+      const todayPicks = ranked
+        .filter((entry) => !occupiedIndexes.has(entry.index))
         .slice(0, 8);
-      renderMiniStack(endingStack, endingSoon.slice(0, 3), "30일 안에 끝나는 일정이 없어요.");
-      renderShelf(todayStack, withoutHero.slice(0, 8), "추천 조건에 맞는 추가 일정이 없어요.");
-      renderShelf(endingShelf, endingSoon, "30일 안에 끝나는 일정이 없어요.");
-      renderShelf(weekShelf, weekPicks, "이번 주 조건에 맞는 일정이 없어요.");
+      todayPicks.forEach((entry) => occupiedIndexes.add(entry.index));
+      const weekPicks = ranked
+        .filter((entry) => !occupiedIndexes.has(entry.index))
+        .filter((entry) => startsThisWeek(entry.item))
+        .slice(0, 8);
+      renderMiniStack(endingStack, urgentEntries, "30일 안에 끝나는 일정이 없어요.");
+      renderShelf(todayStack, todayPicks, "추천 조건에 맞는 추가 일정이 없어요.");
+      weekShelfSection.hidden = weekPicks.length < 3;
+      if (!weekShelfSection.hidden) renderShelf(weekShelf, weekPicks, "");
       renderVenueBundles(ranked);
     }}
 
@@ -4018,7 +5145,6 @@ def render(person_name="가족"):
         const name = button.dataset.quickFilter;
         const pressed =
           quickFilters.has(name) ||
-          (name === "education" && recommendationState.type === "program") ||
           (name === "exhibition" && recommendationState.type === "전시") ||
           (name === "seoul" && recommendationState.region === "서울") ||
           (name === "gyeonggi" && recommendationState.region === "경기") ||
@@ -4028,10 +5154,7 @@ def render(person_name="가족"):
     }}
 
     function applyQuickFilter(name) {{
-      if (name === "education") {{
-        recommendationState.type = recommendationState.type === "program" ? "all" : "program";
-        setSingleChoice("[data-type-choice]", recommendationState.type);
-      }} else if (name === "exhibition") {{
+      if (name === "exhibition") {{
         recommendationState.type = recommendationState.type === "전시" ? "all" : "전시";
         setSingleChoice("[data-type-choice]", recommendationState.type);
       }} else if (name === "seoul" || name === "gyeonggi" || name === "incheon") {{
@@ -4044,6 +5167,33 @@ def render(person_name="가족"):
         quickFilters.add(name);
       }}
       applyRecommendations();
+    }}
+
+    function renderProgramView() {{
+      const rankedPrograms = items
+        .map((item, index) => ({{ item, index, score: scoreRecommendation(item, index) }}))
+        .filter((entry) => ["강연", "교육", "행사"].includes(entry.item.type))
+        .filter((entry) => recommendationState.region === "all" || entry.item.region === recommendationState.region)
+        .filter((entry) => programFilter === "all" || entry.item.type === programFilter)
+        .sort((a, b) => b.score - a.score);
+      const visiblePrograms = rankedPrograms.slice(0, programVisibleLimit);
+
+      programCards.forEach((card) => {{
+        card.hidden = true;
+      }});
+      visiblePrograms.forEach((entry) => {{
+        const card = programCardByIndex.get(entry.index);
+        if (!card) return;
+        card.hidden = false;
+        programGrid.appendChild(card);
+      }});
+
+      const currentProfile = readProfiles().find((profile) => profile.id === activeProfileId);
+      const profileText = currentProfile ? currentProfile.name + " 취향순 · " : "";
+      programSummary.textContent = rankedPrograms.length
+        ? profileText + rankedPrograms.length + "건 중 " + visiblePrograms.length + "건 표시"
+        : "조건에 맞는 강연·교육 일정이 없어요.";
+      programLoadMore.hidden = visiblePrograms.length >= rankedPrograms.length;
     }}
 
     function applyRecommendations() {{
@@ -4070,6 +5220,8 @@ def render(person_name="가족"):
       }});
 
       const basis = [];
+      const currentProfile = readProfiles().find((profile) => profile.id === activeProfileId);
+      if (currentProfile) basis.push(currentProfile.name + " 취향");
       basis.push(selectedKeywords.size ? Array.from(selectedKeywords).join(", ") : "기본 추천");
       if (quickFilters.size) {{
         const quickLabels = {{ free: "무료", family: "가족", week: "이번 주" }};
@@ -4081,6 +5233,7 @@ def render(person_name="가족"):
         ranked.length + "건 중 " + visible.length + "건 표시 · " + basis.join(" · ");
       emptyRecommendations.hidden = visible.length > 0;
       updateFilterChrome();
+      renderProgramView();
       filteringTimer = window.setTimeout(() => document.body.classList.remove("is-filtering"), 160);
     }}
 
@@ -4096,13 +5249,16 @@ def render(person_name="가족"):
 
     function resetRecommendationState() {{
       selectedKeywords.clear();
+      const activeProfile = readProfiles().find((profile) => profile.id === activeProfileId);
+      if (activeProfile) {{
+        (activeProfile.interests || []).forEach((keyword) => selectedKeywords.add(keyword));
+        includeProgramsInRecommendations = activeProfile.includePrograms !== false;
+      }}
       quickFilters.clear();
       recommendationState.region = "all";
       recommendationState.type = "all";
       recommendationState.priority = "recommended";
-      document.querySelectorAll("[data-keyword-choice]").forEach((button) => {{
-        button.setAttribute("aria-pressed", "false");
-      }});
+      syncKeywordButtons();
       setSingleChoice("[data-region-choice]", "all");
       setSingleChoice("[data-type-choice]", "all");
       setSingleChoice("[data-priority-choice]", "recommended");
@@ -4310,6 +5466,9 @@ def render(person_name="가족"):
       fields.price.textContent = item.price || "확인 필요";
       fields.description.textContent = item.description || "추가 설명은 원문에서 확인할 수 있습니다.";
       fields.source.href = item.sourceUrl;
+      const mapQuery = item.displayVenue || item.institution || item.detailLocation || item.location || "";
+      fields.map.href = "https://map.kakao.com/link/search/" + encodeURIComponent(mapQuery);
+      fields.map.hidden = !mapQuery;
       fillWhy(item);
       fillTags(item);
       fillSchedule(item);
@@ -4324,6 +5483,64 @@ def render(person_name="가족"):
       overlay.hidden = true;
       document.body.classList.remove("modal-open");
     }}
+
+    function switchView(view) {{
+      if (view === "program" && !includeProgramsInRecommendations) return;
+      document.querySelectorAll("[data-view]").forEach((button) => {{
+        button.setAttribute("aria-pressed", String(button.dataset.view === view));
+      }});
+      featuredView.hidden = view !== "featured";
+      allView.hidden = view !== "all";
+      programView.hidden = view !== "program";
+      permanentView.hidden = view !== "permanent";
+      document.body.classList.toggle("view-featured", view === "featured");
+      document.body.classList.toggle("view-all", view === "all");
+      document.body.classList.toggle("view-program", view === "program");
+      document.body.classList.toggle("view-permanent", view === "permanent");
+      if (view === "program") renderProgramView();
+    }}
+
+    profileButton.addEventListener("click", () => openPreferencePanel());
+    preferenceClose.addEventListener("click", closePreferencePanel);
+    preferenceOverlay.addEventListener("click", (event) => {{
+      if (event.target === preferenceOverlay && activeProfileId) closePreferencePanel();
+    }});
+    newProfileButton.addEventListener("click", () => {{
+      fillProfileDraft(null);
+      preferenceClose.hidden = false;
+      profileNameInput.focus();
+    }});
+    profileNameInput.addEventListener("input", updatePreferenceCount);
+    interestGrid.addEventListener("click", (event) => {{
+      const button = event.target.closest("[data-interest]");
+      if (!button) return;
+      const keyword = button.dataset.interest;
+      if (profileInterestDraft.has(keyword)) {{
+        profileInterestDraft.delete(keyword);
+      }} else {{
+        profileInterestDraft.add(keyword);
+      }}
+      syncInterestDraft();
+    }});
+    saveProfileButton.addEventListener("click", () => {{
+      const name = profileNameInput.value.trim();
+      if (!name || profileInterestDraft.size < 3) return;
+      const profiles = readProfiles();
+      const profileId = profileDraftId || ("profile-" + Date.now().toString(36));
+      const profile = {{
+        id: profileId,
+        name,
+        interests: Array.from(profileInterestDraft),
+        includePrograms: programPreference.checked,
+        updatedAt: new Date().toISOString()
+      }};
+      const existingIndex = profiles.findIndex((entry) => entry.id === profileId);
+      if (existingIndex >= 0) profiles[existingIndex] = profile;
+      else profiles.push(profile);
+      writeProfiles(profiles);
+      applyProfile(profile);
+      closePreferencePanel();
+    }});
 
     quickFilterRail.addEventListener("click", (event) => {{
       const button = event.target.closest("[data-quick-filter]");
@@ -4349,17 +5566,22 @@ def render(person_name="가족"):
     }});
     document.querySelectorAll("[data-view]").forEach((button) => {{
       button.addEventListener("click", () => {{
-        const view = button.dataset.view;
-        document.querySelectorAll("[data-view]").forEach((other) => {{
+        switchView(button.dataset.view);
+      }});
+    }});
+    document.querySelectorAll("[data-program-filter]").forEach((button) => {{
+      button.addEventListener("click", () => {{
+        programFilter = button.dataset.programFilter;
+        programVisibleLimit = 24;
+        document.querySelectorAll("[data-program-filter]").forEach((other) => {{
           other.setAttribute("aria-pressed", String(other === button));
         }});
-        featuredView.hidden = view !== "featured";
-        allView.hidden = view !== "all";
-        permanentView.hidden = view !== "permanent";
-        document.body.classList.toggle("view-featured", view === "featured");
-        document.body.classList.toggle("view-all", view === "all");
-        document.body.classList.toggle("view-permanent", view === "permanent");
+        renderProgramView();
       }});
+    }});
+    programLoadMore.addEventListener("click", () => {{
+      programVisibleLimit += 24;
+      renderProgramView();
     }});
     document.querySelectorAll("[data-keyword-choice]").forEach((button) => {{
       button.addEventListener("click", () => {{
@@ -4402,6 +5624,7 @@ def render(person_name="가족"):
     }});
     document.addEventListener("keydown", (event) => {{
       if (event.key === "Escape" && !overlay.hidden) closeDetail();
+      else if (event.key === "Escape" && !preferenceOverlay.hidden && activeProfileId) closePreferencePanel();
     }});
 
     document.querySelectorAll("[data-filter]").forEach((button) => {{
@@ -4415,7 +5638,10 @@ def render(person_name="가족"):
         }});
       }});
     }});
+    hydrateInterestArtwork();
+    initializeProfiles();
     applyRecommendations();
+    if (preferenceOverlay.hidden) startCurationReveal();
   </script>
 </body>
 </html>
