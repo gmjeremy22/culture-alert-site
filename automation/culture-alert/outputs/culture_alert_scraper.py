@@ -144,6 +144,10 @@ SEMA_BRANCH_ALIASES = (
         ("서울시립 사진미술관", "사진미술관"),
     ),
     (
+        "서울시립 서서울미술관",
+        ("서울시립 서서울미술관", "서서울미술관", "서서울"),
+    ),
+    (
         "SeMA 백남준기념관",
         ("SeMA 백남준기념관", "백남준기념관"),
     ),
@@ -153,6 +157,16 @@ BRANCH_INSTITUTION_DEFAULTS = {
     "서울시립 사진미술관": {
         "region": "서울",
         "city": "도봉구",
+        "category": "미술관",
+        "priority": 2,
+        "collection_phase": "phase2",
+        "exhibition_url": "https://sema.seoul.go.kr/",
+        "program_url": "https://sema.seoul.go.kr/kr/whatson/landing",
+        "notes": "서울시립미술관 분관. 서울시립미술관 통합 페이지에서 수집",
+    },
+    "서울시립 서서울미술관": {
+        "region": "서울",
+        "city": "금천구",
         "category": "미술관",
         "priority": 2,
         "collection_phase": "phase2",
@@ -1603,6 +1617,11 @@ def extract_inartplatform_exhibitions():
     page = fetch_html(url)
     blocks = re.findall(r'<li>\s*<a href="(/program/view\?no=\d+)">(.*?)</a>\s*</li>', page, flags=re.S)
     if not blocks:
+        empty_gallery = re.search(
+            r'<ul class="[^"]*gallery_list[^"]*">\s*</ul>', page, flags=re.S
+        )
+        if empty_gallery:
+            return []
         raise RuntimeError("인천아트플랫폼 전시 정보 블록을 찾지 못했습니다.")
 
     events = []
@@ -2431,6 +2450,10 @@ SCRAPERS = {
     "small-local-deep-seongbuk": extract_small_local_seongbuk_deep,
     "soma": extract_soma_exhibitions,
 }
+
+from priority_seoul_scrapers import PRIORITY_SCRAPERS
+
+SCRAPERS.update(PRIORITY_SCRAPERS)
 
 
 def get_institution_id(conn, name):

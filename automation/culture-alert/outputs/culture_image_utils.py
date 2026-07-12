@@ -1,7 +1,7 @@
 import html
 import io
 import urllib.request
-from urllib.parse import unquote, urljoin, urlparse
+from urllib.parse import quote, unquote, urljoin, urlparse, urlsplit, urlunsplit
 
 from PIL import Image
 
@@ -98,7 +98,17 @@ def display_image_url(value):
 
 
 def fetch_image(url, timeout=10, max_bytes=4_000_000):
-    request = urllib.request.Request(url, headers=IMAGE_REQUEST_HEADERS)
+    parts = urlsplit(url)
+    request_url = urlunsplit(
+        (
+            parts.scheme,
+            parts.netloc,
+            quote(unquote(parts.path), safe="/%:@"),
+            quote(unquote(parts.query), safe="=&;%:+,/?@"),
+            parts.fragment,
+        )
+    )
+    request = urllib.request.Request(request_url, headers=IMAGE_REQUEST_HEADERS)
     with urllib.request.urlopen(request, timeout=timeout) as response:
         data = response.read(max_bytes)
         content_type = response.headers.get("content-type", "")

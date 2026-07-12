@@ -64,6 +64,7 @@ def run_collection_and_render():
     import culture_alert_scraper as scraper
     import culture_card_gallery
     import culture_keyword_tagger
+    from priority_seoul_scrapers import reconcile_priority_events
     from refresh_event_statuses import refresh_statuses
 
     source_names = selected_sources(scraper)
@@ -75,12 +76,14 @@ def run_collection_and_render():
             try:
                 events = scraper.SCRAPERS[name]()
                 inserted, updated = scraper.upsert_events(conn, events)
+                ended = reconcile_priority_events(conn, name, events)
                 results.append(
                     {
                         "source": name,
                         "fetched": len(events),
                         "inserted": inserted,
                         "updated": updated,
+                        "ended": ended,
                         "error": "",
                     }
                 )
@@ -91,6 +94,7 @@ def run_collection_and_render():
                         "fetched": 0,
                         "inserted": 0,
                         "updated": 0,
+                        "ended": 0,
                         "error": str(exc),
                     }
                 )
@@ -128,7 +132,8 @@ def write_cloud_report(results, status_updated, status_counts, total_cards, coun
             lines.append(f"- {item['source']}: 실패 - {item['error']}")
         else:
             lines.append(
-                f"- {item['source']}: 발견 {item['fetched']}건, 신규 {item['inserted']}건, 갱신 {item['updated']}건"
+                f"- {item['source']}: 발견 {item['fetched']}건, 신규 {item['inserted']}건, "
+                f"갱신 {item['updated']}건, 종료 정리 {item['ended']}건"
             )
     lines.extend(["", "## 상태별 일정 수", ""])
     for status, count in sorted(status_counts.items()):
@@ -156,9 +161,12 @@ def main():
     output_path = args.output.resolve()
 
     if not args.skip_collection:
-        initialize_database(reset=True)
+        # Keep the last successful rows so a temporary source failure does not
+        # erase an institution from the report. Status refresh handles expiry.
+        initialize_database(reset=False)
         run_collection_and_render()
         run([sys.executable, "culture_data_audit.py"], cwd=OUTPUTS_DIR)
+        run([sys.executable, "institution_coverage_audit.py"], cwd=OUTPUTS_DIR)
         run([sys.executable, "culture_ui_audit.py"], cwd=OUTPUTS_DIR)
 
         if os.environ.get("RUN_IMAGE_AUDIT") == "1":

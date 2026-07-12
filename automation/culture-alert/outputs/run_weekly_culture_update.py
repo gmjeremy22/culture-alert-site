@@ -17,6 +17,7 @@ import culture_card_gallery
 import culture_keyword_tagger
 from culture_db_maintenance import cleanup_images
 from refresh_event_statuses import refresh_statuses
+from priority_seoul_scrapers import reconcile_priority_events
 
 
 WEEKLY_SOURCES = sorted(scraper.SCRAPERS)
@@ -109,12 +110,14 @@ def run_sources(conn):
         try:
             events = scraper.SCRAPERS[source_name]()
             inserted, updated = scraper.upsert_events(conn, events)
+            ended = reconcile_priority_events(conn, source_name, events)
             results.append(
                 {
                     "source": source_name,
                     "fetched": len(events),
                     "inserted": inserted,
                     "updated": updated,
+                    "ended": ended,
                     "error": None,
                 }
             )
@@ -125,6 +128,7 @@ def run_sources(conn):
                     "fetched": 0,
                     "inserted": 0,
                     "updated": 0,
+                    "ended": 0,
                     "error": str(exc),
                 }
             )
@@ -174,7 +178,8 @@ def write_report(cleaned, image_cleaned, source_results, status_updated, status_
             lines.append(f"- {item['source']}: 실패 - {item['error']}")
         else:
             lines.append(
-                f"- {item['source']}: 발견 {item['fetched']}건, 신규 {item['inserted']}건, 갱신 {item['updated']}건"
+                f"- {item['source']}: 발견 {item['fetched']}건, 신규 {item['inserted']}건, "
+                f"갱신 {item['updated']}건, 종료 정리 {item['ended']}건"
             )
     lines.extend(["", "## 상태별 일정 수", ""])
     for status in ("진행중", "예정", "상설전시", "종료"):
@@ -202,7 +207,8 @@ def main():
             print(f"{item['source']}: error={item['error']}")
         else:
             print(
-                f"{item['source']}: fetched={item['fetched']} inserted={item['inserted']} updated={item['updated']}"
+                f"{item['source']}: fetched={item['fetched']} inserted={item['inserted']} "
+                f"updated={item['updated']} ended={item['ended']}"
             )
     print(f"cards={render_result['cards']}")
     print(f"recommended={render_result['recommended']}")

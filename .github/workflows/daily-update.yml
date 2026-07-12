@@ -49,11 +49,38 @@ jobs:
       - name: Install Python dependencies
         run: python -m pip install -r automation/requirements.txt
 
+      - name: Restore last successful culture database
+        id: culture-db-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: automation/culture-alert/outputs/culture-alert.sqlite
+          key: culture-alert-db-${{ github.run_id }}
+          restore-keys: |
+            culture-alert-db-
+
       - name: Build encrypted report
         run: python automation/run_daily_update.py
 
+      - name: Upload audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: culture-alert-audit-reports
+          path: |
+            automation/culture-alert/outputs/*-audit-report.md
+            automation/culture-alert/outputs/*-audit-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Verify encrypted report
         run: node tools/verify-protected-site.js --html public/index.html --leak "feature-card"
+
+      - name: Save successful culture database
+        if: success()
+        uses: actions/cache/save@v4
+        with:
+          path: automation/culture-alert/outputs/culture-alert.sqlite
+          key: culture-alert-db-${{ github.run_id }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v6
