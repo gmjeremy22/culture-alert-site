@@ -1,6 +1,7 @@
 import argparse
 import csv
 import sqlite3
+import sys
 from pathlib import Path
 
 
@@ -11,8 +12,13 @@ SCHEMA_PATH = OUTPUTS_DIR / "culture-alert-schema.sql"
 INSTITUTIONS_SEED = OUTPUTS_DIR / "institutions-seed.csv"
 EXPANDED_INSTITUTIONS = OUTPUTS_DIR / "expanded-institution-candidates.csv"
 INTERESTS_SEED = OUTPUTS_DIR / "interests-seed.csv"
+OFFICIAL_DIRECTORY = OUTPUTS_DIR / "official-facility-directory.csv"
 
 TIER_PRIORITY = {"A": 1, "B": 2, "C": 3}
+RETIRED_INSTITUTIONS = {
+    "예술의전당 한가람미술관/디자인미술관",
+    "뮤지엄 산",
+}
 
 
 def read_csv(path):
@@ -98,6 +104,17 @@ def initialize_database(reset=False):
             upsert_institution(conn, row)
         for row in read_csv(INSTITUTIONS_SEED):
             upsert_institution(conn, row)
+        if OFFICIAL_DIRECTORY.exists():
+            if str(OUTPUTS_DIR) not in sys.path:
+                sys.path.insert(0, str(OUTPUTS_DIR))
+            from official_facility_directory import import_directory_csv
+
+            import_directory_csv(conn, OFFICIAL_DIRECTORY)
+        for institution_name in RETIRED_INSTITUTIONS:
+            conn.execute(
+                "UPDATE institutions SET active=0, updated_at=CURRENT_TIMESTAMP WHERE name=?",
+                (institution_name,),
+            )
         for row in read_csv(INTERESTS_SEED):
             upsert_interest(conn, row)
         conn.commit()
@@ -118,4 +135,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

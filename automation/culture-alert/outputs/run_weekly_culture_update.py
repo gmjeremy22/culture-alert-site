@@ -15,6 +15,7 @@ sys.path.insert(0, str(BASE_DIR))
 import culture_alert_scraper as scraper
 import culture_card_gallery
 import culture_keyword_tagger
+import institution_coverage_audit
 from culture_db_maintenance import cleanup_images
 from refresh_event_statuses import refresh_statuses
 from priority_seoul_scrapers import reconcile_priority_events
@@ -34,6 +35,14 @@ PROMOTED_B_INSTITUTIONS = [
 REPLACED_PLACEHOLDER_EVENTS = [
     ("성북구립미술관", "성북구립미술관 전시 일정 모니터"),
 ]
+
+# These legacy rows are either superseded by separate institutions or outside
+# the Seoul/Gyeonggi/Incheon scope. Keep their records, but hide them from the
+# active institution directory on every refresh.
+INSTITUTION_RETIREMENTS = {
+    "예술의전당 한가람미술관/디자인미술관": "split into separate Hangaram institutions",
+    "뮤지엄 산": "outside Seoul metropolitan coverage",
+}
 
 
 def cleanup_promoted_backfill_rows(conn):
@@ -103,14 +112,35 @@ def cleanup_promoted_backfill_rows(conn):
     return removed
 
 
+def retire_out_of_scope_or_duplicate_institutions(conn):
+    retired = 0
+    for name, reason in INSTITUTION_RETIREMENTS.items():
+        cursor = conn.execute(
+            """
+            UPDATE institutions
+            SET active = 0,
+                notes = TRIM(COALESCE(notes, '') || CASE WHEN notes IS NULL OR notes = '' THEN '' ELSE ' / ' END || ?),
+                updated_at = CURRENT_TIMESTAMP
+            WHERE name = ? AND active = 1
+            """,
+            (reason, name),
+        )
+        retired += cursor.rowcount
+    conn.commit()
+    return retired
+
+
 def run_sources(conn):
     results = []
     scraper.ensure_schema(conn)
     for source_name in WEEKLY_SOURCES:
         try:
-            events = scraper.SCRAPERS[source_name]()
+            outcome = scraper.SCRAPERS[source_name]()
+            events = getattr(outcome, "events", outcome)
+            checks = getattr(outcome, "checks", None)
             inserted, updated = scraper.upsert_events(conn, events)
             ended = reconcile_priority_events(conn, source_name, events)
+            scraper.record_collection_check(conn, source_name, events=events, overrides=checks)
             results.append(
                 {
                     "source": source_name,
@@ -122,6 +152,7 @@ def run_sources(conn):
                 }
             )
         except Exception as exc:
+            scraper.record_collection_check(conn, source_name, error=exc)
             results.append(
                 {
                     "source": source_name,
@@ -158,7 +189,29 @@ def rebuild_recommendations_and_cards():
     }
 
 
-def write_report(cleaned, image_cleaned, source_results, status_updated, status_counts, render_result):
+def rebuild_coverage_audit():
+    payload = institution_coverage_audit.audit(
+        DB_PATH, institution_coverage_audit.DEFAULT_REFERENCE
+    )
+    institution_coverage_audit.REPORT_PATH.write_text(
+        institution_coverage_audit.markdown_report(payload), encoding="utf-8"
+    )
+    institution_coverage_audit.JSON_PATH.write_text(
+        institution_coverage_audit.json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return payload["summary"]
+
+
+def write_report(
+    cleaned,
+    image_cleaned,
+    source_results,
+    status_updated,
+    status_counts,
+    render_result,
+    coverage_summary,
+):
     lines = [
         "# 주간 문화 일정 업데이트 리포트",
         "",
@@ -187,6 +240,17 @@ def write_report(cleaned, image_cleaned, source_results, status_updated, status_
     lines.extend(["", "## 카드 유형", ""])
     for content_type, count in render_result["counts"].items():
         lines.append(f"- {content_type}: {count}건")
+    lines.extend(
+        [
+            "",
+            "## 기관 수집 범위",
+            "",
+            f"- 현재 카드 0건 기관: {coverage_summary['seoul_zero_current_cards']}곳",
+            f"- 일정 수집 이력 없음: {coverage_summary['seoul_without_any_events']}곳",
+            f"- 수집 이력은 있으나 현재 공개 일정 없음: {coverage_summary['seoul_with_only_old_events']}곳",
+            f"- 우선 기준 기관 중 카드 0건: {coverage_summary['zero_current_count']}곳",
+        ]
+    )
     REPORT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -194,11 +258,21 @@ def main():
     with sqlite3.connect(DB_PATH) as conn:
         conn.execute("PRAGMA foreign_keys = ON")
         cleaned = cleanup_promoted_backfill_rows(conn)
+        retired = retire_out_of_scope_or_duplicate_institutions(conn)
         source_results = run_sources(conn)
         image_cleaned, _image_size_skipped = cleanup_images(conn)
     status_updated, status_counts = refresh_statuses(DB_PATH)
     render_result = rebuild_recommendations_and_cards()
-    write_report(cleaned, image_cleaned, source_results, status_updated, status_counts, render_result)
+    coverage_summary = rebuild_coverage_audit()
+    write_report(
+        cleaned,
+        image_cleaned,
+        source_results,
+        status_updated,
+        status_counts,
+        render_result,
+        coverage_summary,
+    )
 
     print(f"sources={len(source_results)}")
     print(f"cleaned_backfill={cleaned}")

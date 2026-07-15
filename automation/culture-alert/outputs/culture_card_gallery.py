@@ -1,7 +1,10 @@
+import csv
 import html
 import json
 import re
 import sqlite3
+import unicodedata
+from difflib import SequenceMatcher
 from datetime import date, datetime
 from pathlib import Path
 
@@ -11,6 +14,92 @@ from culture_image_utils import display_image_url
 BASE_DIR = Path(__file__).resolve().parent
 DEFAULT_DB = BASE_DIR / "culture-alert.sqlite"
 OUTPUT_PATH = BASE_DIR / "culture-card-gallery.html"
+INSTITUTION_METRICS_PATH = BASE_DIR / "institution-scale-metrics.csv"
+
+
+INSTITUTION_METRIC_ALIASES = {
+    "sema백남준기념관": "백남준기념관",
+    "서울시립남서울미술관": "서울시립미술관남서울미술관",
+    "서울시립북서울미술관": "서울시립미술관북서울미술관",
+    "서울시립서서울미술관": "서울시립미술관서서울미술관",
+    "서울시립사진미술관": "서울시립미술관사진미술관",
+    "예술의전당한가람디자인미술관": "한가람디자인미술관",
+    "예술의전당한가람미술관": "한가람미술관",
+    "고양아람누리아람미술관": "고양시립아람미술관",
+}
+
+
+def normalize_institution_name(value):
+    text = unicodedata.normalize("NFKC", str(value or "")).lower()
+    return re.sub(r"[^0-9a-zㄱ-ㆎ가-힣]", "", text)
+
+
+def metric_number(value):
+    try:
+        return float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def load_institution_metrics(path=INSTITUTION_METRICS_PATH):
+    if not path.exists():
+        return []
+    metrics = []
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle):
+            row["normalizedName"] = normalize_institution_name(row.get("source_name"))
+            row["officialScaleScore"] = metric_number(row.get("official_scale_score"))
+            row["annualVisitors"] = int(metric_number(row.get("annual_visitors")))
+            row["collectionCount"] = int(metric_number(row.get("collection_count")))
+            row["exhibitionAreaSqm"] = metric_number(row.get("exhibition_area_sqm"))
+            row["dataConfidence"] = metric_number(row.get("data_confidence"))
+            metrics.append(row)
+    return metrics
+
+
+def match_institution_metric(name, region, metrics):
+    normalized = normalize_institution_name(name)
+    target = INSTITUTION_METRIC_ALIASES.get(normalized, normalized)
+    exact = next(
+        (
+            metric
+            for metric in metrics
+            if metric["normalizedName"] == target
+            and (not region or metric.get("region") == region)
+        ),
+        None,
+    )
+    if exact:
+        return exact, "exact"
+
+    candidates = [
+        metric
+        for metric in metrics
+        if not region or metric.get("region") == region
+    ]
+    ranked = []
+    for metric in candidates:
+        candidate = metric["normalizedName"]
+        if min(len(target), len(candidate)) >= 5 and (
+            target in candidate or candidate in target
+        ):
+            similarity = 0.94
+        else:
+            similarity = SequenceMatcher(None, target, candidate).ratio()
+        ranked.append((similarity, metric))
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    if not ranked or ranked[0][0] < 0.84:
+        return None, ""
+    if len(ranked) > 1 and ranked[0][0] - ranked[1][0] < 0.025:
+        return None, ""
+    return ranked[0][1], "fuzzy"
+
+
+def fallback_scale_score(priority, institution_name):
+    base = {1: 62.0, 2: 42.0, 3: 24.0}.get(int(priority or 3), 24.0)
+    if is_major_institution(institution_name):
+        return max(base, 78.0)
+    return base
 
 
 def parse_date(value):
@@ -102,6 +191,16 @@ def display_title(title):
     if title == "한성부입니다":
         return "〈한성부입니다〉"
     return title
+
+
+def recommendation_eligible(title, display_venue):
+    normalized_title = re.sub(r"[^0-9A-Za-zㄱ-ㆎ가-힣]", "", str(title or ""))
+    if normalized_title in {"전시", "현재전시", "기획전시", "특별전시", "전시안내"}:
+        return False
+    venue = str(display_venue or "")
+    return not any(
+        marker in venue for marker in ("주워싱턴한국문화원", "주일한국문화원")
+    )
 
 
 def split_keyword_list(value):
@@ -204,7 +303,9 @@ def editorial_badges(item):
         add_badge(badges, "이번 주 추천", "gold")
     if score >= 2:
         add_badge(badges, "취향 적합", "gold")
-    if item.get("isMajorInstitution"):
+    if item.get("institutionScaleScore", 0) >= 76:
+        add_badge(badges, "많이 찾는 기관", "gold")
+    elif item.get("isMajorInstitution"):
         add_badge(badges, "주요 기관", "gold")
     if item.get("companionEvents"):
         companion_label = (
@@ -422,7 +523,8 @@ def attach_companion_events(items):
         item["curationBadges"] = editorial_badges(item)
 
 
-def load_events(conn, person_name):
+def load_events(conn, person_name, institution_metrics=None):
+    institution_metrics = institution_metrics or []
     rows = conn.execute(
         """
         SELECT
@@ -443,7 +545,8 @@ def load_events(conn, person_name):
           e.source_url,
           e.status,
           e.raw_text,
-          COALESCE(r.score, 0) AS score
+          COALESCE(r.score, 0) AS score,
+          i.priority AS institution_priority
         FROM cultural_events e
         JOIN institutions i ON i.id = e.institution_id
         LEFT JOIN recommendations r
@@ -480,6 +583,7 @@ def load_events(conn, person_name):
             status,
             raw_text,
             score,
+            institution_priority,
         ) = row
         remaining = days_until(end_date)
         starts_in = days_until(start_date)
@@ -501,6 +605,14 @@ def load_events(conn, person_name):
         display_venue = venue_label or institution_name
         detail_location = format_detail_location(venue_label, location or "확인 필요")
         keyword_list = keywords_with_nature(keywords, event_nature, content_type)
+        institution_metric, metric_match = match_institution_metric(
+            institution_name, region or "", institution_metrics
+        )
+        institution_scale_score = (
+            institution_metric["officialScaleScore"]
+            if institution_metric
+            else fallback_scale_score(institution_priority, institution_name)
+        )
         item = {
             "id": event_id,
             "institutionId": institution_id,
@@ -512,6 +624,7 @@ def load_events(conn, person_name):
             "natureLabel": nature_label(event_nature, content_type),
             "title": title,
             "displayTitle": display_title(title),
+            "recommendationEligible": recommendation_eligible(title, display_venue),
             "period": format_period(start_date, end_date, status),
             "startDate": start_date,
             "endDate": end_date,
@@ -526,10 +639,25 @@ def load_events(conn, person_name):
             "imageUrl": usable_image_url(image_url),
             "sourceUrl": source_url,
             "score": float(score or 0),
+            "institutionPriority": int(institution_priority or 3),
+            "institutionScaleScore": round(institution_scale_score, 1),
+            "institutionScaleSourceName": (
+                institution_metric.get("source_name") if institution_metric else ""
+            ),
+            "institutionScaleMatch": metric_match,
+            "institutionScaleConfidence": (
+                institution_metric.get("dataConfidence", 0) if institution_metric else 0
+            ),
+            "institutionAnnualVisitors": (
+                institution_metric.get("annualVisitors", 0) if institution_metric else 0
+            ),
+            "institutionCollectionCount": (
+                institution_metric.get("collectionCount", 0) if institution_metric else 0
+            ),
             "urgency": urgency,
             "remainingDays": remaining,
             "startsInDays": starts_in,
-            "isMajorInstitution": is_major_institution(institution_name),
+            "isMajorInstitution": institution_scale_score >= 76,
             "description": display_description(description, raw_text),
             "occurrences": occurrences,
             "nextOccurrence": next_occurrence,
@@ -539,6 +667,188 @@ def load_events(conn, person_name):
         items.append(item)
     attach_companion_events(items)
     return items
+
+
+def load_institutions(conn, items, institution_metrics=None):
+    institution_metrics = institution_metrics or []
+    rows = conn.execute(
+        """
+        SELECT
+          id,
+          name,
+          region,
+          city,
+          category,
+          priority,
+          collection_phase,
+          exhibition_url,
+          program_url
+        FROM institutions
+        WHERE active = 1
+        ORDER BY priority, region, city, name
+        """
+    ).fetchall()
+    events_by_institution = {}
+    for item in items:
+        events_by_institution.setdefault(item["institutionId"], []).append(item)
+    stored_event_counts = dict(
+        conn.execute(
+            "SELECT institution_id, COUNT(*) FROM cultural_events GROUP BY institution_id"
+        ).fetchall()
+    )
+    collection_checks = {}
+    has_collection_checks = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='institution_collection_checks'"
+    ).fetchone()
+    if has_collection_checks:
+        for institution_id, state, detail, checked_at in conn.execute(
+            """
+            SELECT institution_id, state, detail, checked_at
+            FROM institution_collection_checks
+            ORDER BY checked_at DESC
+            """
+        ).fetchall():
+            collection_checks.setdefault(
+                institution_id,
+                {"state": state, "detail": detail or "", "checkedAt": checked_at or ""},
+            )
+
+    directory_metadata = {}
+    has_directory_metadata = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name='institution_directory_metadata'"
+    ).fetchone()
+    if has_directory_metadata:
+        for row in conn.execute(
+            """
+            SELECT institution_id, directory_year, reference_date, facility_type,
+                   source_name, ownership, registration_type, address, phone,
+                   official_url, official_scale_score
+            FROM institution_directory_metadata
+            ORDER BY directory_year DESC, id DESC
+            """
+        ).fetchall():
+            (
+                institution_id,
+                directory_year,
+                reference_date,
+                facility_type,
+                source_name,
+                ownership,
+                registration_type,
+                address,
+                phone,
+                official_url,
+                official_scale_score,
+            ) = row
+            directory_metadata.setdefault(
+                institution_id,
+                {
+                    "directoryYear": directory_year,
+                    "referenceDate": reference_date or "",
+                    "facilityType": facility_type or "",
+                    "sourceName": source_name or "",
+                    "ownership": ownership or "",
+                    "registrationType": registration_type or "",
+                    "address": address or "",
+                    "phone": phone or "",
+                    "officialUrl": official_url or "",
+                    "officialScaleScore": float(official_scale_score or 0),
+                },
+            )
+
+    institutions = []
+    for (
+        institution_id,
+        name,
+        region,
+        city,
+        category,
+        priority,
+        collection_phase,
+        exhibition_url,
+        program_url,
+    ) in rows:
+        current_events = events_by_institution.get(institution_id, [])
+        collection_check = collection_checks.get(institution_id, {})
+        directory = directory_metadata.get(institution_id, {})
+        keywords = []
+        seen_keywords = set()
+        for event in current_events:
+            for keyword in event.get("keywordList", []):
+                if keyword in seen_keywords:
+                    continue
+                seen_keywords.add(keyword)
+                keywords.append(keyword)
+        representative = next(
+            (event.get("imageUrl") for event in current_events if event.get("imageUrl")),
+            "",
+        )
+        institution_metric, metric_match = match_institution_metric(
+            name, region or "", institution_metrics
+        )
+        institution_scale_score = (
+            directory.get("officialScaleScore")
+            or (
+                institution_metric["officialScaleScore"]
+                if institution_metric
+                else fallback_scale_score(priority, name)
+            )
+        )
+        institutions.append(
+            {
+                "id": institution_id,
+                "name": name,
+                "region": region or "",
+                "city": city or "",
+                "category": category or "문화기관",
+                "institutionKind": (
+                    "art"
+                    if category == "미술관"
+                    else "museum"
+                    if category == "박물관"
+                    else "other"
+                ),
+                "priority": int(priority or 3),
+                "scaleScore": round(institution_scale_score, 1),
+                "scaleSourceName": (
+                    institution_metric.get("source_name") if institution_metric else ""
+                ),
+                "scaleMatch": metric_match,
+                "annualVisitors": (
+                    institution_metric.get("annualVisitors", 0) if institution_metric else 0
+                ),
+                "collectionPhase": collection_phase or "",
+                "officialUrl": exhibition_url or program_url or directory.get("officialUrl", ""),
+                "directoryEntry": bool(directory),
+                "directoryYear": directory.get("directoryYear", ""),
+                "directoryReferenceDate": directory.get("referenceDate", ""),
+                "directorySourceName": directory.get("sourceName", ""),
+                "ownership": directory.get("ownership", ""),
+                "registrationType": directory.get("registrationType", ""),
+                "address": directory.get("address", ""),
+                "phone": directory.get("phone", ""),
+                "currentEventCount": len(current_events),
+                "storedEventCount": stored_event_counts.get(institution_id, 0),
+                "collectionState": collection_check.get("state", ""),
+                "collectionDetail": collection_check.get("detail", ""),
+                "collectionCheckedAt": collection_check.get("checkedAt", ""),
+                "currentExhibitionCount": sum(
+                    1 for event in current_events if event.get("type") == "전시"
+                ),
+                "currentPermanentCount": sum(
+                    1 for event in current_events if event.get("isPermanent")
+                ),
+                "currentProgramCount": sum(
+                    1
+                    for event in current_events
+                    if event.get("type") in {"강연", "교육", "행사"}
+                ),
+                "eventIndexes": [event["index"] for event in current_events],
+                "representativeImage": representative,
+                "keywords": keywords[:12],
+            }
+        )
+    return institutions
 
 
 def load_related_links(conn, event_ids):
@@ -603,6 +913,7 @@ MAJOR_INSTITUTION_MARKERS = (
     "서울공예박물관",
     "경기도박물관",
     "경기도미술관",
+    "퐁피두",
 )
 
 
@@ -612,8 +923,10 @@ def is_major_institution(name):
 
 
 def render(person_name="가족"):
+    institution_metrics = load_institution_metrics()
     with sqlite3.connect(DEFAULT_DB) as conn:
-        items = load_events(conn, person_name)
+        items = load_events(conn, person_name, institution_metrics)
+        institutions = load_institutions(conn, items, institution_metrics)
     indexed_items = list(enumerate(items))
     timed_indexed_items = [
         (index, item) for index, item in indexed_items if not is_permanent_item(item)
@@ -636,6 +949,7 @@ def render(person_name="가족"):
     counts = type_counts(items)
     timed_counts = type_counts(timed_items)
     details_json = json.dumps(items, ensure_ascii=False).replace("</", "<\\/")
+    institutions_json = json.dumps(institutions, ensure_ascii=False).replace("</", "<\\/")
     count_text = " · ".join(f"{key} {value}건" for key, value in counts.items())
     timed_count_text = " · ".join(
         f"{key} {value}건" for key, value in timed_counts.items()
@@ -690,7 +1004,7 @@ def render(person_name="가족"):
         )
     keyword_buttons = "".join(keyword_group_blocks)
     region_buttons = "".join(
-        f'<button class="choice-button" type="button" data-region-choice="{html.escape(region)}" aria-pressed="{str(region == "all").lower()}">{label}</button>'
+        f'<button class="choice-button" type="button" data-region-choice="{html.escape(region)}" aria-pressed="{str(region == "서울").lower()}">{label}</button>'
         for region, label in [
             ("all", "전체"),
             ("서울", "서울"),
@@ -2538,6 +2852,15 @@ def render(person_name="가족"):
       border-radius: 24px;
       padding: 18px;
     }}
+    .primary-recommendation-shelves,
+    .standalone-urgent {{
+      margin-top: 18px;
+    }}
+    .standalone-urgent .urgent-list {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }}
     .urgent-list {{
       gap: 10px;
     }}
@@ -2785,6 +3108,21 @@ def render(person_name="가족"):
       font-weight: 780;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }}
+    .discovery-shelf {{
+      border-color: rgba(189, 157, 105, 0.28);
+      background: linear-gradient(135deg, rgba(189, 157, 105, 0.075), rgba(14, 17, 17, 0.72));
+    }}
+    .discovery-pill {{
+      justify-self: start;
+      width: max-content;
+      border: 1px solid rgba(216, 187, 133, 0.52);
+      border-radius: 999px;
+      background: rgba(20, 18, 14, 0.82);
+      color: #f0d59f !important;
+      padding: 4px 8px;
+      font-size: 11px !important;
+      font-weight: 850 !important;
     }}
     .shelf-card:hover,
     .shelf-card:focus-visible,
@@ -3260,7 +3598,7 @@ def render(person_name="가족"):
       .curation-hero {{
         order: 1;
       }}
-      .urgent-panel {{
+      .cinematic-stage .urgent-panel {{
         order: 2;
       }}
       .hero-slot,
@@ -3275,6 +3613,7 @@ def render(person_name="가족"):
       }}
       .urgent-list {{
         display: grid;
+        grid-template-columns: none;
         grid-auto-flow: column;
         grid-auto-columns: minmax(260px, 84vw);
         overflow-x: auto;
@@ -3355,6 +3694,13 @@ def render(person_name="가족"):
       width: min(100%, calc(100vw - 48px)) !important;
       max-width: calc(100vw - 48px) !important;
       overflow: hidden;
+    }}
+    .hero-stage {{
+      display: block;
+      overflow: visible;
+    }}
+    .hero-stage .curation-hero {{
+      width: 100%;
     }}
     .curation-hero,
     .urgent-panel,
@@ -3452,6 +3798,10 @@ def render(person_name="가족"):
     .cinematic-stage .curation-hero {{
       flex: 1 1 0;
       width: 0;
+    }}
+    .cinematic-stage.hero-stage .curation-hero {{
+      flex: 1 1 auto;
+      width: 100%;
     }}
     .cinematic-stage .urgent-panel {{
       flex: 0 0 340px;
@@ -4234,6 +4584,538 @@ def render(person_name="가족"):
         text-align: left;
       }}
     }}
+    .institution-view {{
+      width: 100%;
+      min-width: 0;
+    }}
+    .institution-view[hidden] {{
+      display: none;
+    }}
+    .institution-intro {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 32px;
+      align-items: end;
+      margin-bottom: 24px;
+      padding: 34px;
+      border: 1px solid rgba(232, 223, 208, 0.13);
+      border-radius: 8px;
+      background:
+        linear-gradient(120deg, rgba(125, 146, 120, 0.12), transparent 48%),
+        rgba(14, 17, 16, 0.84);
+    }}
+    .institution-intro-copy {{
+      min-width: 0;
+    }}
+    .institution-kicker {{
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }}
+    .institution-intro h1 {{
+      margin: 0;
+      max-width: 700px;
+      font-family: var(--font-display);
+      font-size: clamp(32px, 4.4vw, 58px);
+      font-weight: 700;
+      line-height: 1.08;
+      word-break: keep-all;
+    }}
+    .institution-intro-copy > p:last-child {{
+      max-width: 650px;
+      margin: 14px 0 0;
+      color: var(--text-soft);
+      font-size: 14px;
+      line-height: 1.65;
+    }}
+    .institution-search-box {{
+      display: grid;
+      gap: 10px;
+    }}
+    .institution-search-label {{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+    }}
+    .institution-search-shell {{
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      min-height: 56px;
+      padding: 0 14px;
+      border: 1px solid rgba(232, 223, 208, 0.24);
+      border-radius: 6px;
+      background: rgba(6, 8, 8, 0.76);
+      transition: border-color 160ms ease, background 160ms ease;
+    }}
+    .institution-search-shell:focus-within {{
+      border-color: var(--accent);
+      background: rgba(6, 8, 8, 0.94);
+    }}
+    .search-glyph {{
+      color: var(--accent);
+      font-size: 20px;
+      line-height: 1;
+    }}
+    .institution-search-input {{
+      min-width: 0;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 16px;
+    }}
+    .institution-search-input::placeholder {{
+      color: #777d78;
+    }}
+    .search-clear {{
+      min-width: 32px;
+      min-height: 32px;
+      border: 0;
+      border-radius: 4px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+    }}
+    .search-clear:hover,
+    .search-clear:focus-visible {{
+      background: rgba(232, 223, 208, 0.08);
+      color: var(--ink);
+      outline: none;
+    }}
+    .search-hint {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }}
+    .institution-filter-groups {{
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }}
+    .institution-filter-group {{
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+    }}
+    .institution-filter-label {{
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+    }}
+    .institution-filter-bar {{
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      padding-bottom: 3px;
+      scrollbar-width: thin;
+    }}
+    .institution-filter-button {{
+      flex: 0 0 auto;
+      min-height: 38px;
+      border: 1px solid rgba(232, 223, 208, 0.14);
+      border-radius: 999px;
+      background: rgba(232, 223, 208, 0.025);
+      color: var(--text-soft);
+      padding: 0 14px;
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }}
+    .institution-filter-button[aria-pressed="true"] {{
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-ink);
+    }}
+    .institution-result-summary {{
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+    .institution-spotlight {{
+      display: grid;
+      grid-template-columns: minmax(230px, 0.72fr) minmax(0, 1.28fr);
+      gap: 24px;
+      margin-bottom: 24px;
+      padding: 24px;
+      border: 1px solid rgba(216, 224, 212, 0.22);
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(125, 146, 120, 0.12), rgba(12, 17, 23, 0.72));
+    }}
+    .institution-spotlight[hidden] {{
+      display: none;
+    }}
+    .institution-spotlight-main {{
+      display: grid;
+      align-content: start;
+      gap: 9px;
+    }}
+    .institution-spotlight-main h2 {{
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 28px;
+      line-height: 1.2;
+      word-break: keep-all;
+    }}
+    .institution-meta-line {{
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }}
+    .institution-spotlight-actions {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }}
+    .institution-official-link,
+    .institution-collapse-button {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      border: 1px solid rgba(232, 223, 208, 0.2);
+      border-radius: 4px;
+      background: rgba(232, 223, 208, 0.04);
+      color: var(--ink);
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 850;
+      text-decoration: none;
+      cursor: pointer;
+    }}
+    .institution-spotlight-events {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }}
+    .institution-event-button {{
+      display: grid;
+      grid-template-columns: 64px minmax(0, 1fr);
+      gap: 11px;
+      min-height: 92px;
+      padding: 9px;
+      border: 1px solid rgba(232, 223, 208, 0.11);
+      border-radius: 6px;
+      background: rgba(6, 8, 8, 0.52);
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+    }}
+    .institution-event-button:hover,
+    .institution-event-button:focus-visible {{
+      border-color: var(--accent);
+      outline: none;
+    }}
+    .institution-event-thumb {{
+      display: grid;
+      width: 64px;
+      height: 74px;
+      overflow: hidden;
+      place-items: center;
+      border-radius: 4px;
+      background: #141817;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 850;
+    }}
+    .institution-event-thumb img {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }}
+    .institution-event-copy {{
+      display: grid;
+      align-content: center;
+      gap: 5px;
+      min-width: 0;
+    }}
+    .institution-event-copy strong {{
+      display: -webkit-box;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1.35;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }}
+    .institution-event-copy span {{
+      color: var(--muted);
+      font-size: 11px;
+    }}
+    .institution-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }}
+    .institution-card {{
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid rgba(232, 223, 208, 0.11);
+      border-radius: 7px;
+      background: rgba(14, 17, 16, 0.76);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }}
+    .institution-card:hover {{
+      transform: translateY(-2px);
+      border-color: rgba(232, 223, 208, 0.26);
+      background: rgba(18, 22, 20, 0.9);
+    }}
+    .institution-card-media {{
+      position: relative;
+      display: grid;
+      aspect-ratio: 16 / 7;
+      overflow: hidden;
+      place-items: end start;
+      padding: 14px;
+      background:
+        linear-gradient(135deg, rgba(125, 146, 120, 0.18), rgba(12, 17, 23, 0.34)),
+        #151918;
+    }}
+    .institution-card-media.has-image::after {{
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(5, 7, 7, 0.08), rgba(5, 7, 7, 0.82));
+    }}
+    .institution-card-media img {{
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }}
+    .institution-card-region {{
+      position: relative;
+      z-index: 1;
+      color: #f1e6d5;
+      font-size: 11px;
+      font-weight: 900;
+    }}
+    .institution-card-labels {{
+      position: absolute;
+      z-index: 2;
+      inset: 12px 12px auto;
+      display: flex;
+      gap: 6px;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+    }}
+    .institution-type-label,
+    .institution-scale-label {{
+      min-height: 25px;
+      border: 1px solid rgba(241, 230, 213, 0.2);
+      border-radius: 999px;
+      background: rgba(8, 11, 10, 0.78);
+      color: #f1e6d5;
+      padding: 4px 9px;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1.45;
+      backdrop-filter: blur(8px);
+    }}
+    .institution-scale-label {{
+      border-color: rgba(230, 194, 122, 0.42);
+      color: #e6c27a;
+    }}
+    .institution-card-body {{
+      display: grid;
+      gap: 10px;
+      padding: 15px;
+    }}
+    .institution-card-body h2 {{
+      margin: 0;
+      min-height: 48px;
+      font-family: var(--font-display);
+      font-size: 19px;
+      font-weight: 680;
+      line-height: 1.3;
+      word-break: keep-all;
+    }}
+    .institution-counts {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 11px;
+    }}
+    .institution-counts .has-current {{
+      color: var(--accent);
+      font-weight: 850;
+    }}
+    .institution-tag-row {{
+      display: flex;
+      gap: 5px;
+      min-height: 24px;
+      overflow: hidden;
+    }}
+    .institution-tag-row span {{
+      flex: 0 0 auto;
+      padding: 4px 7px;
+      border: 1px solid rgba(232, 223, 208, 0.12);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 10px;
+    }}
+    .institution-card-actions {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+    }}
+    .institution-open-button,
+    .institution-card-link {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      border: 1px solid rgba(232, 223, 208, 0.15);
+      border-radius: 4px;
+      background: rgba(232, 223, 208, 0.035);
+      color: var(--ink);
+      padding: 0 11px;
+      font-size: 12px;
+      font-weight: 850;
+      text-decoration: none;
+      cursor: pointer;
+    }}
+    .institution-open-button:hover,
+    .institution-open-button:focus-visible,
+    .institution-card-link:hover,
+    .institution-card-link:focus-visible {{
+      border-color: var(--accent);
+      outline: none;
+    }}
+    .institution-card-link[hidden] {{
+      display: none;
+    }}
+    .search-results-section {{
+      display: grid;
+      gap: 14px;
+      margin-top: 26px;
+    }}
+    .search-results-section[hidden] {{
+      display: none;
+    }}
+    .search-results-heading {{
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: baseline;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(232, 223, 208, 0.1);
+    }}
+    .search-results-heading h2 {{
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 22px;
+    }}
+    .search-results-heading span {{
+      color: var(--muted);
+      font-size: 12px;
+    }}
+    .event-search-grid {{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }}
+    .header-search-button {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      border: 1px solid rgba(232, 223, 208, 0.15);
+      border-radius: 6px;
+      background: rgba(232, 223, 208, 0.035);
+      color: var(--ink);
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 850;
+      cursor: pointer;
+    }}
+    .header-search-button:hover,
+    .header-search-button:focus-visible {{
+      border-color: var(--accent);
+      outline: none;
+    }}
+    @media (max-width: 1040px) {{
+      .institution-intro {{
+        grid-template-columns: 1fr;
+      }}
+      .institution-grid {{
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+    }}
+    @media (max-width: 767px) {{
+      .toolbar,
+      .toolbar.has-program-view {{
+        display: flex;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: none;
+      }}
+      .toolbar::-webkit-scrollbar {{
+        display: none;
+      }}
+      .view-button {{
+        flex: 0 0 auto;
+        min-width: 72px;
+      }}
+      .header-search-button {{
+        min-height: 32px;
+        padding-inline: 10px;
+      }}
+      .institution-intro {{
+        gap: 22px;
+        margin-bottom: 16px;
+        padding: 20px 16px;
+      }}
+      .institution-intro h1 {{
+        font-size: 32px;
+      }}
+      .institution-search-shell {{
+        min-height: 52px;
+      }}
+      .institution-filter-bar {{
+        margin-inline: -10px;
+        padding-inline: 10px;
+      }}
+      .institution-filter-group {{
+        grid-template-columns: 1fr;
+        gap: 7px;
+      }}
+      .institution-grid,
+      .event-search-grid {{
+        grid-template-columns: 1fr;
+      }}
+      .institution-card-media {{
+        aspect-ratio: 16 / 6;
+      }}
+      .institution-card-body h2 {{
+        min-height: 0;
+      }}
+      .institution-spotlight {{
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 16px;
+      }}
+      .institution-spotlight-events {{
+        grid-template-columns: 1fr;
+      }}
+      .search-results-heading h2 {{
+        font-size: 19px;
+      }}
+    }}
   </style>
 </head>
 <body class="view-featured preference-open reveal-pending">
@@ -4248,8 +5130,10 @@ def render(person_name="가족"):
         <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 전시</button>
         <button class="view-button" id="programViewButton" type="button" data-view="program" aria-pressed="false" hidden>강연·교육</button>
         <button class="view-button" type="button" data-view="permanent" aria-pressed="false">상설전</button>
+        <button class="view-button" type="button" data-view="institutions" aria-pressed="false">기관 둘러보기</button>
       </div>
       <div class="header-actions">
+        <button class="header-search-button" id="headerSearchButton" type="button" aria-label="기관과 전시 검색">검색</button>
         <button class="profile-button" id="profileButton" type="button" aria-haspopup="dialog" aria-controls="preferenceOverlay">
           <span class="profile-avatar" id="profileAvatar" aria-hidden="true">?</span>
           <span id="profileButtonLabel">취향 설정</span>
@@ -4267,23 +5151,32 @@ def render(person_name="가족"):
         </div>
         <aside class="selection-note" aria-label="추천 선정 기준">
           <span class="note-label">어떻게 골랐나요</span>
-          <p>취향과 일정이 잘 맞는지 먼저 보고, 곧 끝나는 일정과 한 번에 묶기 좋은 동선을 함께 살폈어요.</p>
+          <p>취향과 관람 규모·소장 기반을 함께 보고, 마감 일정은 따로 놓치지 않게 모았어요.</p>
           <p class="summary">진행/예정 {len(items)}건 · {html.escape(count_text)}</p>
         </aside>
       </section>
-      <section class="curation-board cinematic-stage" aria-label="오늘의 큐레이션">
+      <section class="curation-board cinematic-stage hero-stage" aria-label="오늘의 큐레이션">
         <section class="curation-hero" id="curationHero" data-reveal-step style="--reveal-delay:0ms" aria-label="오늘의 대표 추천">
           <div class="hero-slot" id="heroSlot"></div>
         </section>
-        <aside class="urgent-panel" id="urgentPanel" data-reveal-step style="--reveal-delay:240ms" aria-label="놓치지 말아야 할 일정">
-          <div class="section-heading">
-            <p>놓치지 말아야 할 일정</p>
-            <span>마감 가까운 순</span>
-          </div>
-          <div class="mini-list urgent-list" id="endingStack"></div>
-        </aside>
       </section>
-      <section class="venue-bundle-section route-board" id="venueBundleSection" data-reveal-step style="--reveal-delay:480ms" aria-label="한 장소에서 묶어보기">
+      <section class="recommendation-shelves primary-recommendation-shelves" id="recommendationShelves" data-reveal-step style="--reveal-delay:180ms" aria-label="먼저 보면 좋은 주요 전시">
+        <section class="recommendation-shelf" aria-label="먼저 보면 좋은 주요 전시">
+          <div class="section-heading">
+            <p>먼저 보면 좋은 주요 전시</p>
+            <span>취향과 관람 규모가 함께 검증된 일정</span>
+          </div>
+          <div class="shelf-row" id="todayStack"></div>
+        </section>
+      </section>
+      <aside class="urgent-panel standalone-urgent" id="urgentPanel" data-reveal-step style="--reveal-delay:360ms" aria-label="곧 마감하는 일정">
+        <div class="section-heading">
+          <p>곧 마감하는 일정</p>
+          <span>마감 가까운 순</span>
+        </div>
+        <div class="mini-list urgent-list" id="endingStack"></div>
+      </aside>
+      <section class="venue-bundle-section route-board" id="venueBundleSection" data-reveal-step style="--reveal-delay:540ms" aria-label="한 장소에서 묶어보기">
         <div class="route-board-main">
           <div class="section-heading">
             <p>한 장소에서 묶어보기</p>
@@ -4299,7 +5192,7 @@ def render(person_name="가족"):
           <p>Route curation</p>
         </div>
       </section>
-      <section class="quick-filter-panel" data-reveal-step style="--reveal-delay:700ms" aria-label="빠른 추천 필터">
+      <section class="quick-filter-panel" data-reveal-step style="--reveal-delay:720ms" aria-label="빠른 추천 필터">
         <div class="section-heading compact-heading">
           <p>빠른 필터</p>
           <span>보고 싶은 조건만 가볍게</span>
@@ -4309,12 +5202,12 @@ def render(person_name="가족"):
           <button class="quick-chip" type="button" data-quick-filter="family" aria-pressed="false">가족</button>
           <button class="quick-chip" type="button" data-quick-filter="week" aria-pressed="false">이번 주</button>
           <button class="quick-chip" type="button" data-quick-filter="exhibition" aria-pressed="false">전시</button>
-          <button class="quick-chip" type="button" data-quick-filter="seoul" aria-pressed="false">서울</button>
+          <button class="quick-chip" type="button" data-quick-filter="seoul" aria-pressed="true">서울</button>
           <button class="quick-chip" type="button" data-quick-filter="gyeonggi" aria-pressed="false">경기</button>
           <button class="quick-chip" type="button" data-quick-filter="incheon" aria-pressed="false">인천</button>
         </div>
       </section>
-      <section class="recommendation-panel" data-reveal-step style="--reveal-delay:780ms" aria-label="관심 기반 추천 설정">
+      <section class="recommendation-panel" data-reveal-step style="--reveal-delay:840ms" aria-label="관심 기반 추천 설정">
         <details class="advanced-filter" id="advancedFilter">
           <summary>
             <span id="advancedFilterLabel">상세 필터 열기</span>
@@ -4354,20 +5247,13 @@ def render(person_name="가족"):
           <button class="reset-button" type="button" id="resetRecommendation">초기화</button>
         </div>
       </section>
-      <section class="recommendation-shelves" id="recommendationShelves" data-reveal-step style="--reveal-delay:920ms" aria-label="추천 선반">
-        <section class="recommendation-shelf" aria-label="취향에 맞는 다음 일정">
+      <section class="recommendation-shelves discovery-recommendation-shelves" data-reveal-step style="--reveal-delay:960ms" aria-label="숨은 전시 추천 선반">
+        <section class="recommendation-shelf discovery-shelf" id="discoveryShelfSection" aria-label="취향으로 찾은 숨은 전시" hidden>
           <div class="section-heading">
-            <p>취향에 맞는 다음 일정</p>
-            <span>대표 추천과 마감 일정에 나오지 않은 후보</span>
+            <p>취향으로 찾은 숨은 전시</p>
+            <span>잘 알려진 곳 밖에서 발견한 취향 적합 일정</span>
           </div>
-          <div class="shelf-row" id="todayStack"></div>
-        </section>
-        <section class="recommendation-shelf" id="weekShelfSection" aria-label="이번 주 새로 시작해요" hidden>
-          <div class="section-heading">
-            <p>이번 주 새로 시작해요</p>
-            <span>7일 안에 시작하는 일정</span>
-          </div>
-          <div class="shelf-row" id="weekShelf"></div>
+          <div class="shelf-row" id="discoveryShelf"></div>
         </section>
       </section>
       <section class="recommendation-grid-section" data-reveal-step style="--reveal-delay:1100ms" aria-label="추천 전체">
@@ -4415,6 +5301,62 @@ def render(person_name="가족"):
       <div class="grid" id="permanentGrid">
         {permanent_cards}
       </div>
+    </section>
+    <section class="institution-view" id="institutionView" aria-label="기관 둘러보기" hidden>
+      <section class="institution-intro">
+        <div class="institution-intro-copy">
+          <p class="institution-kicker">INSTITUTION DIRECTORY</p>
+          <h1>장소에서 시작하는 문화 탐색</h1>
+          <p>현재 일정이 있는 곳뿐 아니라 등록된 박물관과 미술관을 함께 둘러보세요. 기관을 열면 지금 볼 수 있는 전시와 프로그램을 한곳에 모아 보여드립니다.</p>
+        </div>
+        <div class="institution-search-box">
+          <label class="institution-search-label" for="institutionSearch">기관과 전시 통합 검색</label>
+          <div class="institution-search-shell">
+            <span class="search-glyph" aria-hidden="true">⌕</span>
+            <input class="institution-search-input" id="institutionSearch" type="search" autocomplete="off" spellcheck="false" placeholder="예: 리움, 현대미술, 더 하이브리드">
+            <button class="search-clear" id="institutionSearchClear" type="button" aria-label="검색어 지우기" hidden>×</button>
+          </div>
+          <p class="search-hint">띄어쓰기 차이와 일부 오타, 초성 검색도 함께 확인합니다.</p>
+        </div>
+      </section>
+      <div class="institution-filter-groups">
+        <div class="institution-filter-group">
+          <span class="institution-filter-label">기관 유형</span>
+          <div class="institution-filter-bar" id="institutionTypeFilters" aria-label="기관 유형 필터">
+            <button class="institution-filter-button" type="button" data-institution-kind="all" aria-pressed="true">전체</button>
+            <button class="institution-filter-button" type="button" data-institution-kind="art" aria-pressed="false">미술관</button>
+            <button class="institution-filter-button" type="button" data-institution-kind="museum" aria-pressed="false">박물관</button>
+            <button class="institution-filter-button" type="button" data-institution-kind="other" aria-pressed="false">기타 문화공간</button>
+          </div>
+        </div>
+        <div class="institution-filter-group">
+          <span class="institution-filter-label">지역·상태</span>
+          <div class="institution-filter-bar" id="institutionRegionFilters" aria-label="기관 지역 필터">
+            <button class="institution-filter-button" type="button" data-institution-region="all" aria-pressed="false">전체</button>
+            <button class="institution-filter-button" type="button" data-institution-region="서울" aria-pressed="true">서울</button>
+            <button class="institution-filter-button" type="button" data-institution-region="경기" aria-pressed="false">경기</button>
+            <button class="institution-filter-button" type="button" data-institution-region="인천" aria-pressed="false">인천</button>
+            <button class="institution-filter-button" type="button" data-institution-region="current" aria-pressed="false">현재 일정 있음</button>
+          </div>
+        </div>
+      </div>
+      <p class="institution-result-summary" id="institutionResultSummary"></p>
+      <section class="institution-spotlight" id="institutionSpotlight" aria-live="polite" hidden></section>
+      <section class="search-results-section" id="institutionResultsSection" aria-labelledby="institutionResultsTitle">
+        <div class="search-results-heading">
+          <h2 id="institutionResultsTitle">기관</h2>
+          <span id="institutionResultsCount"></span>
+        </div>
+        <div class="institution-grid" id="institutionGrid"></div>
+      </section>
+      <section class="search-results-section" id="eventSearchResultsSection" aria-labelledby="eventSearchResultsTitle" hidden>
+        <div class="search-results-heading">
+          <h2 id="eventSearchResultsTitle">전시와 일정</h2>
+          <span id="eventSearchResultsCount"></span>
+        </div>
+        <div class="event-search-grid" id="eventSearchGrid"></div>
+      </section>
+      <div class="empty-state" id="institutionEmptyState" hidden>비슷한 기관이나 일정을 찾지 못했어요. 검색어를 조금 짧게 바꿔보세요.</div>
     </section>
   </main>
 
@@ -4503,6 +5445,7 @@ def render(person_name="가족"):
 
   <script>
     const items = {details_json};
+    const institutions = {institutions_json};
     const overlay = document.getElementById("detailOverlay");
     const imageBox = document.getElementById("detailImage");
     const closeButton = document.getElementById("detailClose");
@@ -4510,6 +5453,20 @@ def render(person_name="가족"):
     const allView = document.getElementById("allView");
     const programView = document.getElementById("programView");
     const permanentView = document.getElementById("permanentView");
+    const institutionView = document.getElementById("institutionView");
+    const headerSearchButton = document.getElementById("headerSearchButton");
+    const institutionSearch = document.getElementById("institutionSearch");
+    const institutionSearchClear = document.getElementById("institutionSearchClear");
+    const institutionTypeFilters = document.getElementById("institutionTypeFilters");
+    const institutionResultSummary = document.getElementById("institutionResultSummary");
+    const institutionSpotlight = document.getElementById("institutionSpotlight");
+    const institutionResultsSection = document.getElementById("institutionResultsSection");
+    const institutionResultsCount = document.getElementById("institutionResultsCount");
+    const institutionGrid = document.getElementById("institutionGrid");
+    const eventSearchResultsSection = document.getElementById("eventSearchResultsSection");
+    const eventSearchResultsCount = document.getElementById("eventSearchResultsCount");
+    const eventSearchGrid = document.getElementById("eventSearchGrid");
+    const institutionEmptyState = document.getElementById("institutionEmptyState");
     const programViewButton = document.getElementById("programViewButton");
     const programGrid = document.getElementById("programGrid");
     const programSummary = document.getElementById("programSummary");
@@ -4518,8 +5475,8 @@ def render(person_name="가족"):
     const heroSlot = document.getElementById("heroSlot");
     const todayStack = document.getElementById("todayStack");
     const endingStack = document.getElementById("endingStack");
-    const weekShelf = document.getElementById("weekShelf");
-    const weekShelfSection = document.getElementById("weekShelfSection");
+    const discoveryShelf = document.getElementById("discoveryShelf");
+    const discoveryShelfSection = document.getElementById("discoveryShelfSection");
     const recommendationShelves = document.getElementById("recommendationShelves");
     const venueBundleSection = document.getElementById("venueBundleSection");
     const venueBundleList = document.getElementById("venueBundleList");
@@ -4551,7 +5508,7 @@ def render(person_name="가족"):
     );
     const selectedKeywords = new Set();
     const recommendationState = {{
-      region: "all",
+      region: "서울",
       type: "all",
       priority: "recommended"
     }};
@@ -4568,6 +5525,9 @@ def render(person_name="가족"):
     let filteringTimer = null;
     let curationRevealStarted = false;
     let curationRevealBegan = false;
+    let institutionKind = "all";
+    let institutionRegion = "서울";
+    let selectedInstitutionId = null;
     const fields = {{
       kicker: document.getElementById("detailKicker"),
       title: document.getElementById("detailTitle"),
@@ -4814,6 +5774,7 @@ def render(person_name="가족"):
     function recommendationSentence(item) {{
       const labels = badgesFor(item, 3).map((badge) => badge.label);
       if (labels.includes("곧 종료")) return "마감이 가까워 이번 방문 후보에서 먼저 확인하면 좋아요.";
+      if (labels.includes("많이 찾는 기관")) return "실제 관람 규모와 전시 기반이 탄탄한 기관의 일정이에요.";
       if (labels.includes("가족 동선 좋음") || labels.includes("같이 보기 좋음")) return "같은 장소에 함께 볼 일정이 있어 한 번의 방문으로 묶기 좋아요.";
       if (labels.includes("이번 주 추천")) return "이번 주 일정과 맞물려 바로 계획하기 좋은 카드입니다.";
       if (labels.includes("주요 기관")) return "주요 기관 일정이라 전시 완성도와 방문 안정성을 기대하기 좋아요.";
@@ -4900,6 +5861,15 @@ def render(person_name="가족"):
         return false;
       }}
       if (item.type !== "전시") return false;
+      if (item.recommendationEligible === false) return false;
+      const recommendationTitle = normalizeSearchText(item.displayTitle || item.title || "");
+      if (["전시", "현재전시", "기획전시", "특별전시", "전시안내"].includes(recommendationTitle)) {{
+        return false;
+      }}
+      const recommendationVenue = item.displayVenue || item.venueLabel || "";
+      if (["주워싱턴한국문화원", "주일한국문화원"].some((marker) => recommendationVenue.includes(marker))) {{
+        return false;
+      }}
       if (recommendationState.region !== "all" && item.region !== recommendationState.region) {{
         return false;
       }}
@@ -4918,48 +5888,67 @@ def render(person_name="가족"):
       let score = 0;
       if (remaining !== null) {{
         if (remaining < 0) score -= 30;
-        else if (remaining <= 7) score += 18;
-        else if (remaining <= 14) score += 12;
-        else if (remaining <= 30) score += 7;
-        else if (remaining <= 60) score += 3;
+        else if (remaining <= 7) score += 9;
+        else if (remaining <= 14) score += 6;
+        else if (remaining <= 30) score += 3;
+        else if (remaining <= 60) score += 1;
       }}
       if (startsIn !== null) {{
-        if (startsIn >= 0 && startsIn <= 14) score += 5;
-        else if (startsIn > 14 && startsIn <= 30) score += 2;
+        if (startsIn >= 0 && startsIn <= 14) score += 2;
+        else if (startsIn > 14 && startsIn <= 30) score += 1;
       }}
       return score;
     }}
 
     function natureScore(item) {{
-      if (item.eventNature === "limited") return 8;
+      if (item.eventNature === "limited") return 4;
       if (item.eventNature === "long_term") return 2;
       if (item.eventNature === "permanent") return -4;
       return 0;
     }}
 
+    function institutionScaleScore(item) {{
+      const score = numeric(item.institutionScaleScore);
+      return score === null ? 24 : Math.max(0, Math.min(100, score));
+    }}
+
     function scoreRecommendation(item, index) {{
       const matchedKeywords = selectedKeywordCount(item);
-      let score = Number(item.score || 0) * 2;
+      const tasteScore = Number(item.score || 0);
+      const scaleScore = institutionScaleScore(item);
+      let score = tasteScore * 3.2 + scaleScore * 0.3;
 
       if (selectedKeywords.size > 0) {{
-        score += matchedKeywords * 24;
-      }} else {{
-        score += urgencyScore(item) * 0.7;
+        score += matchedKeywords * 28;
       }}
 
-      score += urgencyScore(item);
+      score += urgencyScore(item) * 0.45;
       score += natureScore(item);
-      if (item.imageUrl) score += 1.5;
+      if (item.imageUrl) score += 2;
       if ((item.occurrences || []).length) score += 1;
 
       if (recommendationState.priority === "deadline") {{
-        score += urgencyScore(item) * 1.8;
+        score += urgencyScore(item) * 2.2;
       }} else if (recommendationState.priority === "limited") {{
-        score += item.eventNature === "limited" ? 18 : -2;
+        score += item.eventNature === "limited" ? 14 : -2;
       }} else if (recommendationState.priority === "major") {{
-        score += item.isMajorInstitution ? 16 : -2;
+        score += scaleScore * 0.22 + (item.isMajorInstitution ? 8 : -4);
       }}
 
+      return score - index * 0.01;
+    }}
+
+    function scoreDiscovery(item, index) {{
+      const matchedKeywords = selectedKeywordCount(item);
+      const tasteScore = Number(item.score || 0);
+      const scaleScore = institutionScaleScore(item);
+      if (selectedKeywords.size > 0 && matchedKeywords === 0) return -Infinity;
+      if (scaleScore >= 68) return -Infinity;
+      if (selectedKeywords.size === 0 && tasteScore < 3) return -Infinity;
+      let score = tasteScore * 4 + matchedKeywords * 32;
+      score += Math.max(0, 68 - scaleScore) * 0.24;
+      score += urgencyScore(item) * 0.15;
+      if (item.imageUrl) score += 4;
       return score - index * 0.01;
     }}
 
@@ -4972,8 +5961,11 @@ def render(person_name="가족"):
 
     function chooseHero(ranked) {{
       if (!ranked.length) return null;
+      const majorWithImage = ranked.find(
+        (entry) => entry.item.imageUrl && institutionScaleScore(entry.item) >= 76
+      );
       const withImage = ranked.find((entry) => entry.item.imageUrl && badgesFor(entry.item).length);
-      return withImage || ranked[0];
+      return majorWithImage || withImage || ranked[0];
     }}
 
     function renderHero(ranked) {{
@@ -4991,7 +5983,7 @@ def render(person_name="가족"):
       button.innerHTML = `
         <div class="hero-media">${{imageMarkup(item)}}</div>
         <div class="hero-copy">
-          <p class="hero-label">오늘의 대표 추천</p>
+          <p class="hero-label">취향과 관람 규모로 고른 대표 추천</p>
           <h2>${{escapeHtml(item.displayTitle || item.title)}}</h2>
           <p class="hero-meta">${{escapeHtml(item.displayVenue || item.institution)}} · ${{escapeHtml(item.period)}} · ${{escapeHtml(item.status || "상태 확인")}}</p>
           ${{badgeMarkup(item, 3)}}
@@ -5035,7 +6027,7 @@ def render(person_name="가족"):
       }});
     }}
 
-    function renderShelf(target, entries, emptyText) {{
+    function renderShelf(target, entries, emptyText, variant = "default") {{
       target.textContent = "";
       if (!entries.length) {{
         const empty = document.createElement("p");
@@ -5053,7 +6045,11 @@ def render(person_name="가족"):
         button.innerHTML = `
           <span class="shelf-media">${{imageMarkup(item)}}</span>
           <span class="shelf-overlay">
-            <span class="deadline-pill">${{escapeHtml(deadlineText(item))}}</span>
+            ${{variant === "discovery"
+              ? '<span class="discovery-pill">숨은 발견</span>'
+              : `<span class="deadline-pill">${{escapeHtml(
+                  institutionScaleScore(item) >= 76 ? "많이 찾는 기관" : deadlineText(item)
+                )}}</span>`}}
             <strong>${{escapeHtml(item.displayTitle || item.title)}}</strong>
             <span>${{escapeHtml(item.displayVenue || item.institution)}}</span>
             <small>${{escapeHtml(item.period)}}</small>
@@ -5103,6 +6099,30 @@ def render(person_name="가족"):
       }});
     }}
 
+    function takeDiverseEntries(entries, limit) {{
+      const selected = [];
+      const seenInstitutions = new Set();
+      const seenTitles = new Set();
+      entries.forEach((entry) => {{
+        if (selected.length >= limit) return;
+        const institutionKey = normalizeSearchText(
+          entry.item.displayVenue || entry.item.institution || ""
+        );
+        const titleKey = normalizeSearchText(entry.item.displayTitle || entry.item.title || "");
+        if (seenInstitutions.has(institutionKey) || seenTitles.has(titleKey)) return;
+        selected.push(entry);
+        seenInstitutions.add(institutionKey);
+        seenTitles.add(titleKey);
+      }});
+      if (selected.length < limit) {{
+        entries.forEach((entry) => {{
+          if (selected.length >= limit) return;
+          if (!selected.some((chosen) => chosen.index === entry.index)) selected.push(entry);
+        }});
+      }}
+      return selected;
+    }}
+
     function renderCuration(ranked) {{
       const heroIndex = renderHero(ranked);
       const endingSoon = ranked
@@ -5111,21 +6131,33 @@ def render(person_name="가족"):
           const remaining = numeric(entry.item.remainingDays);
           return remaining !== null && remaining >= 0 && remaining <= 30;
         }})
+        .sort((a, b) => numeric(a.item.remainingDays) - numeric(b.item.remainingDays))
         .slice(0, 8);
       const urgentEntries = endingSoon.slice(0, 3);
       const occupiedIndexes = new Set([heroIndex, ...urgentEntries.map((entry) => entry.index)]);
-      const todayPicks = ranked
+      const majorCandidates = ranked
         .filter((entry) => !occupiedIndexes.has(entry.index))
-        .slice(0, 8);
+        .filter((entry) => institutionScaleScore(entry.item) >= 76);
+      const majorPicks = takeDiverseEntries(majorCandidates, 8);
+      const todayPicks = [...majorPicks];
+      ranked
+        .filter((entry) => !occupiedIndexes.has(entry.index))
+        .filter((entry) => !todayPicks.some((picked) => picked.index === entry.index))
+        .slice(0, Math.max(0, 8 - todayPicks.length))
+        .forEach((entry) => todayPicks.push(entry));
       todayPicks.forEach((entry) => occupiedIndexes.add(entry.index));
-      const weekPicks = ranked
+      const discoveryCandidates = ranked
         .filter((entry) => !occupiedIndexes.has(entry.index))
-        .filter((entry) => startsThisWeek(entry.item))
-        .slice(0, 8);
+        .map((entry) => ({{ ...entry, discoveryScore: scoreDiscovery(entry.item, entry.index) }}))
+        .filter((entry) => Number.isFinite(entry.discoveryScore))
+        .sort((a, b) => b.discoveryScore - a.discoveryScore);
+      const discoveryPicks = takeDiverseEntries(discoveryCandidates, 8);
       renderMiniStack(endingStack, urgentEntries, "30일 안에 끝나는 일정이 없어요.");
       renderShelf(todayStack, todayPicks, "추천 조건에 맞는 추가 일정이 없어요.");
-      weekShelfSection.hidden = weekPicks.length < 3;
-      if (!weekShelfSection.hidden) renderShelf(weekShelf, weekPicks, "");
+      discoveryShelfSection.hidden = discoveryPicks.length < 2;
+      if (!discoveryShelfSection.hidden) {{
+        renderShelf(discoveryShelf, discoveryPicks, "", "discovery");
+      }}
       renderVenueBundles(ranked);
     }}
 
@@ -5255,14 +6287,321 @@ def render(person_name="가족"):
         includeProgramsInRecommendations = activeProfile.includePrograms !== false;
       }}
       quickFilters.clear();
-      recommendationState.region = "all";
+      recommendationState.region = "서울";
       recommendationState.type = "all";
       recommendationState.priority = "recommended";
       syncKeywordButtons();
-      setSingleChoice("[data-region-choice]", "all");
+      setSingleChoice("[data-region-choice]", "서울");
       setSingleChoice("[data-type-choice]", "all");
       setSingleChoice("[data-priority-choice]", "recommended");
       applyRecommendations();
+    }}
+
+    function normalizeSearchText(value) {{
+      return String(value || "")
+        .normalize("NFKC")
+        .toLocaleLowerCase("ko-KR")
+        .replace(/[\\s\\p{{P}}\\p{{S}}]+/gu, "");
+    }}
+
+    function hangulInitials(value) {{
+      const initials = "ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
+      return Array.from(String(value || "")).map((character) => {{
+        const code = character.codePointAt(0);
+        if (code >= 0xac00 && code <= 0xd7a3) {{
+          return initials[Math.floor((code - 0xac00) / 588)];
+        }}
+        return character;
+      }}).join("");
+    }}
+
+    function bigramSimilarity(left, right) {{
+      if (!left || !right) return 0;
+      if (left === right) return 1;
+      if (left.length < 2 || right.length < 2) return 0;
+      const counts = new Map();
+      for (let index = 0; index < left.length - 1; index += 1) {{
+        const pair = left.slice(index, index + 2);
+        counts.set(pair, (counts.get(pair) || 0) + 1);
+      }}
+      let overlap = 0;
+      for (let index = 0; index < right.length - 1; index += 1) {{
+        const pair = right.slice(index, index + 2);
+        const count = counts.get(pair) || 0;
+        if (!count) continue;
+        overlap += 1;
+        counts.set(pair, count - 1);
+      }}
+      return (2 * overlap) / (left.length + right.length - 2);
+    }}
+
+    function editDistance(left, right, cutoff = 3) {{
+      if (Math.abs(left.length - right.length) > cutoff) return cutoff + 1;
+      let previous = Array.from({{ length: right.length + 1 }}, (_, index) => index);
+      for (let row = 1; row <= left.length; row += 1) {{
+        const current = [row];
+        let rowMinimum = row;
+        for (let column = 1; column <= right.length; column += 1) {{
+          const substitution = previous[column - 1] + (left[row - 1] === right[column - 1] ? 0 : 1);
+          const value = Math.min(previous[column] + 1, current[column - 1] + 1, substitution);
+          current.push(value);
+          rowMinimum = Math.min(rowMinimum, value);
+        }}
+        if (rowMinimum > cutoff) return cutoff + 1;
+        previous = current;
+      }}
+      return previous[right.length];
+    }}
+
+    function fieldSearchScore(query, value, options = {{}}) {{
+      const queryText = normalizeSearchText(query);
+      const fieldText = normalizeSearchText(value);
+      if (!queryText || !fieldText) return 0;
+      if (fieldText === queryText) return 120;
+      if (fieldText.startsWith(queryText)) return 104;
+      if (fieldText.includes(queryText)) return 88;
+
+      const rawQuery = String(query || "").replace(/\\s+/g, "");
+      const initials = normalizeSearchText(hangulInitials(value));
+      const normalizedInitialQuery = normalizeSearchText(rawQuery);
+      if (normalizedInitialQuery && initials === normalizedInitialQuery) return 110;
+      if (normalizedInitialQuery && initials.startsWith(normalizedInitialQuery)) return 96;
+      if (normalizedInitialQuery && initials.includes(normalizedInitialQuery)) return 72;
+
+      if (options.fuzzy && queryText.length >= 3) {{
+        const cutoff = 1;
+        const minimumLength = Math.max(2, queryText.length - 1);
+        const maximumLength = Math.min(fieldText.length, queryText.length + 1);
+        for (let windowLength = minimumLength; windowLength <= maximumLength; windowLength += 1) {{
+          for (let start = 0; start <= fieldText.length - windowLength; start += 1) {{
+            const segment = fieldText.slice(start, start + windowLength);
+            if (editDistance(queryText, segment, cutoff) <= cutoff) return 64;
+          }}
+        }}
+      }}
+
+      if (options.fuzzy) {{
+        const similarity = bigramSimilarity(queryText, fieldText);
+        if (similarity >= 0.72) return 68;
+        if (similarity >= 0.58) return 46;
+      }}
+
+      if (options.fuzzy && queryText.length >= 3 && fieldText.length <= queryText.length + 3) {{
+        const cutoff = 1;
+        const distance = editDistance(queryText, fieldText, cutoff);
+        if (distance <= cutoff) return 62 - distance * 12;
+      }}
+      return 0;
+    }}
+
+    function tokenCoverageScore(query, values) {{
+      const tokens = String(query || "").trim().split(/\\s+/).filter(Boolean);
+      if (tokens.length <= 1) return 0;
+      const combined = normalizeSearchText(values.filter(Boolean).join(" "));
+      const matched = tokens.filter((token) => combined.includes(normalizeSearchText(token))).length;
+      return matched === tokens.length ? 34 : matched * 8;
+    }}
+
+    function institutionSearchScore(institution, query) {{
+      if (!String(query || "").trim()) return 1;
+      if (/^[ㄱ-ㅎ]+$/.test(String(query || "").replace(/\\s+/g, ""))) {{
+        return fieldSearchScore(query, institution.name, {{ fuzzy: true }}) * 2;
+      }}
+      const score =
+        fieldSearchScore(query, institution.name, {{ fuzzy: true }}) * 1.5 +
+        fieldSearchScore(query, institution.city) * 0.58 +
+        fieldSearchScore(query, institution.region) * 0.52 +
+        fieldSearchScore(query, institution.category) * 0.48 +
+        fieldSearchScore(query, institution.address) * 0.36 +
+        fieldSearchScore(query, institution.ownership) * 0.30 +
+        fieldSearchScore(query, institution.directorySourceName, {{ fuzzy: true }}) * 0.72 +
+        fieldSearchScore(query, (institution.keywords || []).join(" ")) * 0.62 +
+        tokenCoverageScore(query, [institution.name, institution.directorySourceName, institution.city, institution.category, institution.address, ...(institution.keywords || [])]);
+      return score;
+    }}
+
+    function eventSearchScore(item, query) {{
+      if (!String(query || "").trim()) return 0;
+      if (/^[ㄱ-ㅎ]+$/.test(String(query || "").replace(/\\s+/g, ""))) {{
+        return (
+          fieldSearchScore(query, item.displayTitle || item.title, {{ fuzzy: true }}) * 1.45 +
+          fieldSearchScore(query, item.institution, {{ fuzzy: true }})
+        );
+      }}
+      return (
+        fieldSearchScore(query, item.displayTitle || item.title, {{ fuzzy: true }}) * 1.45 +
+        fieldSearchScore(query, item.institution, {{ fuzzy: true }}) * 1.08 +
+        fieldSearchScore(query, item.displayVenue || item.venueLabel) * 0.82 +
+        fieldSearchScore(query, (item.keywordList || []).join(" ")) * 0.72 +
+        fieldSearchScore(query, item.description) * 0.28 +
+        tokenCoverageScore(query, [item.displayTitle, item.institution, item.displayVenue, ...(item.keywordList || [])])
+      );
+    }}
+
+    function institutionEventMarkup(item) {{
+      const thumb = item.imageUrl
+        ? `<span class="institution-event-thumb"><img src="${{escapeHtml(item.imageUrl)}}" alt="" loading="lazy"></span>`
+        : `<span class="institution-event-thumb">${{escapeHtml(item.type || "일정")}}</span>`;
+      return `
+        <button class="institution-event-button" type="button" data-search-event-index="${{item.index}}">
+          ${{thumb}}
+          <span class="institution-event-copy">
+            <strong>${{escapeHtml(item.displayTitle || item.title)}}</strong>
+            <span>${{escapeHtml(item.type)}} · ${{escapeHtml(item.period)}}</span>
+          </span>
+        </button>`;
+    }}
+
+    function renderInstitutionSpotlight(institutionId, shouldScroll = true) {{
+      const institution = institutions.find((entry) => entry.id === institutionId);
+      if (!institution) return;
+      selectedInstitutionId = institution.id;
+      const currentEvents = (institution.eventIndexes || [])
+        .map((index) => items[index])
+        .filter(Boolean)
+        .sort((left, right) => {{
+          if (left.type === "전시" && right.type !== "전시") return -1;
+          if (left.type !== "전시" && right.type === "전시") return 1;
+          return String(left.endDate || "9999-12-31").localeCompare(String(right.endDate || "9999-12-31"));
+        }});
+      const eventsMarkup = currentEvents.length
+        ? currentEvents.slice(0, 8).map(institutionEventMarkup).join("")
+        : '<p class="institution-meta-line">현재 수집된 진행 일정은 없어요. 기관은 둘러보기 목록에 계속 보관하며 새 일정이 확인되면 자동으로 연결됩니다.</p>';
+      const officialLink = institution.officialUrl
+        ? `<a class="institution-official-link" href="${{escapeHtml(institution.officialUrl)}}" target="_blank" rel="noopener">공식 페이지</a>`
+        : "";
+      const directoryLine = institution.directoryEntry
+        ? `<p class="institution-meta-line">${{escapeHtml(String(institution.directoryYear || ""))}} 전국 문화기반시설 총람 등록 · ${{escapeHtml(institution.ownership || institution.registrationType || "공식 등록 기관")}}</p>`
+        : "";
+      const addressLine = institution.address
+        ? `<p class="institution-meta-line">${{escapeHtml(institution.address)}}</p>`
+        : "";
+      institutionSpotlight.innerHTML = `
+        <div class="institution-spotlight-main">
+          <p class="institution-kicker">${{escapeHtml(institution.region)}} · ${{escapeHtml(institution.category)}}</p>
+          <h2>${{escapeHtml(institution.name)}}</h2>
+          <p class="institution-meta-line">${{escapeHtml(institution.city || institution.region)}} · 진행 일정 ${{institution.currentEventCount}}건 · 전시 ${{institution.currentExhibitionCount}}건</p>
+          ${{directoryLine}}
+          ${{addressLine}}
+          <div class="institution-spotlight-actions">
+            ${{officialLink}}
+            <a class="institution-official-link" href="https://map.kakao.com/link/search/${{encodeURIComponent(institution.name)}}" target="_blank" rel="noopener">지도 보기</a>
+            <button class="institution-collapse-button" type="button" data-close-institution>닫기</button>
+          </div>
+        </div>
+        <div class="institution-spotlight-events">${{eventsMarkup}}</div>`;
+      institutionSpotlight.hidden = false;
+      if (shouldScroll) institutionSpotlight.scrollIntoView({{ block: "start", behavior: "smooth" }});
+    }}
+
+    function institutionCardMarkup(institution) {{
+      const image = institution.representativeImage
+        ? `<img src="${{escapeHtml(institution.representativeImage)}}" alt="" loading="lazy">`
+        : "";
+      const tags = (institution.keywords || []).slice(0, 3);
+      if (!tags.length && institution.category) tags.push(institution.category);
+      const tagMarkup = tags.map((keyword) => `<span>${{escapeHtml(keyword)}}</span>`).join("");
+      const officialLink = institution.officialUrl
+        ? `<a class="institution-card-link" href="${{escapeHtml(institution.officialUrl)}}" target="_blank" rel="noopener" aria-label="${{escapeHtml(institution.name)}} 공식 페이지">↗</a>`
+        : "";
+      const scaleLabel = institution.scaleScore >= 82
+        ? "대표 기관"
+        : institution.scaleScore >= 70
+          ? "주요 기관"
+          : "";
+      const labelMarkup = `
+        <div class="institution-card-labels">
+          <span class="institution-type-label">${{escapeHtml(institution.category)}}</span>
+          ${{scaleLabel ? `<span class="institution-scale-label">${{scaleLabel}}</span>` : ""}}
+        </div>`;
+      const countText = institution.currentEventCount
+        ? `<span class="has-current">진행 일정 ${{institution.currentEventCount}}건</span><span>전시 ${{institution.currentExhibitionCount}} · 프로그램 ${{institution.currentProgramCount}}</span>`
+        : institution.storedEventCount
+          ? "<span>현재 공개 일정 없음</span>"
+          : institution.directoryEntry
+            ? `<span>공식 총람 등록</span><span>${{escapeHtml(String(institution.directoryYear || ""))}} 기준 · 일정 수집 준비 중</span>`
+          : institution.collectionState === "empty"
+            ? "<span>공식 일정 확인: 현재 없음</span>"
+          : institution.collectionState === "failed"
+              ? "<span>공식 일정 확인 필요</span>"
+              : institution.collectionState === "review"
+                ? "<span>공식 일정 구조 확인 필요</span>"
+          : "<span>일정 수집 보강 중</span>";
+      return `
+        <article class="institution-card">
+          <div class="institution-card-media${{image ? " has-image" : ""}}">
+            ${{image}}
+            ${{labelMarkup}}
+            <span class="institution-card-region">${{escapeHtml(institution.region)}} · ${{escapeHtml(institution.city || institution.category)}}</span>
+          </div>
+          <div class="institution-card-body">
+            <h2>${{escapeHtml(institution.name)}}</h2>
+            <div class="institution-counts">${{countText}}</div>
+            <div class="institution-tag-row">${{tagMarkup}}</div>
+            <div class="institution-card-actions">
+              <button class="institution-open-button" type="button" data-open-institution="${{institution.id}}">기관 일정 보기</button>
+              ${{officialLink}}
+            </div>
+          </div>
+        </article>`;
+    }}
+
+    function renderInstitutionView() {{
+      const query = institutionSearch.value.trim();
+      institutionSearchClear.hidden = !query;
+      const kindLabels = {{ all: "전체 기관", art: "미술관", museum: "박물관", other: "기타 문화공간" }};
+      const selectedKindInstitutionIds = new Set(
+        institutions
+          .filter((institution) => institutionKind === "all" || institution.institutionKind === institutionKind)
+          .map((institution) => institution.id)
+      );
+      const filteredInstitutions = institutions
+        .map((institution) => ({{ institution, score: institutionSearchScore(institution, query) }}))
+        .filter((entry) => {{
+          if (!selectedKindInstitutionIds.has(entry.institution.id)) return false;
+          if (institutionRegion === "current" && entry.institution.currentEventCount === 0) return false;
+          if (!["all", "current"].includes(institutionRegion) && entry.institution.region !== institutionRegion) return false;
+          return !query || entry.score > 0;
+        }})
+        .sort((left, right) => {{
+          if (query && right.score !== left.score) return right.score - left.score;
+          if (right.institution.scaleScore !== left.institution.scaleScore) {{
+            return right.institution.scaleScore - left.institution.scaleScore;
+          }}
+          if (right.institution.currentEventCount !== left.institution.currentEventCount) {{
+            return right.institution.currentEventCount - left.institution.currentEventCount;
+          }}
+          if (left.institution.priority !== right.institution.priority) return left.institution.priority - right.institution.priority;
+          return left.institution.name.localeCompare(right.institution.name, "ko");
+        }});
+
+      const eventResults = query
+        ? items
+            .map((item) => ({{ item, score: eventSearchScore(item, query) }}))
+            .filter((entry) => entry.score > 0)
+            .filter((entry) => selectedKindInstitutionIds.has(entry.item.institutionId))
+            .filter((entry) => !["서울", "경기", "인천"].includes(institutionRegion) || entry.item.region === institutionRegion)
+            .sort((left, right) => right.score - left.score)
+            .slice(0, 30)
+        : [];
+
+      institutionGrid.innerHTML = filteredInstitutions.map((entry) => institutionCardMarkup(entry.institution)).join("");
+      eventSearchGrid.innerHTML = eventResults.map((entry) => institutionEventMarkup(entry.item)).join("");
+      institutionResultsCount.textContent = filteredInstitutions.length + "곳";
+      eventSearchResultsCount.textContent = eventResults.length + "건";
+      eventSearchResultsSection.hidden = !query || eventResults.length === 0;
+      institutionResultsSection.hidden = filteredInstitutions.length === 0;
+      institutionEmptyState.hidden = filteredInstitutions.length > 0 || eventResults.length > 0;
+
+      const currentInstitutionCount = filteredInstitutions.filter((entry) => entry.institution.currentEventCount > 0).length;
+      institutionResultSummary.textContent = query
+        ? `“${{query}}”와 가까운 기관 ${{filteredInstitutions.length}}곳 · 전시와 일정 ${{eventResults.length}}건`
+        : `${{kindLabels[institutionKind]}} ${{filteredInstitutions.length}}곳 · 현재 일정이 연결된 기관 ${{currentInstitutionCount}}곳 · 주요 기관 우선`;
+
+      if (selectedInstitutionId && !filteredInstitutions.some((entry) => entry.institution.id === selectedInstitutionId)) {{
+        selectedInstitutionId = null;
+        institutionSpotlight.hidden = true;
+      }}
     }}
 
     function fillImage(item) {{
@@ -5523,12 +6862,66 @@ def render(person_name="가족"):
       allView.hidden = view !== "all";
       programView.hidden = view !== "program";
       permanentView.hidden = view !== "permanent";
+      institutionView.hidden = view !== "institutions";
       document.body.classList.toggle("view-featured", view === "featured");
       document.body.classList.toggle("view-all", view === "all");
       document.body.classList.toggle("view-program", view === "program");
       document.body.classList.toggle("view-permanent", view === "permanent");
+      document.body.classList.toggle("view-institutions", view === "institutions");
       if (view === "program") renderProgramView();
+      if (view === "institutions") renderInstitutionView();
     }}
+
+    headerSearchButton.addEventListener("click", () => {{
+      switchView("institutions");
+      window.setTimeout(() => institutionSearch.focus(), 0);
+    }});
+    institutionSearch.addEventListener("input", renderInstitutionView);
+    institutionSearch.addEventListener("keydown", (event) => {{
+      if (event.key === "Escape" && institutionSearch.value) {{
+        institutionSearch.value = "";
+        renderInstitutionView();
+      }}
+    }});
+    institutionSearchClear.addEventListener("click", () => {{
+      institutionSearch.value = "";
+      renderInstitutionView();
+      institutionSearch.focus();
+    }});
+    institutionTypeFilters.addEventListener("click", (event) => {{
+      const button = event.target.closest("[data-institution-kind]");
+      if (!button) return;
+      institutionKind = button.dataset.institutionKind;
+      document.querySelectorAll("[data-institution-kind]").forEach((other) => {{
+        other.setAttribute("aria-pressed", String(other === button));
+      }});
+      renderInstitutionView();
+    }});
+    document.getElementById("institutionRegionFilters").addEventListener("click", (event) => {{
+      const button = event.target.closest("[data-institution-region]");
+      if (!button) return;
+      institutionRegion = button.dataset.institutionRegion;
+      document.querySelectorAll("[data-institution-region]").forEach((other) => {{
+        other.setAttribute("aria-pressed", String(other === button));
+      }});
+      renderInstitutionView();
+    }});
+    institutionView.addEventListener("click", (event) => {{
+      const institutionButton = event.target.closest("[data-open-institution]");
+      if (institutionButton) {{
+        renderInstitutionSpotlight(Number(institutionButton.dataset.openInstitution));
+        return;
+      }}
+      const eventButton = event.target.closest("[data-search-event-index]");
+      if (eventButton) {{
+        openDetail(Number(eventButton.dataset.searchEventIndex));
+        return;
+      }}
+      if (event.target.closest("[data-close-institution]")) {{
+        selectedInstitutionId = null;
+        institutionSpotlight.hidden = true;
+      }}
+    }});
 
     profileButton.addEventListener("click", () => openPreferencePanel());
     preferenceClose.addEventListener("click", closePreferencePanel);
@@ -5681,6 +7074,7 @@ def render(person_name="가족"):
     hydrateInterestArtwork();
     initializeProfiles();
     applyRecommendations();
+    renderInstitutionView();
     if (preferenceOverlay.hidden) startCurationReveal();
   </script>
 </body>

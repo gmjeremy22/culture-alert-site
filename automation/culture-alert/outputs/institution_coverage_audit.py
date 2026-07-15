@@ -103,6 +103,22 @@ def event_stats(conn, institution_id):
         or PERMANENT_MARKER in (row[1] or "")
         or PERMANENT_MARKER in (row[0] or "")
     ]
+    collection_state = ""
+    collection_detail = ""
+    collection_checked_at = ""
+    if table_exists(conn, "institution_collection_checks"):
+        check = conn.execute(
+            """
+            SELECT state, detail, checked_at
+            FROM institution_collection_checks
+            WHERE institution_id = ?
+            ORDER BY checked_at DESC
+            LIMIT 1
+            """,
+            (institution_id,),
+        ).fetchone()
+        if check:
+            collection_state, collection_detail, collection_checked_at = check
     return {
         "all_events": len(rows),
         "real_events": len(real_rows),
@@ -110,6 +126,9 @@ def event_stats(conn, institution_id):
         "current_cards": len(visible),
         "permanent_cards": len(permanent),
         "latest_checked_at": latest,
+        "collection_state": collection_state,
+        "collection_detail": collection_detail,
+        "collection_checked_at": collection_checked_at,
     }
 
 
@@ -141,7 +160,14 @@ def match_reference(reference, institutions):
 def coverage_reason(stats, exhibition_url, program_url):
     reasons = []
     if stats["all_events"] == 0:
-        reasons.append("수집된 일정 없음")
+        if stats["collection_state"] == "empty":
+            reasons.append("공식 일정 확인 완료: 현재 공개 일정 없음")
+        elif stats["collection_state"] == "failed":
+            reasons.append("공식 일정 확인 실패: " + (stats["collection_detail"] or "원인 확인 필요"))
+        elif stats["collection_state"] == "review":
+            reasons.append("공식 일정 페이지 확인 필요: " + (stats["collection_detail"] or "자동 판별 기준 미달"))
+        else:
+            reasons.append("수집된 일정 없음")
     elif stats["real_events"] == 0 and stats["monitor_events"]:
         reasons.append("공식 페이지 감시만 있고 실제 일정 미수집")
     elif stats["current_cards"] == 0:

@@ -104,6 +104,44 @@ CREATE TABLE IF NOT EXISTS event_occurrences (
   UNIQUE (event_id, occurrence_date, start_time, label)
 );
 
+CREATE TABLE IF NOT EXISTS institution_collection_checks (
+  institution_id INTEGER NOT NULL,
+  source_name TEXT NOT NULL,
+  state TEXT NOT NULL,
+  detail TEXT,
+  checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (institution_id, source_name),
+  FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS institution_directory_metadata (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  institution_id INTEGER NOT NULL,
+  directory_year INTEGER NOT NULL,
+  reference_date TEXT NOT NULL,
+  facility_type TEXT NOT NULL,
+  source_name TEXT NOT NULL,
+  ownership TEXT,
+  registration_type TEXT,
+  registration_status TEXT,
+  registration_number TEXT,
+  address TEXT,
+  phone TEXT,
+  official_url TEXT,
+  opening_date TEXT,
+  annual_visitors REAL,
+  collection_count REAL,
+  exhibition_area_sqm REAL,
+  official_scale_score REAL,
+  source_sheet TEXT NOT NULL,
+  source_row INTEGER NOT NULL,
+  source_url TEXT NOT NULL,
+  imported_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (institution_id) REFERENCES institutions(id) ON DELETE CASCADE,
+  UNIQUE (directory_year, source_sheet, source_row)
+);
+
 CREATE TABLE IF NOT EXISTS event_candidates (
   candidate_id TEXT PRIMARY KEY,
   institution_name TEXT,
@@ -141,6 +179,9 @@ CREATE INDEX IF NOT EXISTS idx_event_keywords_keyword ON event_keywords(keyword,
 CREATE INDEX IF NOT EXISTS idx_event_keywords_event ON event_keywords(event_id);
 CREATE INDEX IF NOT EXISTS idx_related_links_event ON related_links(event_id, rank);
 CREATE INDEX IF NOT EXISTS idx_event_occurrences_event ON event_occurrences(event_id, occurrence_date);
+CREATE INDEX IF NOT EXISTS idx_collection_checks_state ON institution_collection_checks(state, checked_at);
+CREATE INDEX IF NOT EXISTS idx_directory_metadata_institution ON institution_directory_metadata(institution_id, directory_year);
+CREATE INDEX IF NOT EXISTS idx_directory_metadata_region_source ON institution_directory_metadata(source_name, facility_type);
 CREATE INDEX IF NOT EXISTS idx_event_candidates_institution ON event_candidates(institution_name);
 CREATE INDEX IF NOT EXISTS idx_event_candidates_dates ON event_candidates(start_date, end_date);
 CREATE INDEX IF NOT EXISTS idx_event_candidates_review ON event_candidates(review_status, validation_score);

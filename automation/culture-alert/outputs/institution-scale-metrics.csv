@@ -1,0 +1,410 @@
+﻿source_name,region,city,category,ownership,registration_type,annual_visitors,collection_count,exhibition_area_sqm,official_scale_score,data_confidence,source_reference_date,source_sheet,source_row,source_url
+국립중앙박물관,서울,용산구,박물관,국립,1종,3788785,438365,22263.59,99.9,1.0,2025-01-01,박물관,10,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립민속박물관,서울,종로구,박물관,국립,1종,1045627,178999,5874.43,98.9,1.0,2025-01-01,박물관,11,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+대한민국역사박물관,서울,종로구,박물관,국립,1종,947274,174775,3344.71,98.4,1.0,2025-01-01,박물관,13,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립고궁박물관,서울,종로구,박물관,국립,1종,821906,88817,5634.0,98.1,1.0,2025-01-01,박물관,18,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립항공박물관,서울,강서구,박물관,국립,1종,365001,22530,6793.0,95.9,1.0,2025-01-01,박물관,26,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립한글박물관,서울,용산구,박물관,국립,1종,338787,89373,2190.0,95.4,1.0,2025-01-01,박물관,14,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립농업박물관,경기,수원시,박물관,국립,1종,565917,15802,3575.0,95.3,1.0,2025-01-01,박물관,325,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립현대미술관(과천관),경기,과천시,미술관,국립,1종,562604,11819,13788.2,94.6,1.0,2025-01-01,미술관,10,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울역사박물관,서울,종로구,박물관,공립,1종,754677,373422,6328.0,94.5,1.0,2025-01-01,박물관,38,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국회박물관,서울,영등포구,박물관,국립,1종,284185,33552,2559.77,94.0,1.0,2025-01-01,박물관,22,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한성백제박물관,서울,송파구,박물관,공립,1종,637000,91167,2715.8,93.0,1.0,2025-01-01,박물관,48,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울공예박물관,서울,종로구,박물관,공립,1종,652872,51719,2234.1,92.4,1.0,2025-01-01,박물관,33,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+전쟁기념관,서울,용산구,박물관,사립,1종,3074251,39021,40383.0,90.5,1.0,2025-01-01,박물관,97,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서대문자연사박물관,서울,서대문구,박물관,공립,1종,232324,53697,2667.0,89.7,1.0,2025-01-01,박물관,30,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울시립미술관,서울,중구,미술관,공립,1종,1918799,6158,3283.39,89.3,1.0,2025-01-01,미술관,18,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국만화박물관,경기,부천시,박물관,공립,1종,200473,249464,2099.0,89.1,1.0,2025-01-01,박물관,373,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립대한민국임시정부기념관,서울,서대문구,박물관,국립,1종,188095,9742,2385.35,89.0,1.0,2025-01-01,박물관,27,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립세계문자박물관,인천,연수구,박물관,국립,1종,1128818,1834,2740.92,88.6,1.0,2025-01-01,박물관,218,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+DDP디자인뮤지엄,서울,중구,미술관,공립,1종,855433,7024,1557.0,88.0,1.0,2025-01-01,미술관,16,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+송파책박물관,서울,송파구,박물관,공립,1종,326464,22982,1040.0,87.8,1.0,2025-01-01,박물관,42,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국토발전전시관,서울,중구,박물관,국립,1종,121163,18708,1392.8,87.1,1.0,2025-01-01,박물관,21,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울생활사박물관,서울,노원구,박물관,공립,1종,280099,11033,1272.0,86.0,1.0,2025-01-01,박물관,36,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립수목원 산림박물관,경기,포천시,박물관,국립,1종,167149,5399,2130.08,85.7,1.0,2025-01-01,박물관,321,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+리움미술관,서울,용산구,미술관,사립,1종,391414,10137,3284.0,85.3,1.0,2025-01-01,미술관,30,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기도자미술관,경기,이천시,미술관,공립,1종,135731,17027,1926.91,84.6,1.0,2025-01-01,미술관,135,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인천광역시립박물관,인천,연수구,박물관,공립,1종,145961,21008,1495.0,84.6,1.0,2025-01-01,박물관,231,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립경찰박물관,서울,종로구,박물관,국립,1종,102281,16682,1078.2,84.4,1.0,2025-01-01,박물관,17,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+육군박물관,서울,노원구,박물관,국립,1종,67215,15483,4574.0,84.4,1.0,2025-01-01,박물관,24,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기도박물관,경기,용인시,박물관,공립,1종,126070,20371,1761.92,84.2,1.0,2025-01-01,박물관,327,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+여주박물관,경기,여주시,박물관,공립,1종,180186,13867,1106.0,83.7,1.0,2025-01-01,박물관,360,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+수원화성박물관,경기,수원시,박물관,공립,1종,181070,8111,1636.0,83.1,1.0,2025-01-01,박물관,348,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국은행 화폐박물관,서울,중구,박물관,사립,1종,181276,21320,2265.0,83.1,1.0,2025-01-01,박물관,110,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+수원광교박물관,경기,수원시,박물관,공립,1종,95370,43357,1420.0,82.3,1.0,2025-01-01,박물관,346,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+철도박물관,경기,의왕시,박물관,사립,1종,156175,12720,4578.0,81.6,1.0,2025-01-01,박물관,421,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안산산업역사박물관,경기,안산시,박물관,공립,1종,112418,12062,1373.98,81.2,1.0,2025-01-01,박물관,351,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+전곡선사박물관,경기,연천군,박물관,공립,1종,128932,5642,2398.0,80.8,1.0,2025-01-01,박물관,367,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+강화역사박물관,인천,강화군,박물관,공립,1종,111873,11644,1215.0,80.7,1.0,2025-01-01,박물관,220,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립국악원 국악박물관,서울,서초구,박물관,국립,1종,80057,10014,1018.0,80.6,1.0,2025-01-01,박물관,15,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+청계천박물관,서울,성동구,박물관,공립,1종,147522,4687,1552.0,79.8,1.0,2025-01-01,박물관,47,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+허브아일랜드식물원,경기,포천시,박물관,사립,1종,385454,1950,6600.0,79.6,1.0,2025-01-01,박물관,436,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울교육박물관,서울,종로구,박물관,공립,1종,114562,17527,524.0,79.3,1.0,2025-01-01,박물관,34,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국이민사박물관,인천,중구,박물관,공립,1종,81393,14260,1199.0,79.1,1.0,2025-01-01,박물관,234,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+시흥오이도박물관,경기,시흥시,박물관,공립,1종,214503,3230,958.0,79.0,1.0,2025-01-01,박물관,349,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+강화자연사박물관,인천,강화군,박물관,공립,1종,103106,9754,1134.0,78.9,1.0,2025-01-01,박물관,221,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서대문형무소역사관,서울,서대문구,박물관,공립,1종,567608,429,2077.0,78.5,1.0,2025-01-01,박물관,31,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국민속촌 박물관,경기,용인시,박물관,사립,1종,216513,4292,1585.0,78.3,1.0,2025-01-01,박물관,431,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국영화박물관,서울,마포구,박물관,국립,1종,44728,1400083,673.0,78.0,1.0,2025-01-01,박물관,25,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인천도시역사관,인천,연수구,박물관,공립,1종,191175,922,2914.0,77.9,1.0,2025-01-01,박물관,232,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+양주시립회암사지박물관,경기,양주시,박물관,공립,1종,60002,16939,1417.0,77.8,1.0,2025-01-01,박물관,357,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서소문성지 역사박물관,서울,중구,박물관,공립,1종,205843,867,2641.27,77.8,1.0,2025-01-01,박물관,32,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기도어린이박물관,경기,용인시,박물관,공립,1종,336888,367,3225.0,77.7,1.0,2025-01-01,박물관,328,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한양대학교박물관,서울,성동구,박물관,대학,1종,61303,31802,1860.0,77.4,1.0,2025-01-01,박물관,150,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울우리소리박물관,서울,종로구,박물관,공립,1종,127858,7869,576.0,77.3,1.0,2025-01-01,박물관,39,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+수원박물관,경기,수원시,박물관,공립,1종,50003,42370,1682.0,77.2,1.0,2025-01-01,박물관,347,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+부천자연생태박물관,경기,부천시,박물관,공립,1종,324940,920,870.3,76.7,1.0,2025-01-01,박물관,341,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+K현대미술관,서울,강남구,미술관,사립,2종,356000,1760,3734.0,75.7,1.0,2025-01-01,미술관,23,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+전기박물관,서울,서초구,박물관,사립,1종,72737,12676,2706.0,75.7,1.0,2025-01-01,박물관,95,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+삼성화재 모빌리티 뮤지엄,경기,용인시,박물관,사립,1종,241575,893,5058.0,75.5,1.0,2025-01-01,박물관,396,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+실학박물관,경기,남양주시,박물관,공립,1종,161391,1878,959.8,75.2,1.0,2025-01-01,박물관,350,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+롯데월드 민속박물관,서울,송파구,박물관,사립,1종,268633,778,3600.0,75.1,1.0,2025-01-01,박물관,66,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+검단선사박물관,인천,서구,박물관,공립,1종,62241,12207,784.06,74.9,1.0,2025-01-01,박물관,223,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립6.25전쟁납북자기념관,경기,파주시,박물관,국립,1종,50967,5598,1006.0,74.8,1.0,2025-01-01,박물관,320,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세종대왕역사문화관,경기,여주시,박물관,국립,1종,297594,160,780.0,74.7,1.0,2025-01-01,박물관,323,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+수도박물관,서울,성동구,박물관,공립,1종,109436,926,5941.0,74.4,1.0,2025-01-01,박물관,43,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+짜장면박물관,인천,중구,박물관,공립,1종,196653,1213,566.0,74.2,1.0,2025-01-01,박물관,233,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+연세대학교박물관,서울,서대문구,박물관,대학,1종,42900,152609,1884.0,74.1,1.0,2025-01-01,박물관,147,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기도자박물관,경기,광주시,박물관,공립,1종,66591,4120,1735.0,74.0,1.0,2025-01-01,박물관,329,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한가람미술관,서울,서초구,미술관,사립,1종,800146,214,3805.0,73.9,1.0,2025-01-01,미술관,52,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기도미술관,경기,안산시,미술관,공립,1종,125679,761,2115.0,73.7,1.0,2025-01-01,미술관,134,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+남양주시립박물관,경기,남양주시,박물관,공립,1종,70998,10249,517.3,73.7,1.0,2025-01-01,박물관,337,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울상상나라,서울,광진구,박물관,공립,1종,404503,99,2781.0,73.7,1.0,2025-01-01,박물관,35,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+농협 농업박물관,서울,중구,박물관,사립,1종,103189,3415,2753.0,73.4,1.0,2025-01-01,박물관,62,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+양평친환경농업박물관,경기,양평군,박물관,공립,1종,72518,4440,1097.0,73.3,1.0,2025-01-01,박물관,359,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립여성사전시관,경기,고양시,박물관,국립,1종,46537,8513,507.0,73.2,1.0,2025-01-01,박물관,322,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+고양어린이박물관,경기,고양시,박물관,공립,1종,215708,163,2337.6,72.9,1.0,2025-01-01,박물관,333,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안양박물관,경기,안양시,박물관,공립,1종,92165,4165,621.0,72.9,1.0,2025-01-01,박물관,356,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+여주곤충박물관,경기,여주시,박물관,사립,1종,176463,4880,492.27,72.7,1.0,2025-01-01,박물관,403,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인천개항박물관,인천,중구,박물관,공립,1종,181697,675,758.87,72.7,1.0,2025-01-01,박물관,230,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+용산역사박물관,서울,용산구,박물관,공립,1종,57439,5564,1104.96,72.4,1.0,2025-01-01,박물관,45,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+양평곤충박물관,경기,양평군,박물관,공립,1종,61801,11697,372.0,72.3,1.0,2025-01-01,박물관,358,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울약령시한의약박물관,서울,동대문구,박물관,공립,1종,146227,1137,624.0,72.3,1.0,2025-01-01,박물관,37,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+고려대학교박물관,서울,성북구,박물관,대학,1종,33080,104105,3041.0,71.9,1.0,2025-01-01,박물관,128,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+은평역사한옥박물관,서울,은평구,박물관,공립,1종,67964,4388,788.0,71.8,1.0,2025-01-01,박물관,46,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+백남준아트센터,경기,용인시,미술관,공립,1종,186583,279,1157.0,71.5,1.0,2025-01-01,미술관,139,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+부평역사박물관,인천,부평구,박물관,공립,1종,55997,6393,943.6,71.5,1.0,2025-01-01,박물관,226,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+암사동선사유적박물관,서울,강동구,박물관,공립,1종,110080,542,1687.0,71.3,1.0,2025-01-01,박물관,44,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한가람디자인미술관,서울,서초구,미술관,사립,1종,275997,414,1394.0,71.2,1.0,2025-01-01,미술관,51,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+옥토끼우주센터,인천,강화군,박물관,사립,1종,130732,693,3956.0,70.9,1.0,2025-01-01,박물관,241,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한탄강 세계지질공원센터,경기,포천시,박물관,공립,1종,45914,7885,971.0,70.6,1.0,2025-01-01,박물관,374,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+하남역사박물관,경기,하남시,박물관,공립,1종,41743,8641,1149.0,70.4,1.0,2025-01-01,박물관,372,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+호암미술관,경기,용인시,박물관,사립,1종,227000,350,1515.0,70.4,1.0,2025-01-01,박물관,437,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기북부어린이박물관,경기,동두천시,박물관,공립,1종,166371,158,1783.71,70.1,1.0,2025-01-01,박물관,330,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+수원시립미술관,경기,수원시,미술관,공립,1종,119259,294,2058.6,70.0,1.0,2025-01-01,미술관,141,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+영종역사관,인천,중구,박물관,공립,1종,47477,4466,938.4,69.1,1.0,2025-01-01,박물관,229,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세미원연꽃박물관,경기,양평군,박물관,공립,2종,284447,692,288.0,68.9,1.0,2025-01-01,박물관,345,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+백범김구기념관,서울,용산구,박물관,사립,1종,110096,796,1788.0,68.8,1.0,2025-01-01,박물관,73,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+허준박물관,서울,강서구,박물관,공립,1종,46365,2655,1522.0,68.8,1.0,2025-01-01,박물관,49,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+북촌동양문화박물관,서울,종로구,박물관,사립,1종,95151,8520,235.06,68.6,1.0,2025-01-01,박물관,75,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+건국대학교 박물관,서울,광진구,박물관,대학,1종,50907,13721,331.0,68.3,1.0,2025-01-01,박물관,124,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+독도체험관,서울,영등포구,박물관,사립,1종,211664,320,1058.76,68.1,1.0,2025-01-01,박물관,121,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+송암미술관,인천,미추홀구,미술관,공립,1종,26361,11139,2069.4,67.6,1.0,2025-01-01,미술관,90,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+용인시박물관,경기,용인시,박물관,공립,1종,42997,6043,682.0,67.5,1.0,2025-01-01,박물관,362,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안성맞춤박물관,경기,안성시,박물관,공립,1종,46830,3747,633.0,67.2,1.0,2025-01-01,박물관,355,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울대학교박물관,서울,관악구,박물관,대학,1종,35319,8089,1675.11,67.2,1.0,2025-01-01,박물관,136,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립지도박물관,경기,수원시,박물관,국립,1종,43453,1042,938.0,67.1,1.0,2025-01-01,박물관,324,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+김홍도미술관,경기,안산시,미술관,공립,1종,58251,616,1398.0,66.7,1.0,2025-01-01,미술관,138,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+유니스의정원 보타닉하우스,경기,안산시,박물관,사립,1종,32921,10012,8542.0,66.7,1.0,2025-01-01,박물관,412,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+판교박물관,경기,성남시,박물관,공립,1종,38109,5550,1043.0,66.6,1.0,2025-01-01,박물관,370,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울서예박물관,서울,서초구,미술관,사립,1종,88482,807,1423.0,66.4,1.0,2025-01-01,미술관,34,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국천주교순교자박물관,서울,마포구,박물관,사립,1종,54934,5772,786.0,66.4,1.0,2025-01-01,박물관,112,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립극장 공연예술박물관,서울,중구,박물관,국립,1종,14081,504521,885.0,66.3,1.0,2025-01-01,박물관,16,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+유엔군 초전기념관,경기,오산시,박물관,공립,1종,88142,274,1184.76,66.2,1.0,2025-01-01,박물관,363,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+숭실대학교 한국기독교박물관,서울,동작구,박물관,대학,1종,27518,10914,1515.0,65.9,1.0,2025-01-01,박물관,146,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+자유수호평화박물관,경기,동두천시,박물관,공립,1종,39792,2024,1312.0,65.2,1.0,2025-01-01,박물관,366,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+화성시 역사박물관,경기,화성시,박물관,공립,1종,38267,19319,136.21,65.1,1.0,2025-01-01,박물관,375,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안중근의사기념관,서울,중구,박물관,사립,1종,136994,218,1169.0,65.0,1.0,2025-01-01,박물관,87,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이화여자대학교박물관,서울,서대문구,박물관,대학,1종,19267,23664,2137.1,64.3,1.0,2025-01-01,박물관,148,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기생활도자미술관,경기,여주시,미술관,공립,1종,39116,2903,934.0,64.2,1.0,2025-01-01,미술관,136,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안성3·1운동기념관,경기,안성시,박물관,공립,1종,57061,1553,377.9,64.1,1.0,2025-01-01,박물관,354,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+둘리뮤지엄,서울,도봉구,박물관,공립,1종,57434,466,1046.0,64.0,1.0,2025-01-01,박물관,29,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+조명박물관,경기,양주시,박물관,사립,1종,39341,2845,3346.0,63.8,1.0,2025-01-01,박물관,415,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+김중업건축박물관,경기,안양시,박물관,공립,1종,24516,7408,1018.0,63.5,1.0,2025-01-01,박물관,335,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+양주시립장욱진미술관,경기,양주시,미술관,공립,1종,64484,580,481.0,63.5,1.0,2025-01-01,미술관,142,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+부천시립박물관,경기,부천시,박물관,공립,1종,22719,6116,1464.78,63.4,1.0,2025-01-01,박물관,340,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아모레퍼시픽미술관,서울,용산구,미술관,사립,1종,90000,180,3122.0,63.3,1.0,2025-01-01,미술관,41,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+제암리3.1운동순국기념관,경기,화성시,박물관,공립,1종,33943,6591,364.0,63.1,1.0,2025-01-01,박물관,368,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+풀짚공예박물관,경기,광주시,박물관,사립,1종,98112,2382,106.0,62.9,1.0,2025-01-01,박물관,425,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+양주시립민복진미술관,경기,양주시,미술관,공립,1종,64484,479,447.0,62.5,1.0,2025-01-01,미술관,147,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이천시립박물관,경기,이천시,박물관,공립,2종,37891,1733,3882.0,62.4,1.0,2025-01-01,박물관,365,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울대학교미술관,서울,관악구,미술관,대학,1종,44589,1006,1112.0,62.2,1.0,2025-01-01,미술관,60,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+소마미술관,서울,송파구,미술관,사립,1종,53183,518,2412.0,62.1,1.0,2025-01-01,미술관,38,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세종문화회관 미술관,서울,종로구,미술관,사립,2종,150558,64,5478.0,61.7,1.0,2025-01-01,미술관,36,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+미호박물관,경기,남양주시,박물관,사립,1종,45720,2241,940.0,61.6,1.0,2025-01-01,박물관,390,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+대림미술관,서울,종로구,미술관,사립,1종,95082,236,897.2,61.2,1.0,2025-01-01,미술관,27,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+단국대학교 석주선기념박물관,경기,용인시,박물관,대학,1종,12359,48533,1761.0,60.8,1.0,2025-01-01,박물관,444,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+롯데뮤지엄,서울,송파구,미술관,사립,1종,84091,206,1129.6,60.8,1.0,2025-01-01,미술관,29,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+계양산성박물관,인천,계양구,박물관,공립,1종,33873,2445,599.0,60.8,1.0,2025-01-01,박물관,224,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+G밸리산업박물관,서울,구로구,박물관,공립,1종,22000,2416,2151.0,60.6,1.0,2025-01-01,박물관,51,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+황순원문학촌 소나기마을,경기,양평군,박물관,공립,1종,56262,227,801.6,60.5,1.0,2025-01-01,박물관,376,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+과천시 추사박물관,경기,과천시,박물관,공립,1종,15778,16329,765.0,60.1,1.0,2025-01-01,박물관,334,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경희대학교 자연사박물관,서울,동대문구,박물관,대학,1종,11450,64660,1580.0,60.0,1.0,2025-01-01,박물관,125,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+양평군립미술관,경기,양평군,미술관,공립,2종,46352,359,1685.0,59.9,1.0,2025-01-01,미술관,143,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+현대어린이책미술관 MOKA,경기,성남시,미술관,사립,1종,91563,236,620.0,59.8,1.0,2025-01-01,미술관,187,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성호박물관,경기,안산시,박물관,공립,1종,26926,3103,532.0,59.0,1.0,2025-01-01,박물관,344,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아르코미술관,서울,종로구,미술관,사립,1종,58268,423,715.5,58.9,1.0,2025-01-01,미술관,40,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이화여자대학교 자연사박물관,서울,서대문구,박물관,대학,1종,11701,242835,953.0,58.7,1.0,2025-01-01,박물관,149,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+매헌윤봉길의사기념관,서울,서초구,박물관,사립,2종,78098,594,617.0,58.6,1.0,2025-01-01,박물관,67,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+여주시립폰박물관,경기,여주시,박물관,공립,1종,21788,5696,486.58,58.5,1.0,2025-01-01,박물관,361,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성곡미술관,서울,종로구,미술관,사립,1종,56195,307,1108.62,58.4,1.0,2025-01-01,미술관,35,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+도산안창호기념관,서울,강남구,박물관,사립,2종,50265,6260,143.0,58.3,1.0,2025-01-01,박물관,64,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+겸재정선미술관,서울,강서구,미술관,공립,1종,41575,446,606.0,58.0,1.0,2025-01-01,미술관,17,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안산어촌민속박물관,경기,안산시,박물관,공립,1종,34100,543,819.0,57.7,1.0,2025-01-01,박물관,352,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+석조전 대한제국역사관,서울,중구,박물관,국립,2종,45800,71,1170.0,57.7,1.0,2025-01-01,박물관,23,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국금융사박물관,서울,중구,박물관,사립,1종,22086,6635,802.5,57.5,1.0,2025-01-01,박물관,108,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+녹청자박물관,인천,서구,박물관,공립,1종,43002,471,342.0,57.0,1.0,2025-01-01,박물관,225,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+불교중앙박물관,서울,종로구,박물관,사립,1종,16242,12240,1090.0,56.9,1.0,2025-01-01,박물관,78,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아프리카예술박물관,경기,포천시,박물관,사립,1종,31200,1300,1106.0,56.7,1.0,2025-01-01,박물관,399,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+환기미술관,서울,종로구,미술관,사립,1종,24225,2500,1197.0,56.5,1.0,2025-01-01,미술관,55,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+명성황후기념관,경기,여주시,박물관,공립,2종,85131,137,327.0,56.4,1.0,2025-01-01,박물관,338,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+부천로보파크 전시관,경기,부천시,박물관,사립,2종,57231,197,2119.0,56.4,1.0,2025-01-01,박물관,393,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+현대어린이책미술관 MOKA GARDEN,경기,남양주시,미술관,사립,2종,329874,61,84.0,56.1,1.0,2025-01-01,미술관,188,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국근현대사박물관,경기,파주시,박물관,사립,1종,11000,70000,1049.34,56.0,1.0,2025-01-01,박물관,428,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+강화전쟁박물관,인천,강화군,박물관,공립,1종,38523,357,555.0,56.0,1.0,2025-01-01,박물관,222,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기대학교 소성박물관,경기,수원시,박물관,대학,1종,19891,2751,1267.0,55.9,1.0,2025-01-01,박물관,442,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+(재)중남미문화원병설박물관,경기,고양시,박물관,사립,1종,20658,3538,1518.0,55.8,1.0,2025-01-01,박물관,418,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인천어린이박물관,인천,미추홀구,박물관,사립,1종,30000,565,2180.0,55.7,1.0,2025-01-01,박물관,242,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+목인박물관 목석원,서울,종로구,박물관,사립,1종,10386,12419,2038.0,55.3,1.0,2025-01-01,박물관,69,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성남큐브미술관,경기,성남시,미술관,공립,2종,42016,204,1131.0,55.1,1.0,2025-01-01,미술관,140,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+배재학당역사박물관,서울,중구,박물관,사립,1종,20012,6704,633.0,55.1,1.0,2025-01-01,박물관,72,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+우석헌자연사박물관,경기,남양주시,박물관,사립,1종,21978,3690,948.94,55.0,1.0,2025-01-01,박물관,410,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+고양시립 아람미술관,경기,고양시,미술관,공립,1종,27645,112,2801.6,54.7,1.0,2025-01-01,미술관,137,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국항공대학교 항공우주박물관,경기,고양시,박물관,대학,1종,25000,1191,673.0,54.6,1.0,2025-01-01,박물관,452,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안산향토사박물관,경기,안산시,박물관,공립,1종,21768,2648,348.0,54.5,1.0,2025-01-01,박물관,353,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이천시립월전미술관,경기,이천시,미술관,공립,1종,21154,1665,637.0,54.5,1.0,2025-01-01,미술관,146,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+오산시립미술관,경기,오산시,미술관,공립,1종,38557,160,648.75,54.4,1.0,2025-01-01,미술관,145,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+고양가와지볍씨박물관,경기,고양시,박물관,공립,1종,16191,3108,697.0,54.2,1.0,2025-01-01,박물관,332,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이화박물관,서울,중구,박물관,사립,1종,18000,5023,959.0,54.2,1.0,2025-01-01,박물관,94,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립기상박물관,서울,종로구,박물관,국립,1종,16946,1123,429.54,54.1,1.0,2025-01-01,박물관,20,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+가회민화박물관,서울,종로구,박물관,사립,1종,26650,6656,110.0,53.9,1.0,2025-01-01,박물관,54,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아트선재센터,서울,종로구,미술관,사립,1종,46000,103,1276.0,53.9,1.0,2025-01-01,미술관,42,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+영훈뮤지엄,인천,남동구,박물관,사립,1종,27000,2500,414.0,53.9,1.0,2025-01-01,박물관,240,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+종자와 시인박물관,경기,연천군,박물관,사립,1종,18000,16780,209.04,53.8,1.0,2025-01-01,박물관,417,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성북구립미술관,서울,성북구,미술관,공립,2종,24020,4715,222.0,53.6,1.0,2025-01-01,미술관,19,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+김포시독립운동기념관,경기,김포시,박물관,공립,2종,39980,370,479.0,53.5,1.0,2025-01-01,박물관,336,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+말박물관,경기,과천시,박물관,사립,1종,30599,1655,395.0,53.4,1.0,2025-01-01,박물관,388,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+종로구립 박노수미술관,서울,종로구,미술관,공립,1종,28426,998,191.0,53.4,1.0,2025-01-01,미술관,20,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+갤러리 우촌(미술관),경기,성남시,미술관,대학,2종,77414,70,495.0,53.3,1.0,2025-01-01,미술관,193,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+최용신기념관,경기,안산시,박물관,공립,1종,22953,1685,255.0,53.0,1.0,2025-01-01,박물관,369,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+손기정기념관,서울,중구,박물관,공립,1종,10772,5540,715.0,53.0,1.0,2025-01-01,박물관,41,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+가천박물관,인천,연수구,박물관,사립,1종,10129,55800,553.0,53.0,1.0,2025-01-01,박물관,236,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+미메시스아트뮤지엄,경기,파주시,미술관,사립,1종,29500,230,2374.0,52.9,1.0,2025-01-01,미술관,159,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성균관대학교박물관,서울,종로구,박물관,대학,1종,8500,6484,1150.0,52.1,1.0,2025-01-01,박물관,139,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+목아박물관,경기,여주시,박물관,사립,1종,8232,10000,1478.0,51.9,1.0,2025-01-01,박물관,389,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+소전미술관,경기,시흥시,미술관,사립,2종,74750,320,129.51,51.9,1.0,2025-01-01,미술관,167,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+덕소자연사박물관,경기,남양주시,박물관,사립,1종,17107,2071,1157.0,51.6,1.0,2025-01-01,박물관,382,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+우리은행 은행사박물관,서울,중구,박물관,사립,1종,7078,14724,1128.72,51.6,1.0,2025-01-01,박물관,90,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+소래역사관,인천,남동구,박물관,공립,2종,28624,493,540.0,51.6,1.0,2025-01-01,박물관,227,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+다문화박물관,서울,은평구,박물관,사립,1종,10000,9000,1046.12,51.4,1.0,2025-01-01,박물관,63,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+예아리박물관,경기,용인시,박물관,사립,1종,14864,2000,1660.0,51.3,1.0,2025-01-01,박물관,405,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+삼육대학교 박물관,서울,노원구,박물관,대학,1종,7000,6400,1218.0,50.9,1.0,2025-01-01,박물관,133,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이함미술관,경기,양평군,미술관,사립,1종,39457,110,943.85,50.6,1.0,2025-01-01,미술관,177,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인천아트플랫폼,인천,중구,미술관,공립,1종,20771,607,460.0,50.6,1.0,2025-01-01,미술관,91,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국제성서박물관,인천,미추홀구,박물관,사립,1종,8000,15000,631.0,50.4,1.0,2025-01-01,박물관,237,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+뮤지엄김치간,서울,종로구,박물관,사립,1종,36061,476,296.0,50.3,1.0,2025-01-01,박물관,70,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국립관세박물관,서울,강남구,박물관,국립,1종,5218,4029,490.0,50.1,1.0,2025-01-01,박물관,19,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+의왕향토사료관,경기,의왕시,박물관,공립,2종,16873,5141,198.0,49.2,1.0,2025-01-01,박물관,364,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+몽양기념관,경기,양평군,박물관,공립,2종,24149,493,431.0,48.7,1.0,2025-01-01,박물관,339,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+간송박물관,서울,성북구,박물관,사립,1종,41085,283,177.0,48.7,1.0,2025-01-01,박물관,55,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국광고박물관,서울,송파구,박물관,사립,1종,4832,45810,667.8,48.6,1.0,2025-01-01,박물관,107,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+포스코미술관,서울,강남구,미술관,사립,1종,24694,326,691.0,48.2,1.0,2025-01-01,미술관,50,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+유진민속박물관,경기,고양시,박물관,사립,1종,19090,2308,308.0,48.1,1.0,2025-01-01,박물관,411,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국잡지박물관,서울,영등포구,박물관,사립,1종,10000,13601,236.0,48.1,1.0,2025-01-01,박물관,111,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경희대학교 중앙박물관,서울,동대문구,박물관,대학,1종,4500,6472,1140.0,47.8,1.0,2025-01-01,박물관,126,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+오디움(Audeum),서울,서초구,박물관,사립,1종,18000,350,1719.56,47.8,1.0,2025-01-01,박물관,122,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국카메라박물관,경기,과천시,박물관,사립,1종,6859,14000,417.0,47.6,1.0,2025-01-01,박물관,433,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아트센터 화이트블럭,경기,파주시,미술관,사립,1종,21624,194,1491.0,47.3,1.0,2025-01-01,미술관,169,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+일민미술관,서울,종로구,미술관,사립,1종,21499,337,958.47,47.2,1.0,2025-01-01,미술관,45,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+종이미술관,경기,안산시,미술관,사립,1종,33000,130,519.0,47.1,1.0,2025-01-01,미술관,179,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+신문박물관 PRESSEUM,서울,종로구,박물관,사립,1종,9170,4000,876.0,46.9,1.0,2025-01-01,박물관,86,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성북선잠박물관,서울,성북구,박물관,공립,2종,26727,491,161.0,46.8,1.0,2025-01-01,박물관,40,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+포천 역사문화관,경기,포천시,박물관,공립,2종,10212,5475,286.0,46.5,1.0,2025-01-01,박물관,371,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+프라움악기박물관,경기,남양주시,박물관,사립,1종,22000,175,1062.0,46.5,1.0,2025-01-01,박물관,426,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+고양로봇박물관,경기,고양시,박물관,사립,2종,43902,119,360.0,46.4,1.0,2025-01-01,박물관,379,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+부천활박물관,경기,부천시,박물관,공립,1종,16141,481,366.0,46.3,1.0,2025-01-01,박물관,343,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국전통음식박물관,인천,남동구,박물관,사립,1종,27000,500,142.0,46.2,1.0,2025-01-01,박물관,247,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울대학교병원 의학박물관,서울,종로구,박물관,사립,1종,11027,4130,342.0,46.0,1.0,2025-01-01,박물관,81,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+만해기념관,경기,광주시,박물관,사립,1종,15640,3263,198.0,45.9,1.0,2025-01-01,박물관,387,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+종이나라박물관,서울,중구,박물관,사립,1종,11023,8171,114.0,45.9,1.0,2025-01-01,박물관,98,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+덕포진교육박물관,경기,김포시,박물관,사립,1종,7119,3502,1042.0,45.8,1.0,2025-01-01,박물관,383,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+단국역사관,경기,용인시,박물관,대학,1종,3309,10000,689.0,45.4,1.0,2025-01-01,박물관,445,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+종로구립 고희동미술관,서울,종로구,박물관,공립,2종,27383,337,83.0,45.4,1.0,2025-01-01,박물관,50,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+여주시 미술관 아트뮤지엄 려,경기,여주시,미술관,공립,2종,27365,135,334.6,45.2,1.0,2025-01-01,미술관,144,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+기생충박물관,서울,강서구,박물관,사립,1종,5743,12082,320.0,45.1,1.0,2025-01-01,박물관,59,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+전쟁과여성인권박물관,서울,마포구,박물관,사립,2종,8798,21013,194.5,45.1,1.0,2025-01-01,박물관,96,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+사비나미술관,서울,은평구,미술관,사립,1종,12000,400,1740.0,45.0,1.0,2025-01-01,미술관,32,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울시립대학교 박물관,서울,동대문구,박물관,대학,1종,3080,9612,811.0,45.0,1.0,2025-01-01,박물관,137,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아라리오뮤지엄 인 스페이스,서울,종로구,미술관,사립,1종,22480,113,919.0,44.9,1.0,2025-01-01,미술관,39,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+피규어뮤지엄W,서울,강남구,박물관,사립,2종,18124,2000,339.1,44.9,1.0,2025-01-01,박물관,105,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+동국대학교박물관,서울,중구,박물관,대학,1종,4582,8000,371.0,44.7,1.0,2025-01-01,박물관,131,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아트센터나비미술관,서울,종로구,미술관,사립,1종,20000,465,432.0,44.7,1.0,2025-01-01,미술관,43,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경기여자고등학교 경운박물관,서울,강남구,박물관,사립,1종,5000,13187,339.0,44.6,1.0,2025-01-01,박물관,56,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아주대학교 도구박물관,경기,수원시,박물관,대학,1종,7615,4800,215.0,44.4,1.0,2025-01-01,박물관,449,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+짚풀생활사박물관,서울,종로구,박물관,사립,1종,3335,67292,335.0,44.4,1.0,2025-01-01,박물관,99,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+춘원당한의약박물관,서울,종로구,박물관,사립,1종,6502,7731,355.0,44.4,1.0,2025-01-01,박물관,101,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+국민대학교 명원박물관,서울,성북구,박물관,대학,1종,2460,15292,722.8,44.3,1.0,2025-01-01,박물관,129,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+덕성여자대학교박물관,서울,도봉구,박물관,대학,1종,5200,3400,643.0,44.2,1.0,2025-01-01,박물관,130,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+자하미술관,서울,종로구,미술관,사립,1종,7410,3000,712.0,44.2,1.0,2025-01-01,미술관,46,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세계민속악기박물관,경기,파주시,박물관,사립,1종,13541,2000,191.76,43.7,1.0,2025-01-01,박물관,397,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+밀알미술관,서울,강남구,미술관,사립,1종,14265,1040,300.0,43.7,1.0,2025-01-01,미술관,31,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+창조자연사박물관,경기,시흥시,박물관,사립,1종,3221,7405,1051.0,43.5,1.0,2025-01-01,박물관,420,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성북근현대문학관,서울,성북구,박물관,공립,1종,11314,844,193.64,43.5,1.0,2025-01-01,박물관,52,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국조리박물관,경기,안성시,박물관,사립,1종,4204,10371,448.9,43.4,1.0,2025-01-01,박물관,432,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+호림박물관 신림본관,서울,관악구,박물관,사립,1종,1622,18131,4623.0,43.3,1.0,2025-01-01,박물관,117,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국기독교역사박물관,경기,이천시,박물관,사립,2종,4032,105366,364.0,43.1,1.0,2025-01-01,박물관,429,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+구하우스 미술관,경기,양평군,미술관,사립,1종,20241,113,787.0,43.0,1.0,2025-01-01,미술관,152,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+유리섬미술관,경기,안산시,미술관,사립,2종,35000,150,257.0,43.0,1.0,2025-01-01,미술관,176,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한강뮤지엄,경기,남양주시,미술관,사립,1종,20103,111,786.0,42.6,1.0,2025-01-01,미술관,183,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세화미술관,서울,종로구,미술관,사립,1종,17810,108,1124.8,42.3,1.0,2025-01-01,미술관,37,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+김포다도박물관,경기,김포시,박물관,사립,1종,23257,207,185.0,42.1,1.0,2025-01-01,박물관,380,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+금호미술관,서울,종로구,미술관,사립,1종,9235,818,727.0,42.0,1.0,2025-01-01,미술관,25,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성신여자대학교 자연사박물관,서울,강북구,박물관,대학,1종,1650,340000,525.0,42.0,1.0,2025-01-01,박물관,141,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이한열기념관,서울,마포구,박물관,사립,2종,17760,2302,104.0,42.0,1.0,2025-01-01,박물관,93,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+(재)한국등잔박물관,경기,용인시,박물관,사립,1종,4356,3950,820.0,41.8,1.0,2025-01-01,박물관,430,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+맥아트미술관,경기,안산시,미술관,사립,2종,35000,109,257.0,41.8,1.0,2025-01-01,미술관,157,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+명지대학교박물관,경기,용인시,박물관,대학,1종,2600,5165,963.0,41.7,1.0,2025-01-01,박물관,446,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+부천펄벅기념관,경기,부천시,박물관,공립,1종,12208,373,146.0,41.4,1.0,2025-01-01,박물관,342,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+보름산미술관,경기,김포시,미술관,사립,1종,13400,517,299.0,40.8,1.0,2025-01-01,미술관,161,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+고구려대장간마을,경기,구리시,박물관,공립,2종,12622,648,179.0,40.7,1.0,2025-01-01,박물관,331,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한향림도자미술관,경기,파주시,미술관,사립,1종,7000,1200,515.28,40.3,1.0,2025-01-01,미술관,185,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+잔아박물관,경기,양평군,박물관,사립,1종,7456,1725,334.0,39.9,1.0,2025-01-01,박물관,414,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울여자대학교 박물관,서울,노원구,박물관,대학,1종,3100,4001,409.0,39.8,1.0,2025-01-01,박물관,138,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+숙명여자대학교박물관,서울,용산구,박물관,대학,1종,1969,11240,506.0,39.8,1.0,2025-01-01,박물관,144,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+화정박물관,서울,종로구,박물관,사립,1종,1468,9493,2760.0,39.8,1.0,2025-01-01,박물관,119,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+충현박물관,경기,광명시,박물관,사립,1종,4406,1992,694.0,39.5,1.0,2025-01-01,박물관,422,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+신구대학교 우촌박물관,경기,성남시,박물관,대학,1종,2220,3706,1142.59,39.4,1.0,2025-01-01,박물관,448,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+혜곡최순우기념관,서울,성북구,박물관,사립,2종,12975,2072,82.0,39.3,1.0,2025-01-01,박물관,116,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+일본군'위안부'역사관,경기,광주시,박물관,사립,1종,1911,6000,1320.0,38.9,1.0,2025-01-01,박물관,413,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성신여자대학교박물관,서울,성북구,박물관,대학,1종,1876,3700,1303.0,38.8,1.0,2025-01-01,박물관,140,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+해든뮤지움,인천,강화군,미술관,사립,1종,12000,100,1066.0,38.8,1.0,2025-01-01,미술관,95,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+상명대학교박물관,서울,종로구,박물관,대학,1종,2231,3645,1024.0,38.7,1.0,2025-01-01,박물관,134,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+우리옛돌박물관,서울,성북구,박물관,사립,1종,9345,189,996.0,38.3,1.0,2025-01-01,박물관,89,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한과문화박물관,경기,포천시,박물관,사립,1종,10000,390,400.3,38.2,1.0,2025-01-01,박물관,427,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+떡박물관,서울,종로구,박물관,사립,1종,3571,3155,461.96,38.2,1.0,2025-01-01,박물관,65,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한신대학교 박물관,경기,오산시,박물관,대학,1종,2350,9107,177.0,37.4,1.0,2025-01-01,박물관,453,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+용주사효행박물관(휴관),경기,화성시,박물관,사립,1종,13208,300,189.0,37.3,1.0,2025-01-01,박물관,409,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+수도국산달동네박물관(휴관),인천,동구,박물관,공립,1종,0,11593,1506.67,37.3,1.0,2025-01-01,박물관,228,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+조병화문학관,경기,안성시,박물관,사립,1종,2755,12000,103.0,37.1,1.0,2025-01-01,박물관,416,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경희대학교 혜정박물관,경기,용인시,박물관,대학,1종,721,8546,1252.4,36.6,1.0,2025-01-01,박물관,443,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+영인문학관,서울,종로구,박물관,사립,1종,1668,30300,194.1,35.9,1.0,2025-01-01,박물관,88,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+뮤지엄한미삼청,서울,종로구,미술관,사립,1종,10347,100,624.2,35.5,1.0,2025-01-01,미술관,56,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+여성생활사박물관,경기,여주시,박물관,사립,1종,1806,4710,818.0,35.4,1.0,2025-01-01,박물관,402,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+삼성출판박물관,서울,종로구,박물관,사립,1종,1079,100000,262.0,35.1,1.0,2025-01-01,박물관,79,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+대한불교조계종봉녕사 세주묘엄박물관,경기,수원시,박물관,사립,1종,2974,2417,374.94,35.0,1.0,2025-01-01,박물관,381,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+왈츠와 닥터만 커피박물관,경기,남양주시,박물관,사립,1종,3300,2378,280.0,35.0,1.0,2025-01-01,박물관,407,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+유금와당박물관,서울,종로구,박물관,사립,1종,2260,8200,164.0,34.7,1.0,2025-01-01,박물관,92,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+청강만화역사박물관,경기,이천시,박물관,대학,1종,1866,2686,524.0,34.4,1.0,2025-01-01,박물관,451,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+탄허기념불교박물관,서울,강남구,박물관,사립,1종,2886,2886,290.93,34.4,1.0,2025-01-01,박물관,103,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세종대학교 박물관(휴관),서울,광진구,박물관,대학,1종,0,5163,3968.0,34.1,1.0,2025-01-01,박물관,143,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+파주나비나라박물관,경기,파주시,박물관,사립,1종,4783,628,293.0,33.8,1.0,2025-01-01,박물관,424,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한무숙문학관,서울,종로구,박물관,사립,1종,2500,3346,295.0,33.7,1.0,2025-01-01,박물관,114,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+소다미술관,경기,화성시,미술관,사립,1종,8348,106,499.0,33.4,1.0,2025-01-01,미술관,166,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+마가미술관,경기,용인시,미술관,사립,1종,5000,442,340.0,33.3,1.0,2025-01-01,미술관,156,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+근현대사미술관담다,경기,용인시,미술관,사립,1종,6600,150,467.0,32.8,1.0,2025-01-01,미술관,153,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+OCI미술관,서울,종로구,미술관,사립,1종,4363,100,1571.28,32.8,1.0,2025-01-01,미술관,24,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+양평아프리카문화예술박물관,경기,양평군,박물관,사립,2종,16950,97,177.0,32.2,1.0,2025-01-01,박물관,401,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+샬트르 성바오로수녀회 역사박물관,서울,중구,박물관,사립,1종,2458,2755,227.0,32.1,1.0,2025-01-01,박물관,80,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서호미술관,경기,남양주시,미술관,사립,1종,5054,251,362.88,32.0,1.0,2025-01-01,미술관,163,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+을지대학교 범석의학박물관,경기,성남시,박물관,대학,1종,745,4545,643.5,32.0,1.0,2025-01-01,박물관,454,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인천공항박물관,인천,중구,박물관,사립,2종,13599,102,244.2,32.0,1.0,2025-01-01,박물관,249,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+홍익대학교박물관,서울,마포구,박물관,대학,1종,1277,5240,243.0,31.9,1.0,2025-01-01,박물관,151,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경인교육대학교 미술관 지누지움,인천,계양구,미술관,대학,1종,5795,133,249.0,31.8,1.0,2025-01-01,미술관,98,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+수원대학교박물관,경기,화성시,박물관,대학,1종,1000,1512,1179.0,31.7,1.0,2025-01-01,박물관,447,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+영은미술관,경기,광주시,미술관,사립,1종,2579,326,1234.0,31.7,1.0,2025-01-01,미술관,175,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한향림옹기박물관,경기,파주시,박물관,사립,1종,3500,600,261.6,31.4,1.0,2025-01-01,박물관,435,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+모란미술관,경기,남양주시,미술관,사립,1종,5213,105,544.22,30.9,1.0,2025-01-01,미술관,158,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아트린뮤지움,경기,파주시,미술관,사립,1종,5625,100,534.0,30.9,1.0,2025-01-01,미술관,168,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+두루뫼사료관,경기,파주시,박물관,사립,2종,1700,6278,369.0,30.8,1.0,2025-01-01,박물관,385,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+증권박물관(휴관),경기,고양시,박물관,사립,1종,0,9987,932.0,30.8,1.0,2025-01-01,박물관,419,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성신여자대학교 정원박광훈복식박물관,서울,강북구,박물관,대학,1종,1654,966,545.0,30.7,1.0,2025-01-01,박물관,142,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+코리아나미술관,서울,강남구,미술관,사립,1종,2244,700,641.0,30.7,1.0,2025-01-01,미술관,48,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+권숙자 안젤리미술관,경기,용인시,미술관,사립,1종,6000,120,298.0,30.5,1.0,2025-01-01,미술관,171,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+디자인코리아뮤지엄,경기,성남시,박물관,사립,1종,545,21000,251.0,30.3,1.0,2025-01-01,박물관,386,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+김달진미술자료박물관,서울,종로구,박물관,사립,2종,2781,4096,88.0,30.2,1.0,2025-01-01,박물관,60,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+숙명여자대학교 정영양자수박물관,서울,용산구,박물관,대학,1종,1634,1012,473.0,30.1,1.0,2025-01-01,박물관,145,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+콩세유미술관,경기,파주시,미술관,사립,1종,5938,100,361.0,30.0,1.0,2025-01-01,미술관,181,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세계골프역사박물관,서울,강남구,박물관,사립,1종,1795,1972,410.0,30.0,1.0,2025-01-01,박물관,83,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+(재)한원미술관,서울,서초구,미술관,사립,1종,3170,353,361.0,29.9,1.0,2025-01-01,미술관,47,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+숙명여자대학교문신미술관,서울,용산구,미술관,대학,1종,1818,659,506.0,29.9,1.0,2025-01-01,미술관,61,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+안상철미술관,경기,양주시,미술관,사립,1종,3638,332,280.0,29.8,1.0,2025-01-01,미술관,170,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+범패민속문화박물관,인천,미추홀구,박물관,사립,1종,500,56363,148.0,29.8,1.0,2025-01-01,박물관,238,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+닻미술관,경기,광주시,미술관,사립,1종,2399,899,315.0,29.7,1.0,2025-01-01,미술관,155,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+동덕여자대학교 박물관,서울,성북구,박물관,대학,1종,568,3002,751.0,29.7,1.0,2025-01-01,박물관,132,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+아해한국전통문화어린이박물관,경기,과천시,박물관,사립,1종,2190,958,399.0,29.6,1.0,2025-01-01,박물관,400,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+헬로우뮤지움,서울,성동구,미술관,사립,1종,6255,111,234.0,29.5,1.0,2025-01-01,미술관,54,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울올림픽기념관(휴관),서울,송파구,박물관,사립,1종,0,16712,0,29.4,0.67,2025-01-01,박물관,82,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국현대문학관(휴관),서울,중구,박물관,사립,1종,0,13680,363.0,29.3,1.0,2025-01-01,박물관,113,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+성재전통건축박물관,서울,종로구,박물관,사립,2종,12000,66,159.0,29.2,1.0,2025-01-01,박물관,120,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+배다골민속박물관,경기,고양시,박물관,사립,1종,3000,187,595.0,29.0,1.0,2025-01-01,박물관,391,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+여주미술관,경기,여주시,미술관,사립,1종,1072,871,1203.0,28.9,1.0,2025-01-01,미술관,174,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+코리아나 화장박물관,서울,강남구,박물관,사립,1종,883,4896,358.0,28.8,1.0,2025-01-01,박물관,102,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인하대학교박물관,인천,미추홀구,박물관,대학,1종,980,4076,210.0,28.7,1.0,2025-01-01,박물관,251,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+보나장신구박물관(휴관),서울,종로구,박물관,사립,1종,0,15000,281.0,28.6,1.0,2025-01-01,박물관,74,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+사람박물관얼굴,경기,광주시,박물관,사립,1종,1200,1950,500.0,28.5,1.0,2025-01-01,박물관,394,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+벽봉한국장신구박물관,경기,파주시,박물관,사립,1종,2672,575,151.95,27.6,1.0,2025-01-01,박물관,392,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+K&L 뮤지엄,경기,과천시,미술관,사립,2종,8000,80,284.0,27.5,1.0,2025-01-01,미술관,189,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+C ART MUSEUM,경기,양평군,미술관,사립,1종,1500,1750,295.5,27.4,1.0,2025-01-01,미술관,149,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+북촌생활사박물관,서울,종로구,박물관,사립,1종,1268,3742,117.0,27.3,1.0,2025-01-01,박물관,77,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국가구박물관,서울,성북구,박물관,사립,1종,540,2000,1082.0,27.3,1.0,2025-01-01,박물관,106,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+토탈미술관,서울,종로구,미술관,사립,1종,2876,136,561.0,27.2,1.0,2025-01-01,미술관,49,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+화폐박물관,경기,파주시,박물관,사립,2종,2600,1080,211.0,27.1,1.0,2025-01-01,박물관,438,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+타임앤블레이드박물관,경기,파주시,박물관,사립,1종,1097,1708,396.0,27.0,1.0,2025-01-01,박물관,423,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울대학교 치의학대학원 치의학박물관(휴관),서울,종로구,박물관,대학,1종,0,6000,252.0,26.9,1.0,2025-01-01,박물관,135,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경희대학교 한의학역사박물관,서울,동대문구,박물관,대학,1종,1000,1980,215.1,26.8,1.0,2025-01-01,박물관,127,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+JCC아트센터,서울,종로구,미술관,사립,1종,4000,188,121.0,26.7,1.0,2025-01-01,미술관,22,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+꼭두박물관(휴관),서울,종로구,박물관,사립,1종,0,13632,143.0,26.7,1.0,2025-01-01,박물관,61,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+블루메미술관,경기,파주시,미술관,사립,1종,3624,101,293.31,26.1,1.0,2025-01-01,미술관,162,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+북촌박물관,서울,종로구,박물관,사립,2종,5103,162,201.0,26.1,1.0,2025-01-01,박물관,76,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+서울과학기술대학교 미술관,서울,노원구,미술관,대학,2종,4400,153,104.0,25.7,1.0,2025-01-01,미술관,59,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+넬슨신애니메이션아트박물관,경기,과천시,박물관,사립,1종,736,1200,575.61,25.5,1.0,2025-01-01,박물관,439,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+엄미술관,경기,화성시,미술관,사립,1종,3012,125,258.0,25.3,1.0,2025-01-01,미술관,172,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+뮤지엄 한미,서울,송파구,미술관,사립,1종,3000,100,347.0,25.1,1.0,2025-01-01,미술관,53,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한길책박물관,경기,파주시,박물관,사립,1종,2156,232,428.0,25.0,1.0,2025-01-01,박물관,434,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+평강성서유물박물관,서울,구로구,박물관,사립,1종,586,2460,350.0,24.9,1.0,2025-01-01,박물관,104,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세계인형박물관,경기,파주시,박물관,사립,1종,1833,750,126.0,24.8,1.0,2025-01-01,박물관,398,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+KUMA 계원예술대학교 미술관,경기,의왕시,미술관,대학,2종,3000,94,479.0,24.7,1.0,2025-01-01,미술관,192,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+인천학생6.25참전관,인천,중구,박물관,사립,2종,3848,225,167.9,24.6,1.0,2025-01-01,박물관,243,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+CICA미술관,경기,김포시,미술관,사립,1종,2355,100,600.0,24.5,1.0,2025-01-01,미술관,150,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+DIMA 아트센터,경기,안성시,미술관,대학,2종,2980,213,191.96,24.5,1.0,2025-01-01,미술관,191,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+더리미미술관,인천,강화군,미술관,사립,1종,2113,300,280.0,24.1,1.0,2025-01-01,미술관,93,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+우석뮤지엄,서울,서대문구,박물관,사립,1종,798,1411,268.0,23.4,1.0,2025-01-01,박물관,91,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+관문사성보 박물관,서울,서초구,박물관,사립,1종,1000,900,270.0,23.3,1.0,2025-01-01,박물관,58,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+해움미술관,경기,수원시,미술관,사립,1종,2250,146,293.0,23.0,1.0,2025-01-01,미술관,186,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국선교역사기념관(휴관),인천,부평구,박물관,사립,1종,0,359,2350.0,23.0,1.0,2025-01-01,박물관,246,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+가일미술관,경기,가평군,미술관,사립,1종,700,240,1040.0,21.9,1.0,2025-01-01,미술관,151,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+용인대학교박물관,경기,용인시,박물관,대학,1종,474,583,381.0,21.8,1.0,2025-01-01,박물관,450,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+영집궁시박물관,경기,파주시,박물관,사립,2종,2287,376,116.0,21.5,1.0,2025-01-01,박물관,404,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국미술관,경기,용인시,미술관,사립,1종,1280,130,539.0,21.1,1.0,2025-01-01,미술관,184,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+초전섬유·퀼트박물관,서울,중구,박물관,사립,1종,496,1925,202.0,21.1,1.0,2025-01-01,박물관,100,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+남송미술관,경기,가평군,미술관,사립,1종,1095,160,565.0,21.0,1.0,2025-01-01,미술관,154,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+선바위미술관,경기,과천시,미술관,사립,1종,100,500,742.0,20.9,1.0,2025-01-01,미술관,164,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+과천사료박물관,경기,과천시,박물관,공립,1종,868,175,225.6,20.8,1.0,2025-01-01,박물관,377,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한익환서울아트박물관,서울,용산구,박물관,사립,1종,1165,526,103.0,20.8,1.0,2025-01-01,박물관,115,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+고촌이종근기념관,서울,서대문구,박물관,사립,2종,2655,119,200.0,20.1,1.0,2025-01-01,박물관,57,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+재미난박물관,인천,중구,박물관,사립,미등록,1100,600,480.0,19.9,1.0,2025-01-01,박물관,244,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+포마자동차디자인미술관,경기,고양시,미술관,사립,1종,577,264,626.0,19.7,1.0,2025-01-01,미술관,182,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+전원미술관,인천,강화군,미술관,사립,1종,700,230,555.9,19.7,1.0,2025-01-01,미술관,94,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+돌석도예박물관(휴관),경기,안양시,박물관,사립,1종,0,1000,264.0,19.5,1.0,2025-01-01,박물관,384,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+삶의이야기가있는집,경기,용인시,박물관,사립,2종,558,1580,300.0,19.5,1.0,2025-01-01,박물관,395,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+경원미술관,인천,연수구,미술관,사립,2종,700,710,373.31,19.3,1.0,2025-01-01,미술관,96,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+심장박물관,인천,계양구,박물관,사립,1종,1489,271,102.6,19.2,1.0,2025-01-01,박물관,239,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+옹청박물관,경기,여주시,박물관,사립,1종,650,573,210.0,19.1,1.0,2025-01-01,박물관,406,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+김세중미술관,서울,용산구,미술관,사립,2종,2111,110,362.0,19.0,1.0,2025-01-01,미술관,26,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+세계장신구박물관,서울,종로구,박물관,사립,1종,0,1000,221.0,19.0,1.0,2025-01-01,박물관,84,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+뮤제 쉼,서울,종로구,박물관,사립,1종,0,1082,145.0,18.5,1.0,2025-01-01,박물관,85,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+외할머니의 부엌,경기,김포시,박물관,사립,2종,1510,362,132.0,18.2,1.0,2025-01-01,박물관,408,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+박을복자수박물관,서울,강북구,박물관,사립,1종,1008,272,152.0,18.1,1.0,2025-01-01,박물관,71,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+이영미술관(휴관),서울,성북구,미술관,사립,1종,0,500,329.0,17.9,1.0,2025-01-01,미술관,57,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+죽포미술관,경기,여주시,미술관,사립,2종,550,200,1105.8,17.5,1.0,2025-01-01,미술관,180,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+혜명단청박물관,인천,중구,박물관,사립,1종,50,758,163.4,17.5,1.0,2025-01-01,박물관,248,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+명인박물관,서울,종로구,박물관,사립,2종,963,700,90.0,17.1,1.0,2025-01-01,박물관,68,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+백영수미술관,경기,의정부시,미술관,사립,1종,1496,110,106.0,16.9,1.0,2025-01-01,미술관,160,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+기산음악박물관,경기,양평군,박물관,사립,1종,800,112,305.7,16.3,1.0,2025-01-01,박물관,440,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+엠엠아트센터(휴관),경기,평택시,미술관,사립,1종,0,110,892.5,16.3,1.0,2025-01-01,미술관,173,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+설미재미술관,경기,가평군,미술관,사립,1종,1050,139,104.0,15.9,1.0,2025-01-01,미술관,165,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+한국색동박물관,서울,종로구,박물관,사립,2종,350,1319,108.0,15.9,1.0,2025-01-01,박물관,109,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+상원미술관(휴관),서울,종로구,미술관,사립,1종,0,322,219.0,15.0,1.0,2025-01-01,미술관,33,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+초연다구박물관(휴관),인천,중구,박물관,사립,2종,0,1000,109.0,14.9,1.0,2025-01-01,박물관,245,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+유리지공예관,서울,서초구,미술관,사립,1종,540,68,254.0,12.2,1.0,2025-01-01,미술관,44,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=
+일지미술관,경기,가평군,미술관,사립,2종,430,66,84.0,6.8,1.0,2025-01-01,미술관,178,https://www.mcst.go.kr/site/s_policy/dept/deptView.jsp?pDataCD=0417000000&pSeq=2078&pType=

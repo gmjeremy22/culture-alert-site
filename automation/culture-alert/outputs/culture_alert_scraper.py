@@ -312,6 +312,18 @@ def ensure_schema(conn):
         conn.execute("ALTER TABLE cultural_events ADD COLUMN image_url TEXT")
     if "event_nature" not in columns:
         conn.execute("ALTER TABLE cultural_events ADD COLUMN event_nature TEXT NOT NULL DEFAULT 'unknown'")
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS institution_collection_checks (
+          institution_id INTEGER NOT NULL REFERENCES institutions(id) ON DELETE CASCADE,
+          source_name TEXT NOT NULL,
+          state TEXT NOT NULL,
+          detail TEXT,
+          checked_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (institution_id, source_name)
+        )
+        """
+    )
 
 
 def parse_date_range(value):
@@ -1654,6 +1666,301 @@ def extract_inartplatform_exhibitions():
     return events
 
 
+def extract_inmm_exhibitions():
+    """Collect the current special exhibitions surfaced on the museum home page."""
+    url = "https://www.inmm.or.kr/"
+    doc = doc_from_html(fetch_html(url))
+    events = []
+    seen = set()
+    for node in doc.xpath('//div[contains(concat(" ", normalize-space(@class), " "), " main-sl__item ")]'):
+        category = first_node_text(node, './/div[contains(@class, "ctg-line")]')
+        title = first_node_text(node, './/div[contains(@class, "tit-line")]')
+        period = first_node_text(node, './/div[contains(@class, "date-line")]')
+        if "전시" not in category or not title or not period:
+            continue
+        start_date, end_date = parse_date_range(period)
+        if not start_date or not end_date:
+            continue
+        status = infer_status(start_date, end_date)
+        if status == "종료":
+            continue
+        onclick = first_node_text(node, './a/@onclick')
+        href_match = re.search(r"location\.href='([^']+)'", onclick)
+        source_url = urljoin(url, html.unescape(href_match.group(1))) if href_match else url
+        image_url = first_node_text(node, './/img/@src')
+        key = (title, start_date)
+        if key in seen:
+            continue
+        seen.add(key)
+        events.append(
+            {
+                "institution_name": "국립인천해양박물관",
+                "content_type": "전시",
+                "title": title,
+                "start_date": start_date,
+                "end_date": end_date,
+                "location": "국립인천해양박물관",
+                "region": "인천",
+                "price": None,
+                "description": category,
+                "keywords": "해양;인천;박물관",
+                "image_url": urljoin(url, image_url) if image_url else None,
+                "source_url": source_url,
+                "status": status,
+                "raw_text": node_text(node),
+            }
+        )
+    if not events:
+        raise RuntimeError("국립인천해양박물관 현재 전시 블록을 찾지 못했습니다.")
+    return events
+
+
+def extract_suma_exhibitions():
+    """Collect current exhibitions from Suwon Museum of Art's list and detail pages."""
+    url = "https://suma.suwon.go.kr/exhi/current_list.do?lang=ko"
+    page = fetch_html(url)
+    blocks = re.findall(r"<li>\s*(.*?)\s*</li>", page, flags=re.S)
+    events = []
+    seen = set()
+    for block in blocks:
+        href_match = re.search(r"goUrl\('([^']*current_view\.do\?[^']*ge_idx=\d+[^']*)'\)", block)
+        title_match = re.search(r'<p class="title">.*?class="line">(.*?)</a>', block, flags=re.S)
+        if not href_match or not title_match:
+            continue
+        title = clean_text(title_match.group(1))
+        detail_url = urljoin(url, html.unescape(href_match.group(1)))
+        if not title or detail_url in seen:
+            continue
+        seen.add(detail_url)
+        detail_page = fetch_html(detail_url)
+        period = table_value(detail_page, "전시기간")
+        location = table_value(detail_page, "전시장소") or "수원시립미술관"
+        start_date, end_date = parse_date_range(period)
+        if not start_date or not end_date:
+            continue
+        image_url = image_from_block(url, block)
+        events.append(
+            {
+                "institution_name": "수원시립미술관",
+                "content_type": "전시",
+                "title": title,
+                "start_date": start_date,
+                "end_date": end_date,
+                "location": location,
+                "region": "경기",
+                "price": table_value(detail_page, "관람료") or None,
+                "description": table_value(detail_page, "전시부문") or None,
+                "keywords": "현대미술;수원;경기",
+                "image_url": image_url,
+                "source_url": detail_url,
+                "status": infer_status(start_date, end_date),
+                "raw_text": clean_text(block),
+            }
+        )
+    if not events:
+        raise RuntimeError("수원시립미술관 현재 전시 목록을 찾지 못했습니다.")
+    return events
+
+
+def fetch_post_json(url, params, referer):
+    data = urlencode(params).encode("utf-8")
+    request = Request(
+        url,
+        data=data,
+        headers={
+            "User-Agent": "Mozilla/5.0 culture-alert prototype; contact=personal-use",
+            "Accept": "application/json, text/plain, */*",
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Referer": referer,
+            "X-Requested-With": "XMLHttpRequest",
+        },
+    )
+    with urlopen(request, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8", "replace"))
+
+
+def extract_hoam_exhibitions():
+    url = "https://www.leeumhoam.org/hoam/exhibition/list"
+    data = json.loads(fetch_html(url))
+    events = []
+    for row in data.get("list", []):
+        title = clean_text(row.get("title") or "")
+        if not title:
+            continue
+        start_date = row.get("startDate")
+        end_date = row.get("endDate")
+        if infer_status(start_date, end_date) == "종료":
+            continue
+        image_url = row.get("image")
+        events.append(
+            {
+                "institution_name": "호암미술관",
+                "content_type": "전시",
+                "title": title,
+                "start_date": start_date,
+                "end_date": end_date,
+                "location": clean_text(row.get("location") or "호암미술관"),
+                "region": "경기",
+                "price": None,
+                "description": clean_text(row.get("imageAlt") or "") or None,
+                "keywords": "현대미술;경기",
+                "image_url": urljoin("https://www.leeumhoam.org/", image_url) if image_url else None,
+                "source_url": f"https://www.leeumhoam.org/hoam/exhibition/{row.get('exhibitionSeq')}",
+                "status": infer_status(start_date, end_date),
+                "raw_text": json.dumps(row, ensure_ascii=False),
+            }
+        )
+    return events
+
+
+def extract_sac_hangaram_exhibitions():
+    referer = "https://www.sac.or.kr/site/main/program/schedule?tab=3"
+    today = date.today()
+    payload = fetch_post_json(
+        "https://www.sac.or.kr/site/main/program/getProgramCalList",
+        {
+            "searchYear": str(today.year),
+            "searchMonth": str(today.month),
+            "searchFirstDay": "1",
+            "searchLastDay": str(31),
+            "CATEGORY_PRIMARY": "6",
+        },
+        referer,
+    )
+    events = []
+    seen = set()
+    for day_items in payload.values():
+        if not isinstance(day_items, list):
+            continue
+        for row in day_items:
+            place = clean_text(row.get("PLACE_NAME") or "")
+            if "한가람디자인미술관" in place:
+                institution_name = "예술의전당 한가람디자인미술관"
+            elif "한가람미술관" in place:
+                institution_name = "예술의전당 한가람미술관"
+            else:
+                continue
+            event_key = (institution_name, row.get("SN"))
+            if event_key in seen:
+                continue
+            seen.add(event_key)
+            title = clean_text(row.get("PROGRAM_SUBJECT") or "")
+            start_date, end_date = parse_date_range(row.get("PBLPRFR_PERIOD") or "")
+            if not title or not start_date or infer_status(start_date, end_date) == "종료":
+                continue
+            event_id = row.get("SN")
+            events.append(
+                {
+                    "institution_name": institution_name,
+                    "content_type": "전시",
+                    "title": title,
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "location": place,
+                    "region": "서울",
+                    "price": clean_text(row.get("PRICE_INFO") or "") or None,
+                    "description": clean_text(row.get("PROGRAM_PLAYTIME") or "") or None,
+                    "keywords": "미술;전시;예술의전당",
+                    "image_url": None,
+                    "source_url": f"https://www.sac.or.kr/site/main/show/show_view?SN={event_id}",
+                    "status": infer_status(start_date, end_date),
+                    "raw_text": json.dumps(row, ensure_ascii=False),
+                }
+            )
+    return events
+
+
+def extract_aviation_exhibitions():
+    url = "https://www.aviation.or.kr/board.do?boardno=51&menuno=75"
+    page = fetch_html(url)
+    events = []
+    for href, block in re.findall(r'<a href="([^"]*view\.do[^"]*)"[^>]*>(.*?)</a>', page, flags=re.S):
+        title = clean_text(first_match(r"<dt>(.*?)</dt>", block) or "")
+        period = clean_text(first_match(r"<dd>(.*?)</dd>", block) or "")
+        start_date, end_date = parse_date_range(period)
+        if not title or not start_date:
+            continue
+        image_url = image_from_block(url, block)
+        events.append(
+            {
+                "institution_name": "국립항공박물관",
+                "content_type": "전시",
+                "title": title,
+                "start_date": start_date,
+                "end_date": end_date,
+                "location": "국립항공박물관 기획전시실",
+                "region": "서울",
+                "price": None,
+                "description": "국립항공박물관 현재 기획전시",
+                "keywords": "항공;과학;역사;박물관",
+                "image_url": image_url,
+                "source_url": urljoin(url, html.unescape(href)),
+                "status": infer_status(start_date, end_date),
+                "raw_text": clean_text(block),
+            }
+        )
+    deduped = {}
+    for event in events:
+        if event["status"] != "종료":
+            deduped[(event["title"], event["start_date"], event["source_url"])] = event
+    return list(deduped.values())
+
+
+def extract_baekje_exhibitions():
+    url = "https://baekjemuseum.seoul.go.kr/"
+    page = fetch_html(url)
+    events = []
+    for href, block in re.findall(r'<a href="([^"]+)"[^>]*class="main_eventBox"[^>]*>(.*?)</a>', page, flags=re.S):
+        if "state __ing" not in block:
+            continue
+        title = clean_text(first_match(r'<p class="tit_txt">(.*?)</p>', block) or "")
+        start_date, end_date = parse_date_range(
+            clean_text(first_match(r'<p class="date_txt">(.*?)</p>', block) or "")
+        )
+        if not title or not start_date:
+            continue
+        events.append(
+            {
+                "institution_name": "한성백제박물관",
+                "content_type": "전시",
+                "title": title,
+                "start_date": start_date,
+                "end_date": end_date,
+                "location": "한성백제박물관",
+                "region": "서울",
+                "price": None,
+                "description": "한성백제박물관 현재 특별전시",
+                "keywords": "백제;고고학;역사;박물관",
+                "image_url": image_from_block(url, block),
+                "source_url": urljoin(url, html.unescape(href)),
+                "status": infer_status(start_date, end_date),
+                "raw_text": clean_text(block),
+            }
+        )
+    deduped = {}
+    for event in events:
+        if event["status"] != "종료":
+            deduped[(event["title"], event["start_date"], event["source_url"])] = event
+    return list(deduped.values())
+
+
+def extract_war_memorial_exhibitions():
+    url = "https://www.warmemo.or.kr:8443/Home/H20000/H20200/boardList"
+    page, _final_url = priority_fetch_html(url)
+    text = clean_text(page)
+    if "전시중" in text or "전시예정" in text:
+        raise RuntimeError("전쟁기념관 현재 전시가 확인되어 전용 상세 파서 보강이 필요합니다.")
+    return []
+
+
+def extract_incheon_city_museum_exhibitions():
+    url = "https://www.incheon.go.kr/museum/MU010210"
+    page = fetch_html(url)
+    if "등록된 게시물이 없습니다." in page:
+        return []
+    raise RuntimeError("인천광역시립박물관 현재 전시 목록 형식이 바뀌어 상세 파서 보강이 필요합니다.")
+
+
 def extract_artsonje_exhibitions():
     url = "https://artsonje.org/exhibition-program/exhibition/"
     page = fetch_html(url)
@@ -2432,6 +2739,13 @@ SCRAPERS = {
     "ggcf-silhak": extract_silhak_exhibitions,
     "gogung": extract_gogung_exhibitions,
     "hangeul": extract_hangeul_museum_exhibitions,
+    "priority-aviation": extract_aviation_exhibitions,
+    "priority-baekje": extract_baekje_exhibitions,
+    "priority-hoam": extract_hoam_exhibitions,
+    "priority-incheon-city-museum": extract_incheon_city_museum_exhibitions,
+    "priority-sac-hangaram": extract_sac_hangaram_exhibitions,
+    "priority-war-memorial": extract_war_memorial_exhibitions,
+    "inmm": extract_inmm_exhibitions,
     "inartplatform": extract_inartplatform_exhibitions,
     "leeum": extract_leeum_exhibitions,
     "mmca": extract_mmca_exhibitions,
@@ -2449,11 +2763,32 @@ SCRAPERS = {
     "small-local-deep-seodaemun": extract_small_local_seodaemun_deep,
     "small-local-deep-seongbuk": extract_small_local_seongbuk_deep,
     "soma": extract_soma_exhibitions,
+    "suma": extract_suma_exhibitions,
 }
 
-from priority_seoul_scrapers import PRIORITY_SCRAPERS
+from priority_seoul_scrapers import PRIORITY_SCRAPERS, fetch_html as priority_fetch_html, PRIORITY_SOURCE_INSTITUTIONS
+from adaptive_official_collector import ADAPTIVE_INSTITUTION_NAMES, collect_adaptive_official_events
 
 SCRAPERS.update(PRIORITY_SCRAPERS)
+SCRAPERS["adaptive-official"] = collect_adaptive_official_events
+
+SOURCE_INSTITUTIONS = {
+    "adaptive-official": ADAPTIVE_INSTITUTION_NAMES,
+    "mmca": ("국립현대미술관 덕수궁관",),
+    "sema": ("서울시립 사진미술관",),
+    "priority-aviation": ("국립항공박물관",),
+    "priority-baekje": ("한성백제박물관",),
+    "priority-hoam": ("호암미술관",),
+    "priority-incheon-city-museum": ("인천광역시립박물관",),
+    "priority-sac-hangaram": (
+        "예술의전당 한가람미술관",
+        "예술의전당 한가람디자인미술관",
+    ),
+    "priority-war-memorial": ("전쟁기념관",),
+}
+SOURCE_INSTITUTIONS.update(
+    {source: (name,) for source, name in PRIORITY_SOURCE_INSTITUTIONS.items()}
+)
 
 
 def get_institution_id(conn, name):
@@ -2496,6 +2831,41 @@ def get_institution_id(conn, name):
             ).fetchone()[0]
         raise RuntimeError(f"기관이 DB에 없습니다: {name}")
     return row[0]
+
+
+def record_collection_check(conn, source_name, events=None, error=None, overrides=None):
+    """Remember whether a tracked official source was healthy even when it had no events."""
+    institutions = SOURCE_INSTITUTIONS.get(source_name, ())
+    if not institutions:
+        return 0
+    events = events or []
+    collected_names = {event.get("institution_name") for event in events}
+    changed = 0
+    for institution_name in institutions:
+        row = conn.execute(
+            "SELECT id FROM institutions WHERE name = ?", (institution_name,)
+        ).fetchone()
+        if not row:
+            continue
+        override = (overrides or {}).get(institution_name)
+        if override:
+            state, detail = override
+        else:
+            state = "failed" if error else "collected" if institution_name in collected_names else "empty"
+            detail = str(error)[:600] if error else f"official source returned {sum(event.get('institution_name') == institution_name for event in events)} current event(s)"
+        conn.execute(
+            """
+            INSERT INTO institution_collection_checks (institution_id, source_name, state, detail, checked_at)
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(institution_id, source_name) DO UPDATE SET
+              state=excluded.state,
+              detail=excluded.detail,
+              checked_at=CURRENT_TIMESTAMP
+            """,
+            (row[0], source_name, state, detail),
+        )
+        changed += 1
+    return changed
 
 
 def upsert_events(conn, events):

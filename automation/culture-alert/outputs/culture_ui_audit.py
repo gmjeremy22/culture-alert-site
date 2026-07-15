@@ -62,13 +62,19 @@ REQUIRED_IDS = {
     "programSummary": "강연·교육 표시 건수",
     "programLoadMore": "강연·교육 더 보기",
     "permanentView": "상설전 영역",
+    "institutionView": "기관 둘러보기 영역",
+    "institutionSearch": "기관과 전시 통합 검색",
+    "institutionTypeFilters": "박물관·미술관 유형 전환",
+    "institutionGrid": "기관 카드 목록",
+    "institutionSpotlight": "기관별 현재 일정",
+    "eventSearchGrid": "전시와 일정 검색 결과",
     "curationHero": "대표 추천 영역",
     "heroSlot": "대표 추천 카드",
     "urgentPanel": "마감 임박 패널",
-    "todayStack": "취향에 맞는 다음 일정 묶음",
+    "todayStack": "먼저 볼 주요 전시 묶음",
     "endingStack": "곧 종료 묶음",
-    "weekShelf": "이번 주 새 시작 선반",
-    "weekShelfSection": "조건부 이번 주 시작 선반",
+    "discoveryShelf": "취향으로 찾은 숨은 전시 선반",
+    "discoveryShelfSection": "조건부 숨은 발견 선반",
     "venueBundleList": "한 장소 묶음",
     "routeMapPanel": "동선 지도 패널",
     "recommendationShelves": "추천 선반",
@@ -84,7 +90,7 @@ REQUIRED_IDS = {
     "recommendationSummary": "추천 조건 요약",
 }
 
-REQUIRED_VIEWS = {"featured", "all", "program", "permanent"}
+REQUIRED_VIEWS = {"featured", "all", "program", "permanent", "institutions"}
 
 EDITORIAL_BADGE_LABELS = {
     "취향 적합",
@@ -92,6 +98,7 @@ EDITORIAL_BADGE_LABELS = {
     "가족 동선 좋음",
     "같이 보기 좋음",
     "주요 기관",
+    "많이 찾는 기관",
     "이번 주 추천",
     "상설로 여유롭게",
     "서울권 접근성 좋음",
@@ -126,6 +133,10 @@ SCRIPT_FLOW_MARKERS = {
     "모바일 원문 보기 고정": "mobile-source-actions",
     "같은 장소 다른 일정 표시": "function fillCompanions",
     "후기/검색 링크 표시": "function fillRelated",
+    "기관 둘러보기 렌더링": "function renderInstitutionView",
+    "기관 현재 일정 열기": "function renderInstitutionSpotlight",
+    "기관과 전시 유사 검색": "function fieldSearchScore",
+    "기관 규모 우선 정렬": "right.institution.scaleScore - left.institution.scaleScore",
 }
 
 TEXT_FIELDS = (
@@ -238,8 +249,11 @@ def extract_items(html_text):
     if start < 0:
         raise ValueError("HTML 안에서 카드 데이터(const items)를 찾지 못했습니다.")
     start += len(marker)
-    end_marker = ";\n    const overlay"
-    end = html_text.find(end_marker, start)
+    end_markers = (";\n    const institutions", ";\n    const overlay")
+    end = next(
+        (position for marker in end_markers if (position := html_text.find(marker, start)) >= 0),
+        -1,
+    )
     if end < 0:
         match = re.search(r"const items = (\[.*?\]);\s+const overlay", html_text, re.DOTALL)
         if not match:
@@ -368,12 +382,12 @@ def check_html_structure(findings, parser, html_text, items):
         ("CULTURE EDIT", "슬림 헤더 브랜드"),
         ("이번 주, 마음이 가는 곳", "첫 화면 큐레이션 제목"),
         ("어떻게 골랐나요", "추천 선정 기준 안내"),
-        ("오늘의 대표 추천", "대표 추천 헤딩"),
-        ("놓치지 말아야 할 일정", "마감 임박 패널"),
-        ("취향에 맞는 다음 일정", "중복 없는 다음 추천 선반"),
+        ("취향과 관람 규모로 고른 대표 추천", "대표 추천 헤딩"),
+        ("곧 마감하는 일정", "마감 임박 패널"),
+        ("먼저 보면 좋은 주요 전시", "관람 규모를 반영한 주요 전시 선반"),
         ("한 장소에서 묶어보기", "장소 묶음 섹션"),
         ("동선까지 생각한 오늘의 문화 코스", "동선 코스 설명"),
-        ("이번 주 새로 시작해요", "조건부 이번 주 시작 선반"),
+        ("취향으로 찾은 숨은 전시", "취향 적합 마이너 전시 선반"),
         ("추천 전체", "추천 전체 그리드"),
         ("왜 추천하나요", "세부창 추천 판단 설명"),
         ("어떤 이야기에 끌리나요?", "프로필별 취향 선택 화면"),
@@ -398,6 +412,16 @@ def check_html_structure(findings, parser, html_text, items):
             "상세 필터 기본 펼침",
             "첫 화면에서는 상세 필터가 접힌 상태로 시작해야 합니다.",
             advanced_match.group(0),
+        )
+    major_position = html_text.find('id="todayStack"')
+    urgent_position = html_text.find('id="urgentPanel"')
+    if major_position < 0 or urgent_position < 0 or major_position > urgent_position:
+        add_finding(
+            findings,
+            "P2",
+            "첫 화면 추천 우선순위 역전",
+            "대표 추천 다음에는 마감 일정이 아니라 주요 전시 선반이 먼저 보여야 합니다.",
+            f"todayStack={major_position}, urgentPanel={urgent_position}",
         )
     for marker in ("raw score", "추천 점수", "score:"):
         if marker in parser.visible_text:
@@ -719,18 +743,20 @@ def render_findings(lines, findings):
 def manual_review_checklist():
     return [
         "관심 분야 이미지: 12개 원형 선택지에 분야별 전시 사진이 채워지고 글자가 읽히며, 이미지가 없는 경우 색상 원형으로 자연스럽게 대체되는지 확인",
-        "첫 화면 등장: 대표 추천, 오른쪽 마감 일정, 장소 묶음, 필터, 추천 선반, 전체 카드가 짧은 간격으로 자연스럽게 나타나며 설정창 뒤에서 먼저 재생되지 않는지 확인",
+        "첫 화면 등장: 대표 추천, 주요 전시 선반, 마감 일정, 장소 묶음, 필터, 숨은 전시, 전체 카드가 짧은 간격으로 자연스럽게 나타나며 설정창 뒤에서 먼저 재생되지 않는지 확인",
         "프로필: 첫 접속에서 이름/관심 분야 3개/강연·교육 여부를 저장하고, 두 번째 프로필을 추가한 뒤 서로 전환되는지 확인",
         "개인화 추천: 모든 기본 추천은 전시만 포함하고, 강연·교육을 켠 프로필에만 전용 탭이 나타나는지 확인",
         "강연·교육 탭: 전용 탭을 누르기 전에는 프로그램이 보이지 않고, 탭 안에서만 취향순 24건/필터/더 보기가 동작하는지 확인",
-        "첫 화면: 전체 폭 큐레이션 제목, 선정 기준 안내, 대표 추천, 놓치지 말아야 할 일정 패널이 첫 viewport에서 균형 있게 보이는지 확인",
+        "첫 화면: 전체 폭 큐레이션 제목과 선정 기준 안내 뒤에 대표 추천, 주요 전시, 곧 마감하는 일정 순서가 분명하게 보이는지 확인",
         "동선 보드: 한 장소에서 묶어보기 카드와 route map panel이 long filter보다 먼저 보이고 동선 보기 버튼이 자연스럽게 느껴지는지 확인",
         "빠른 필터: 무료/가족/이번 주/전시/서울/경기/인천을 각각 눌러 대표 추천과 추천 전체가 함께 바뀌는지 확인",
         "상세 필터: 기본 접힘 상태에서 열기, 관심 키워드/지역/일정/우선순위/초기화를 눌러 요약 문구가 자연스럽게 바뀌는지 확인",
-        "추천 선반: 취향에 맞는 다음 일정은 대표/마감 패널과 중복되지 않고, 이번 주 새 시작 일정은 고유 후보가 3건 이상일 때만 나타나는지 확인",
+        "추천 선반: 주요 전시는 총람 규모가 반영되고, 숨은 전시는 주요 기관과 중복되지 않으며 취향 적합 후보가 2건 이상일 때만 나타나는지 확인",
         "추천 전체: 카드 제목이 2줄 안에서 정리되고 배지가 1-2초 안에 이해되는지 확인",
         "기간 전시: 강연/교육/행사 카드가 섞이지 않고 기간 전시만 표시되는지 확인",
         "상설전: 상설전 탭의 첫 12개와 이미지 없는 카드 몇 개를 열어 기간/상태 문구가 기간 일정과 섞이지 않는지 확인",
+        "기관 둘러보기: 주요 기관이 먼저 보이고, 전체/미술관/박물관/기타 문화공간 및 지역/현재 일정 있음 필터와 기관 일정 보기가 자연스럽게 동작하는지 확인",
+        "통합 검색: 기관명, 전시 제목, 띄어쓰기 차이, 한 글자 오타, 초성 검색에서 기관과 일정 결과가 구분되어 적절한 순서로 나오는지 확인",
         "세부창: 왜 추천하나요, 원문 보기, 지도 보기, 후기/검색 링크, 이 장소에서 같이 묶어볼 일정, 세부 회차 목록이 있는 카드와 없는 카드를 각각 확인하고 휴대폰 뒤로가기로 페이지 이탈 없이 닫히는지 확인",
         "동선 포커스: 동선 보기 클릭 후 drawer가 열리고 같은 장소 섹션이 1200ms 정도 강조되는지 확인",
         "문구 품질: 국립중앙박물관, 자동 모니터 출신 기관, 설명이 긴 카드에서 코드/푸터/깨진 글자가 보이지 않는지 확인",

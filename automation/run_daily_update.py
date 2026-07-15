@@ -166,6 +166,10 @@ def main():
         initialize_database(reset=False)
         run_collection_and_render()
         run([sys.executable, "culture_data_audit.py"], cwd=OUTPUTS_DIR)
+        run(
+            [sys.executable, "official_facility_directory.py", "--from-csv", "--audit-only"],
+            cwd=OUTPUTS_DIR,
+        )
         run([sys.executable, "institution_coverage_audit.py"], cwd=OUTPUTS_DIR)
         run([sys.executable, "culture_ui_audit.py"], cwd=OUTPUTS_DIR)
 
