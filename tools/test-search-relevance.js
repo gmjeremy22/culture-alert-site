@@ -33,9 +33,61 @@ function extractSearchApi(html) {
     throw new Error("search implementation was not found");
   }
 
+  const fixtureInstitution = {
+    id: -9101,
+    name: "국립현대미술관 테스트관",
+    region: "서울",
+    city: "서울",
+    category: "미술관",
+    address: "서울 테스트로",
+    keywords: ["현대미술", "사진", "어린이", "공예"],
+    directorySourceName: "",
+  };
+  const typoFixtureInstitution = {
+    id: -9102,
+    name: "리움미술관",
+    region: "서울",
+    city: "서울",
+    category: "미술관",
+    address: "서울 테스트로",
+    keywords: ["현대미술", "공예"],
+    directorySourceName: "",
+  };
+  const fixtureExhibition = {
+    id: -9201,
+    institutionId: -9101,
+    type: "전시",
+    institution: "국립현대미술관 테스트관",
+    title: "현대 사진과 어린이 공예",
+    displayTitle: "현대 사진과 어린이 공예",
+    displayVenue: "국립현대미술관 테스트관",
+    venueLabel: "국립현대미술관 테스트관",
+    region: "서울",
+    period: "2026-01-01 ~ 2026-12-31",
+    status: "진행중",
+    keywordList: ["현대미술", "사진", "어린이", "공예"],
+    description: "검색 검증용 전시",
+    institutionScaleScore: 80,
+  };
+  const fixtureProgram = {
+    ...fixtureExhibition,
+    id: -9202,
+    type: "교육",
+    title: "어린이 과학 공예 교실",
+    displayTitle: "어린이 과학 공예 교실",
+    keywordList: ["어린이", "과학", "공예", "교육"],
+  };
   const source = `
     const items = ${itemsMatch[1]};
     const institutions = ${institutionsMatch[1]};
+    institutions.push(
+      ${JSON.stringify(fixtureInstitution)},
+      ${JSON.stringify(typoFixtureInstitution)}
+    );
+    items.push(
+      ${JSON.stringify(fixtureExhibition)},
+      ${JSON.stringify(fixtureProgram)}
+    );
     const institutionById = new Map(institutions.map((item) => [item.id, item]));
     ${script.slice(coreStart, coreEnd)}
     globalThis.searchApi = {
@@ -53,8 +105,12 @@ function extractSearchApi(html) {
 function runSearch(api, query, options = {}) {
   const region = options.region || "서울";
   const eventTypes = options.eventTypes || ["전시"];
+  const fixtureOnly = options.fixtureOnly === true;
   const startedAt = Date.now();
   const institutions = api.institutions
+    .filter((institution) =>
+      fixtureOnly ? institution.id < 0 : institution.id > 0
+    )
     .filter((institution) => region === "all" || institution.region === region)
     .map((institution) => ({
       institution,
@@ -63,6 +119,7 @@ function runSearch(api, query, options = {}) {
     .filter((entry) => entry.match)
     .sort((left, right) => right.match.score - left.match.score);
   const events = api.items
+    .filter((item) => (fixtureOnly ? item.id < 0 : item.id > 0))
     .filter((item) => region === "all" || item.region === region)
     .filter((item) => eventTypes.includes(item.type))
     .map((item) => ({ item, match: api.eventSearchMatch(item, query) }))
@@ -98,7 +155,7 @@ function main() {
   const api = extractSearchApi(fs.readFileSync(htmlPath, "utf8"));
   const tests = [];
 
-  const koreanAlias = runSearch(api, "국현");
+  const koreanAlias = runSearch(api, "국현", { fixtureOnly: true });
   const koreanAliasNames = topInstitutionNames(koreanAlias);
   assertIncludes(koreanAliasNames, "국립현대미술관", "Korean alias");
   if (koreanAliasNames.some((name) => !name.includes("국립현대미술관"))) {
@@ -106,7 +163,7 @@ function main() {
   }
   tests.push(["국현", koreanAlias]);
 
-  const englishAlias = runSearch(api, "MMCA");
+  const englishAlias = runSearch(api, "MMCA", { fixtureOnly: true });
   assertIncludes(
     topInstitutionNames(englishAlias),
     "국립현대미술관",
@@ -114,23 +171,23 @@ function main() {
   );
   tests.push(["MMCA", englishAlias]);
 
-  const typo = runSearch(api, "리움미술과");
+  const typo = runSearch(api, "리움미술과", { fixtureOnly: true });
   assertIncludes(topInstitutionNames(typo), "리움미술관", "One-letter typo");
   tests.push(["리움미술과", typo]);
 
-  const combinedTopic = runSearch(api, "현대 사진");
+  const combinedTopic = runSearch(api, "현대 사진", { fixtureOnly: true });
   if (totalResults(combinedTopic) === 0) {
     fail("combined topic returned no results");
   }
   tests.push(["현대 사진", combinedTopic]);
 
-  const familyCraft = runSearch(api, "아이와 공예");
+  const familyCraft = runSearch(api, "아이와 공예", { fixtureOnly: true });
   if (totalResults(familyCraft) === 0) {
     fail("synonym-based combined topic returned no results");
   }
   tests.push(["아이와 공예", familyCraft]);
 
-  const ceramics = runSearch(api, "도자");
+  const ceramics = runSearch(api, "도자", { fixtureOnly: true });
   if (totalResults(ceramics) === 0) {
     fail("ceramics synonym returned no results");
   }
@@ -138,19 +195,25 @@ function main() {
 
   const program = runSearch(api, "과학", {
     eventTypes: ["강연", "교육", "행사"],
+    fixtureOnly: true,
   });
   if (program.events.length === 0) {
     fail("program search returned no results");
   }
   tests.push(["과학 (program)", program]);
 
-  const unrelated = runSearch(api, "야구선수 이적시장");
+  const unrelated = runSearch(api, "야구선수 이적시장", {
+    fixtureOnly: true,
+  });
   if (totalResults(unrelated) !== 0) {
     fail(
       `unrelated query returned ${totalResults(unrelated)} results`
     );
   }
   tests.push(["야구선수 이적시장", unrelated]);
+
+  const livePerformance = runSearch(api, "미술");
+  tests.push(["미술 (live performance)", livePerformance]);
 
   const slow = tests.filter(([, result]) => result.elapsedMs > 1500);
   if (slow.length) {
