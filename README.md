@@ -24,6 +24,7 @@ https://gmjeremy22.github.io/culture-alert-site/
 ## 자동 업데이트
 
 - 외부 예약 호출이 `.github/workflows/daily-update.yml`을 매일 07:40 KST에 한 번 실행합니다.
+- 검색·수집기·UI 코드가 `main`에 반영되면 `.github/workflows/deploy.yml`이 자동으로 검증과 Pages 배포를 실행합니다.
 - GitHub Actions가 새 DB를 만들고, 공개 가능한 수집기 26개를 실행하고, 카드 HTML을 다시 만든 뒤 암호화해서 Pages에 배포합니다.
 - 기본 실행에서는 느리고 실패 가능성이 큰 `official-page-monitor`를 제외합니다.
 - 필요할 때만 workflow 환경변수 `CULTURE_ALERT_INCLUDE_OFFICIAL_MONITOR=1`로 켤 수 있습니다.
