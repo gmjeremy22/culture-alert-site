@@ -62,6 +62,9 @@ jobs:
       - name: Verify search relevance
         run: node tools/test-search-relevance.js
 
+      - name: Verify recommendation priority
+        run: node tools/test-recommendation-priority.js
+
       - name: Upload audit reports
         if: always()
         uses: actions/upload-artifact@v4

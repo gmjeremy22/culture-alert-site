@@ -60,6 +60,9 @@ jobs:
       - name: Verify search relevance
         run: node tools/test-search-relevance.js
 
+      - name: Verify recommendation priority
+        run: node tools/test-recommendation-priority.js
+
       - name: Verify encrypted report
         run: node tools/verify-protected-site.js --html public/index.html --leak "feature-card"
 

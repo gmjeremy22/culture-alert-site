@@ -294,6 +294,12 @@ def editorial_badges(item):
     score = float(item.get("score") or 0)
     keywords = set(item.get("keywordList") or [])
 
+    if item.get("institutionScaleScore", 0) >= 76:
+        add_badge(badges, "많이 찾는 기관", "gold")
+    elif item.get("isMajorInstitution"):
+        add_badge(badges, "주요 기관", "gold")
+    if score >= 2:
+        add_badge(badges, "취향 적합", "gold")
     if remaining is not None and 0 <= remaining <= 14:
         add_badge(badges, "곧 종료", "deadline")
     if (
@@ -301,12 +307,6 @@ def editorial_badges(item):
         or (next_occurrence_days is not None and 0 <= next_occurrence_days <= 7)
     ):
         add_badge(badges, "이번 주 추천", "gold")
-    if score >= 2:
-        add_badge(badges, "취향 적합", "gold")
-    if item.get("institutionScaleScore", 0) >= 76:
-        add_badge(badges, "많이 찾는 기관", "gold")
-    elif item.get("isMajorInstitution"):
-        add_badge(badges, "주요 기관", "gold")
     if item.get("companionEvents"):
         companion_label = (
             "가족 동선 좋음"
@@ -1022,10 +1022,9 @@ def render(person_name="가족"):
     priority_buttons = "".join(
         f'<button class="choice-button" type="button" data-priority-choice="{html.escape(value)}" aria-pressed="{str(value == "recommended").lower()}">{label}</button>'
         for value, label in [
-            ("recommended", "추천순"),
-            ("deadline", "마감 임박"),
-            ("limited", "기간한정"),
-            ("major", "주요 기관"),
+            ("recommended", "주요 기관 우선"),
+            ("deadline", "기관 등급 내 마감순"),
+            ("limited", "기관 등급 내 기간한정"),
         ]
     )
     filter_order = ["전시", "강연", "교육", "행사"]
@@ -5486,7 +5485,7 @@ def render(person_name="가족"):
         </div>
         <aside class="selection-note" aria-label="추천 선정 기준">
           <span class="note-label">어떻게 골랐나요</span>
-          <p>취향과 관람 규모·소장 기반을 함께 보고, 마감 일정은 따로 놓치지 않게 모았어요.</p>
+          <p>관람 규모·소장 기반이 탄탄한 주요 기관을 먼저 놓고, 그 안에서 취향과 일정 조건을 살폈어요.</p>
           <p class="summary">진행/예정 {len(items)}건 · {html.escape(count_text)}</p>
         </aside>
       </section>
@@ -5499,7 +5498,7 @@ def render(person_name="가족"):
         <section class="recommendation-shelf" aria-label="먼저 보면 좋은 주요 전시">
           <div class="section-heading">
             <p>먼저 보면 좋은 주요 전시</p>
-            <span>취향과 관람 규모가 함께 검증된 일정</span>
+            <span>주요 기관을 먼저, 취향에 맞는 순서로</span>
           </div>
           <div class="shelf-row" id="todayStack"></div>
         </section>
@@ -6198,11 +6197,11 @@ def render(person_name="가족"):
 
     function recommendationSentence(item) {{
       const labels = badgesFor(item, 3).map((badge) => badge.label);
-      if (labels.includes("곧 종료")) return "마감이 가까워 이번 방문 후보에서 먼저 확인하면 좋아요.";
       if (labels.includes("많이 찾는 기관")) return "실제 관람 규모와 전시 기반이 탄탄한 기관의 일정이에요.";
-      if (labels.includes("가족 동선 좋음") || labels.includes("같이 보기 좋음")) return "같은 장소에 함께 볼 일정이 있어 한 번의 방문으로 묶기 좋아요.";
-      if (labels.includes("이번 주 추천")) return "이번 주 일정과 맞물려 바로 계획하기 좋은 카드입니다.";
       if (labels.includes("주요 기관")) return "주요 기관 일정이라 전시 완성도와 방문 안정성을 기대하기 좋아요.";
+      if (labels.includes("가족 동선 좋음") || labels.includes("같이 보기 좋음")) return "같은 장소에 함께 볼 일정이 있어 한 번의 방문으로 묶기 좋아요.";
+      if (labels.includes("곧 종료")) return "마감이 가까워 이번 방문 후보에서 먼저 확인하면 좋아요.";
+      if (labels.includes("이번 주 추천")) return "이번 주 일정과 맞물려 바로 계획하기 좋은 카드입니다.";
       if (labels.includes("서울권 접근성 좋음")) return "서울권 접근성이 좋아 부담 없이 다녀올 수 있는 후보예요.";
       if (labels.includes("상설로 여유롭게")) return "상설 일정이라 날짜 압박 없이 천천히 고를 수 있어요.";
       if (labels.includes("기간한정")) return "기간이 정해진 일정이라 놓치기 전에 살펴볼 만합니다.";
@@ -6287,6 +6286,8 @@ def render(person_name="가족"):
       }}
       if (item.type !== "전시") return false;
       if (item.recommendationEligible === false) return false;
+      const remainingDays = numeric(item.remainingDays);
+      if (remainingDays !== null && remainingDays < 0) return false;
       const recommendationTitle = normalizeSearchText(item.displayTitle || item.title || "");
       if (["전시", "현재전시", "기획전시", "특별전시", "전시안내"].includes(recommendationTitle)) {{
         return false;
@@ -6337,30 +6338,56 @@ def render(person_name="가족"):
       return score === null ? 24 : Math.max(0, Math.min(100, score));
     }}
 
+    function institutionPriorityTier(item) {{
+      const scaleScore = institutionScaleScore(item);
+      if (scaleScore >= 86) return 3;
+      if (scaleScore >= 76 || item.isMajorInstitution) return 2;
+      if (scaleScore >= 60) return 1;
+      return 0;
+    }}
+
     function scoreRecommendation(item, index) {{
       const matchedKeywords = selectedKeywordCount(item);
       const tasteScore = Number(item.score || 0);
       const scaleScore = institutionScaleScore(item);
-      let score = tasteScore * 3.2 + scaleScore * 0.3;
+      const institutionTier = institutionPriorityTier(item);
+      let score = tasteScore * 3.2 + scaleScore * 0.9 + institutionTier * 18;
 
       if (selectedKeywords.size > 0) {{
-        score += matchedKeywords * 28;
+        score += matchedKeywords * 24;
       }}
 
-      score += urgencyScore(item) * 0.45;
+      score += urgencyScore(item) * 0.12;
       score += natureScore(item);
       if (item.imageUrl) score += 2;
       if ((item.occurrences || []).length) score += 1;
 
       if (recommendationState.priority === "deadline") {{
-        score += urgencyScore(item) * 2.2;
+        score += urgencyScore(item) * 0.65;
       }} else if (recommendationState.priority === "limited") {{
-        score += item.eventNature === "limited" ? 14 : -2;
-      }} else if (recommendationState.priority === "major") {{
-        score += scaleScore * 0.22 + (item.isMajorInstitution ? 8 : -4);
+        score += item.eventNature === "limited" ? 10 : -2;
       }}
 
       return score - index * 0.01;
+    }}
+
+    function compareRecommendationEntries(left, right) {{
+      const tierDifference =
+        institutionPriorityTier(right.item) - institutionPriorityTier(left.item);
+      if (tierDifference !== 0) return tierDifference;
+
+      if (recommendationState.priority === "deadline") {{
+        const urgencyDifference = urgencyScore(right.item) - urgencyScore(left.item);
+        if (urgencyDifference !== 0) return urgencyDifference;
+      }} else if (recommendationState.priority === "limited") {{
+        const limitedDifference =
+          Number(right.item.eventNature === "limited") -
+          Number(left.item.eventNature === "limited");
+        if (limitedDifference !== 0) return limitedDifference;
+      }}
+
+      if (right.score !== left.score) return right.score - left.score;
+      return institutionScaleScore(right.item) - institutionScaleScore(left.item);
     }}
 
     function scoreDiscovery(item, index) {{
@@ -6378,10 +6405,9 @@ def render(person_name="가족"):
     }}
 
     function priorityLabel() {{
-      if (recommendationState.priority === "deadline") return "마감 임박";
-      if (recommendationState.priority === "limited") return "기간한정";
-      if (recommendationState.priority === "major") return "주요 기관";
-      return "추천순";
+      if (recommendationState.priority === "deadline") return "기관 등급 내 마감순";
+      if (recommendationState.priority === "limited") return "기관 등급 내 기간한정";
+      return "주요 기관 우선";
     }}
 
     function chooseHero(ranked) {{
@@ -6550,19 +6576,10 @@ def render(person_name="가족"):
 
     function renderCuration(ranked) {{
       const heroIndex = renderHero(ranked);
-      const endingSoon = ranked
-        .filter((entry) => entry.index !== heroIndex)
-        .filter((entry) => {{
-          const remaining = numeric(entry.item.remainingDays);
-          return remaining !== null && remaining >= 0 && remaining <= 30;
-        }})
-        .sort((a, b) => numeric(a.item.remainingDays) - numeric(b.item.remainingDays))
-        .slice(0, 8);
-      const urgentEntries = endingSoon.slice(0, 3);
-      const occupiedIndexes = new Set([heroIndex, ...urgentEntries.map((entry) => entry.index)]);
+      const occupiedIndexes = new Set([heroIndex]);
       const majorCandidates = ranked
         .filter((entry) => !occupiedIndexes.has(entry.index))
-        .filter((entry) => institutionScaleScore(entry.item) >= 76);
+        .filter((entry) => institutionPriorityTier(entry.item) >= 2);
       const majorPicks = takeDiverseEntries(majorCandidates, 8);
       const todayPicks = [...majorPicks];
       ranked
@@ -6571,6 +6588,16 @@ def render(person_name="가족"):
         .slice(0, Math.max(0, 8 - todayPicks.length))
         .forEach((entry) => todayPicks.push(entry));
       todayPicks.forEach((entry) => occupiedIndexes.add(entry.index));
+      const endingSoon = ranked
+        .filter((entry) => !occupiedIndexes.has(entry.index))
+        .filter((entry) => {{
+          const remaining = numeric(entry.item.remainingDays);
+          return remaining !== null && remaining >= 0 && remaining <= 30;
+        }})
+        .sort((a, b) => numeric(a.item.remainingDays) - numeric(b.item.remainingDays))
+        .slice(0, 8);
+      const urgentEntries = endingSoon.slice(0, 3);
+      urgentEntries.forEach((entry) => occupiedIndexes.add(entry.index));
       const discoveryCandidates = ranked
         .filter((entry) => !occupiedIndexes.has(entry.index))
         .map((entry) => ({{ ...entry, discoveryScore: scoreDiscovery(entry.item, entry.index) }}))
@@ -6630,9 +6657,13 @@ def render(person_name="가족"):
       const rankedPrograms = items
         .map((item, index) => ({{ item, index, score: scoreRecommendation(item, index) }}))
         .filter((entry) => ["강연", "교육", "행사"].includes(entry.item.type))
+        .filter((entry) => {{
+          const remainingDays = numeric(entry.item.remainingDays);
+          return remainingDays === null || remainingDays >= 0;
+        }})
         .filter((entry) => recommendationState.region === "all" || entry.item.region === recommendationState.region)
         .filter((entry) => programFilter === "all" || entry.item.type === programFilter)
-        .sort((a, b) => b.score - a.score);
+        .sort(compareRecommendationEntries);
       const visiblePrograms = rankedPrograms.slice(0, programVisibleLimit);
 
       programCards.forEach((card) => {{
@@ -6659,7 +6690,7 @@ def render(person_name="가족"):
       const ranked = items
         .map((item, index) => ({{ item, index, score: scoreRecommendation(item, index) }}))
         .filter((entry) => passesRecommendationFilters(entry.item))
-        .sort((a, b) => b.score - a.score);
+        .sort(compareRecommendationEntries);
       const visible = ranked.slice(0, 12);
       renderCuration(ranked);
 

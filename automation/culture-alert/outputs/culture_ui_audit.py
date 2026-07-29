@@ -148,6 +148,8 @@ SCRIPT_FLOW_MARKERS = {
     "사이트 전체 검색 렌더링": "function renderGlobalSearch",
     "휴대폰 뒤로가기로 검색 닫기": "cultureAlertSearch",
     "기관 규모 우선 정렬": "right.institution.scaleScore - left.institution.scaleScore",
+    "추천 기관 등급 계산": "function institutionPriorityTier",
+    "주요 기관 최우선 추천 정렬": "function compareRecommendationEntries",
 }
 
 TEXT_FIELDS = (
