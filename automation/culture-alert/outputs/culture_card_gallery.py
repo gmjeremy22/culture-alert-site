@@ -1664,7 +1664,7 @@ def render(person_name="가족"):
     .overlay {{
       position: fixed;
       inset: 0;
-      z-index: 20;
+      z-index: 70;
       display: grid;
       place-items: center;
       padding: 22px;
@@ -1899,7 +1899,8 @@ def render(person_name="가족"):
       white-space: nowrap;
     }}
     .modal-open,
-    .preference-open {{
+    .preference-open,
+    .search-open {{
       overflow: hidden;
     }}
     @media (max-width: 760px) {{
@@ -5047,12 +5048,305 @@ def render(person_name="가족"):
       border-color: var(--accent);
       outline: none;
     }}
+    .global-search-overlay {{
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: start center;
+      padding: 28px;
+      background: rgba(2, 4, 4, 0.82);
+      backdrop-filter: blur(16px);
+    }}
+    .global-search-overlay[hidden] {{
+      display: none;
+    }}
+    .global-search-panel {{
+      width: min(1120px, 100%);
+      max-height: calc(100dvh - 56px);
+      overflow: auto;
+      border: 1px solid rgba(232, 223, 208, 0.18);
+      border-radius: 8px;
+      background: #0b0e0d;
+      box-shadow: 0 32px 110px rgba(0, 0, 0, 0.66);
+    }}
+    .global-search-head {{
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      display: grid;
+      gap: 16px;
+      padding: 24px 26px 18px;
+      border-bottom: 1px solid rgba(232, 223, 208, 0.12);
+      background: rgba(11, 14, 13, 0.96);
+      backdrop-filter: blur(18px);
+    }}
+    .global-search-title-row {{
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 20px;
+    }}
+    .global-search-kicker {{
+      margin: 0 0 5px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 850;
+    }}
+    .global-search-title {{
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(25px, 3vw, 38px);
+      line-height: 1.1;
+    }}
+    .global-search-close {{
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      border: 1px solid rgba(232, 223, 208, 0.18);
+      border-radius: 50%;
+      background: rgba(232, 223, 208, 0.04);
+      color: var(--ink);
+      font: inherit;
+      font-size: 22px;
+      cursor: pointer;
+    }}
+    .global-search-close:hover,
+    .global-search-close:focus-visible {{
+      border-color: var(--accent);
+      outline: none;
+    }}
+    .global-search-shell {{
+      display: grid;
+      grid-template-columns: 1fr auto;
+      min-height: 58px;
+      border: 1px solid rgba(232, 223, 208, 0.24);
+      border-radius: 6px;
+      background: #111512;
+    }}
+    .global-search-input {{
+      min-width: 0;
+      border: 0;
+      padding: 0 18px;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      font-size: 18px;
+      font-weight: 700;
+      outline: none;
+    }}
+    .global-search-input::placeholder {{
+      color: #7d837d;
+    }}
+    .global-search-clear {{
+      min-width: 54px;
+      border: 0;
+      border-left: 1px solid rgba(232, 223, 208, 0.12);
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 21px;
+      cursor: pointer;
+    }}
+    .global-search-clear[hidden] {{
+      display: none;
+    }}
+    .global-search-controls {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      align-items: center;
+    }}
+    .global-search-filter-group {{
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }}
+    .global-search-filter-group::-webkit-scrollbar {{
+      display: none;
+    }}
+    .global-search-filter {{
+      flex: 0 0 auto;
+      min-height: 34px;
+      border: 1px solid rgba(232, 223, 208, 0.15);
+      border-radius: 999px;
+      padding: 0 12px;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }}
+    .global-search-filter[aria-pressed="true"] {{
+      border-color: rgba(184, 147, 99, 0.62);
+      background: rgba(184, 147, 99, 0.16);
+      color: #f4dfbf;
+    }}
+    .global-search-topics {{
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 0 26px 18px;
+      scrollbar-width: none;
+    }}
+    .global-search-topics::-webkit-scrollbar {{
+      display: none;
+    }}
+    .global-topic-button {{
+      flex: 0 0 auto;
+      min-height: 32px;
+      border: 1px solid rgba(232, 223, 208, 0.13);
+      border-radius: 999px;
+      padding: 0 11px;
+      background: rgba(232, 223, 208, 0.025);
+      color: #bec4bc;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 720;
+      cursor: pointer;
+    }}
+    .global-topic-button:hover,
+    .global-topic-button:focus-visible {{
+      border-color: var(--accent);
+      color: var(--ink);
+      outline: none;
+    }}
+    .global-search-content {{
+      padding: 22px 26px 30px;
+    }}
+    .global-search-summary {{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+    .global-search-summary strong {{
+      color: var(--ink);
+    }}
+    .global-search-columns {{
+      display: grid;
+      grid-template-columns: minmax(280px, 0.82fr) minmax(420px, 1.18fr);
+      gap: 28px;
+    }}
+    .global-search-columns.single-column {{
+      grid-template-columns: 1fr;
+    }}
+    .global-result-section[hidden],
+    .global-search-empty[hidden],
+    .global-search-start[hidden] {{
+      display: none;
+    }}
+    .global-result-heading {{
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(232, 223, 208, 0.11);
+    }}
+    .global-result-heading h3 {{
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 19px;
+    }}
+    .global-result-heading span {{
+      color: var(--muted);
+      font-size: 11px;
+    }}
+    .global-result-list {{
+      display: grid;
+    }}
+    .global-result-row {{
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      border-bottom: 1px solid rgba(232, 223, 208, 0.09);
+      padding: 15px 2px;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }}
+    .global-result-row:hover,
+    .global-result-row:focus-visible {{
+      background: rgba(232, 223, 208, 0.035);
+      outline: none;
+    }}
+    .global-result-copy {{
+      display: grid;
+      min-width: 0;
+      gap: 5px;
+    }}
+    .global-result-eyebrow {{
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 820;
+    }}
+    .global-result-copy strong {{
+      overflow-wrap: anywhere;
+      font-size: 15px;
+      line-height: 1.38;
+    }}
+    .global-result-meta {{
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }}
+    .global-result-reasons {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 2px;
+    }}
+    .global-result-reason {{
+      border: 1px solid rgba(184, 147, 99, 0.34);
+      border-radius: 999px;
+      padding: 3px 7px;
+      background: rgba(184, 147, 99, 0.09);
+      color: #dfc18e;
+      font-size: 10px;
+      font-weight: 760;
+    }}
+    .global-result-arrow {{
+      align-self: center;
+      color: var(--muted);
+      font-size: 18px;
+    }}
+    .global-search-start,
+    .global-search-empty {{
+      padding: 34px 8px 40px;
+      color: var(--muted);
+      text-align: center;
+    }}
+    .global-search-start strong,
+    .global-search-empty strong {{
+      display: block;
+      margin-bottom: 7px;
+      color: var(--ink);
+      font-family: var(--font-display);
+      font-size: 20px;
+    }}
+    .global-search-start p,
+    .global-search-empty p {{
+      margin: 0;
+      font-size: 13px;
+    }}
     @media (max-width: 1040px) {{
       .institution-intro {{
         grid-template-columns: 1fr;
       }}
       .institution-grid {{
         grid-template-columns: repeat(2, minmax(0, 1fr));
+      }}
+      .global-search-columns {{
+        grid-template-columns: 1fr;
       }}
     }}
     @media (max-width: 767px) {{
@@ -5074,6 +5368,47 @@ def render(person_name="가족"):
       .header-search-button {{
         min-height: 32px;
         padding-inline: 10px;
+      }}
+      .global-search-overlay {{
+        padding: 0;
+      }}
+      .global-search-panel {{
+        width: 100%;
+        height: 100dvh;
+        max-height: none;
+        border: 0;
+        border-radius: 0;
+      }}
+      .global-search-head {{
+        gap: 12px;
+        padding: 18px 16px 14px;
+      }}
+      .global-search-title {{
+        font-size: 26px;
+      }}
+      .global-search-shell {{
+        min-height: 52px;
+      }}
+      .global-search-input {{
+        padding-inline: 14px;
+        font-size: 16px;
+      }}
+      .global-search-controls {{
+        display: grid;
+        gap: 8px;
+      }}
+      .global-search-filter-group {{
+        margin-inline: -16px;
+        padding-inline: 16px;
+      }}
+      .global-search-topics {{
+        padding: 0 16px 14px;
+      }}
+      .global-search-content {{
+        padding: 18px 16px 92px;
+      }}
+      .global-result-row {{
+        min-height: 82px;
       }}
       .institution-intro {{
         gap: 22px;
@@ -5360,6 +5695,75 @@ def render(person_name="가족"):
     </section>
   </main>
 
+  <div class="global-search-overlay" id="globalSearchOverlay" hidden>
+    <section class="global-search-panel" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
+      <header class="global-search-head">
+        <div class="global-search-title-row">
+          <div>
+            <p class="global-search-kicker">CULTURE SEARCH</p>
+            <h2 class="global-search-title" id="globalSearchTitle">기관·전시·주제를 함께 찾기</h2>
+          </div>
+          <button class="global-search-close" id="globalSearchClose" type="button" aria-label="검색 닫기">×</button>
+        </div>
+        <div class="global-search-shell">
+          <input class="global-search-input" id="globalSearchInput" type="search" autocomplete="off" spellcheck="false" placeholder="예: 국현, 현대 사진, 아이와 공예">
+          <button class="global-search-clear" id="globalSearchClear" type="button" aria-label="검색어 지우기" hidden>×</button>
+        </div>
+        <div class="global-search-controls">
+          <div class="global-search-filter-group" id="globalSearchTypeFilters" aria-label="검색 결과 유형">
+            <button class="global-search-filter" type="button" data-global-type="all" aria-pressed="true">기관·전시</button>
+            <button class="global-search-filter" type="button" data-global-type="institution" aria-pressed="false">기관</button>
+            <button class="global-search-filter" type="button" data-global-type="exhibition" aria-pressed="false">전시</button>
+            <button class="global-search-filter" type="button" data-global-type="program" aria-pressed="false">강연·교육</button>
+          </div>
+          <div class="global-search-filter-group" id="globalSearchRegionFilters" aria-label="검색 지역">
+            <button class="global-search-filter" type="button" data-global-region="서울" aria-pressed="true">서울</button>
+            <button class="global-search-filter" type="button" data-global-region="all" aria-pressed="false">수도권</button>
+            <button class="global-search-filter" type="button" data-global-region="경기" aria-pressed="false">경기</button>
+            <button class="global-search-filter" type="button" data-global-region="인천" aria-pressed="false">인천</button>
+          </div>
+        </div>
+      </header>
+      <div class="global-search-topics" aria-label="추천 검색어">
+        <button class="global-topic-button" type="button" data-global-topic="현대미술">현대미술</button>
+        <button class="global-topic-button" type="button" data-global-topic="한국미술">한국미술</button>
+        <button class="global-topic-button" type="button" data-global-topic="역사">역사</button>
+        <button class="global-topic-button" type="button" data-global-topic="공예">공예·도자</button>
+        <button class="global-topic-button" type="button" data-global-topic="디자인">디자인</button>
+        <button class="global-topic-button" type="button" data-global-topic="사진">사진</button>
+        <button class="global-topic-button" type="button" data-global-topic="미디어아트">미디어아트</button>
+        <button class="global-topic-button" type="button" data-global-topic="어린이">어린이·가족</button>
+      </div>
+      <div class="global-search-content">
+        <p class="global-search-summary" id="globalSearchSummary">기관명, 전시 제목, 관심 분야를 검색해보세요.</p>
+        <div class="global-search-start" id="globalSearchStart">
+          <strong>정확한 이름을 몰라도 괜찮아요</strong>
+          <p>띄어쓰기, 초성, 자주 쓰는 별칭과 한 글자 오타까지 함께 확인합니다.</p>
+        </div>
+        <div class="global-search-columns" id="globalSearchColumns" hidden>
+          <section class="global-result-section" id="globalInstitutionResultsSection" aria-labelledby="globalInstitutionResultsTitle">
+            <div class="global-result-heading">
+              <h3 id="globalInstitutionResultsTitle">기관</h3>
+              <span id="globalInstitutionResultsCount"></span>
+            </div>
+            <div class="global-result-list" id="globalInstitutionResults"></div>
+          </section>
+          <section class="global-result-section" id="globalEventResultsSection" aria-labelledby="globalEventResultsTitle">
+            <div class="global-result-heading">
+              <h3 id="globalEventResultsTitle">전시·일정</h3>
+              <span id="globalEventResultsCount"></span>
+            </div>
+            <div class="global-result-list" id="globalEventResults"></div>
+          </section>
+        </div>
+        <div class="global-search-empty" id="globalSearchEmpty" hidden>
+          <strong>가까운 결과를 찾지 못했어요</strong>
+          <p>검색어를 짧게 바꾸거나 위의 분야 버튼을 눌러보세요. 무관한 일정은 대신 보여드리지 않습니다.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
   <div class="preference-overlay" id="preferenceOverlay" hidden>
     <section class="preference-panel" role="dialog" aria-modal="true" aria-labelledby="preferenceTitle">
       <button class="preference-close" id="preferenceClose" type="button" aria-label="취향 설정 닫기" hidden>×</button>
@@ -5446,6 +5850,7 @@ def render(person_name="가족"):
   <script>
     const items = {details_json};
     const institutions = {institutions_json};
+    const institutionById = new Map(institutions.map((institution) => [institution.id, institution]));
     const overlay = document.getElementById("detailOverlay");
     const imageBox = document.getElementById("detailImage");
     const closeButton = document.getElementById("detailClose");
@@ -5455,6 +5860,23 @@ def render(person_name="가족"):
     const permanentView = document.getElementById("permanentView");
     const institutionView = document.getElementById("institutionView");
     const headerSearchButton = document.getElementById("headerSearchButton");
+    const globalSearchOverlay = document.getElementById("globalSearchOverlay");
+    const globalSearchClose = document.getElementById("globalSearchClose");
+    const globalSearchInput = document.getElementById("globalSearchInput");
+    const globalSearchClear = document.getElementById("globalSearchClear");
+    const globalSearchTypeFilters = document.getElementById("globalSearchTypeFilters");
+    const globalSearchRegionFilters = document.getElementById("globalSearchRegionFilters");
+    const globalSearchSummary = document.getElementById("globalSearchSummary");
+    const globalSearchStart = document.getElementById("globalSearchStart");
+    const globalSearchColumns = document.getElementById("globalSearchColumns");
+    const globalSearchEmpty = document.getElementById("globalSearchEmpty");
+    const globalInstitutionResultsSection = document.getElementById("globalInstitutionResultsSection");
+    const globalInstitutionResultsCount = document.getElementById("globalInstitutionResultsCount");
+    const globalInstitutionResults = document.getElementById("globalInstitutionResults");
+    const globalEventResultsSection = document.getElementById("globalEventResultsSection");
+    const globalEventResultsTitle = document.getElementById("globalEventResultsTitle");
+    const globalEventResultsCount = document.getElementById("globalEventResultsCount");
+    const globalEventResults = document.getElementById("globalEventResults");
     const institutionSearch = document.getElementById("institutionSearch");
     const institutionSearchClear = document.getElementById("institutionSearchClear");
     const institutionTypeFilters = document.getElementById("institutionTypeFilters");
@@ -5528,6 +5950,9 @@ def render(person_name="가족"):
     let institutionKind = "all";
     let institutionRegion = "서울";
     let selectedInstitutionId = null;
+    let globalSearchType = "all";
+    let globalSearchRegion = "서울";
+    let globalSearchTimer = null;
     const fields = {{
       kicker: document.getElementById("detailKicker"),
       title: document.getElementById("detailTitle"),
@@ -6297,11 +6722,169 @@ def render(person_name="가족"):
       applyRecommendations();
     }}
 
+    const SEARCH_SYNONYM_GROUPS = [
+      ["현대미술", "현대예술", "동시대미술", "컨템포러리", "contemporary"],
+      ["한국미술", "한국화", "우리미술"],
+      ["역사", "근현대사", "문화사"],
+      ["공예", "도자", "도예", "세라믹", "ceramic"],
+      ["디자인", "그래픽", "타이포그래피"],
+      ["사진", "포토", "photography"],
+      ["미디어아트", "미디어", "영상", "디지털아트"],
+      ["건축", "공간", "도시"],
+      ["어린이", "아동", "키즈", "아이랑", "아이와", "가족"],
+      ["참여형", "체험", "인터랙티브"],
+      ["무료", "무료관람"],
+      ["인상주의", "인상파"],
+      ["조선", "조선시대"],
+      ["불교미술", "불교", "사찰"]
+    ];
+    const INSTITUTION_ALIAS_RULES = [
+      {{ marker: "국립현대미술관", aliases: ["국현", "MMCA"] }},
+      {{ marker: "국립중앙박물관", aliases: ["국중박"] }},
+      {{ marker: "서울시립미술관", aliases: ["서울시립", "SeMA"] }},
+      {{ marker: "리움미술관", aliases: ["리움", "Leeum"] }},
+      {{ marker: "예술의전당", aliases: ["예당"] }},
+      {{ marker: "동대문디자인플라자", aliases: ["DDP", "동대문디자인"] }},
+      {{ marker: "아모레퍼시픽미술관", aliases: ["APMA", "아모레미술관"] }},
+      {{ marker: "국립민속박물관", aliases: ["민속박물관", "국립민속"] }},
+      {{ marker: "서울역사박물관", aliases: ["서울역사"] }},
+      {{ marker: "대한민국역사박물관", aliases: ["대한민국역사"] }}
+    ];
+    const SEARCH_NORMALIZE_CACHE = new Map();
+    const SEARCH_FIELD_TOKEN_CACHE = new Map();
+    const SEARCH_EXPANSION_CACHE = new Map();
+    const INSTITUTION_ALIAS_CACHE = new Map();
+    const INSTITUTION_SEARCH_DOCUMENT_CACHE = new Map();
+    const EVENT_SEARCH_DOCUMENT_CACHE = new Map();
+
     function normalizeSearchText(value) {{
-      return String(value || "")
+      const source = String(value || "");
+      if (SEARCH_NORMALIZE_CACHE.has(source)) return SEARCH_NORMALIZE_CACHE.get(source);
+      const normalized = source
         .normalize("NFKC")
         .toLocaleLowerCase("ko-KR")
         .replace(/[\\s\\p{{P}}\\p{{S}}]+/gu, "");
+      if (SEARCH_NORMALIZE_CACHE.size < 12000) SEARCH_NORMALIZE_CACHE.set(source, normalized);
+      return normalized;
+    }}
+
+    function searchQueryTokens(value) {{
+      return String(value || "")
+        .normalize("NFKC")
+        .trim()
+        .split(/[\\s,·/]+/)
+        .map((token) => token.trim())
+        .filter(Boolean);
+    }}
+
+    function expandedSearchTerms(term) {{
+      const normalizedTerm = normalizeSearchText(term);
+      if (SEARCH_EXPANSION_CACHE.has(normalizedTerm)) return SEARCH_EXPANSION_CACHE.get(normalizedTerm);
+      const group = SEARCH_SYNONYM_GROUPS.find((entries) =>
+        entries.some((entry) => normalizeSearchText(entry) === normalizedTerm)
+      );
+      const expanded = group ? Array.from(new Set([term, ...group])) : [term];
+      SEARCH_EXPANSION_CACHE.set(normalizedTerm, expanded);
+      return expanded;
+    }}
+
+    function normalizedFieldTokens(value) {{
+      const source = String(value || "");
+      if (SEARCH_FIELD_TOKEN_CACHE.has(source)) return SEARCH_FIELD_TOKEN_CACHE.get(source);
+      const tokens = source
+        .normalize("NFKC")
+        .toLocaleLowerCase("ko-KR")
+        .split(/[\\s\\p{{P}}\\p{{S}}]+/u)
+        .map(normalizeSearchText)
+        .filter(Boolean);
+      if (SEARCH_FIELD_TOKEN_CACHE.size < 12000) SEARCH_FIELD_TOKEN_CACHE.set(source, tokens);
+      return tokens;
+    }}
+
+    function institutionAliases(institution) {{
+      const cacheKey = institution && (institution.id || institution.name);
+      if (INSTITUTION_ALIAS_CACHE.has(cacheKey)) return INSTITUTION_ALIAS_CACHE.get(cacheKey);
+      const name = normalizeSearchText(institution && institution.name);
+      const aliases = [];
+      INSTITUTION_ALIAS_RULES.forEach((rule) => {{
+        if (name.includes(normalizeSearchText(rule.marker))) aliases.push(...rule.aliases);
+      }});
+      const sourceName = institution && institution.directorySourceName;
+      if (sourceName && normalizeSearchText(sourceName) !== name) aliases.push(sourceName);
+      const uniqueAliases = Array.from(new Set(aliases));
+      INSTITUTION_ALIAS_CACHE.set(cacheKey, uniqueAliases);
+      return uniqueAliases;
+    }}
+
+    function exactKnownInstitutionAlias(value) {{
+      const normalizedValue = normalizeSearchText(value);
+      if (!normalizedValue) return "";
+      const alias = INSTITUTION_ALIAS_RULES
+        .flatMap((rule) => rule.aliases)
+        .find((candidate) => normalizeSearchText(candidate) === normalizedValue);
+      return alias ? normalizedValue : "";
+    }}
+
+    function institutionSearchDocument(institution) {{
+      if (INSTITUTION_SEARCH_DOCUMENT_CACHE.has(institution.id)) {{
+        return INSTITUTION_SEARCH_DOCUMENT_CACHE.get(institution.id);
+      }}
+      const aliases = institutionAliases(institution);
+      const fuzzySource = `${{institution.name || ""}} ${{aliases.join(" ")}}`;
+      const document = {{
+        combined: normalizeSearchText([
+          institution.name,
+          aliases.join(" "),
+          institution.region,
+          institution.city,
+          institution.category,
+          institution.address,
+          ...(institution.keywords || [])
+        ].filter(Boolean).join(" ")),
+        initials: normalizeSearchText(hangulInitials(fuzzySource)),
+        fuzzyTokens: normalizedFieldTokens(fuzzySource)
+      }};
+      INSTITUTION_SEARCH_DOCUMENT_CACHE.set(institution.id, document);
+      return document;
+    }}
+
+    function eventSearchDocument(item) {{
+      if (EVENT_SEARCH_DOCUMENT_CACHE.has(item.id)) return EVENT_SEARCH_DOCUMENT_CACHE.get(item.id);
+      const institution = institutionById.get(item.institutionId);
+      const aliases = institutionAliases(institution || {{ name: item.institution }});
+      const fuzzySource = `${{item.displayTitle || item.title || ""}} ${{item.institution || ""}} ${{aliases.join(" ")}}`;
+      const document = {{
+        combined: normalizeSearchText([
+          item.displayTitle,
+          item.title,
+          item.institution,
+          aliases.join(" "),
+          item.displayVenue,
+          item.venueLabel,
+          item.type,
+          item.natureLabel,
+          item.contentType,
+          ...(item.keywordList || [])
+        ].filter(Boolean).join(" ")),
+        initials: normalizeSearchText(hangulInitials(fuzzySource)),
+        fuzzyTokens: normalizedFieldTokens(fuzzySource)
+      }};
+      EVENT_SEARCH_DOCUMENT_CACHE.set(item.id, document);
+      return document;
+    }}
+
+    function likelySearchCandidate(document, tokens) {{
+      return tokens.every((token) => {{
+        const normalizedVariants = expandedSearchTerms(token).map(normalizeSearchText).filter(Boolean);
+        if (normalizedVariants.some((variant) => document.combined.includes(variant))) return true;
+        const normalizedToken = normalizeSearchText(token);
+        if (/^[ㄱ-ㅎ]+$/.test(normalizedToken) && document.initials.includes(normalizedToken)) return true;
+        if (normalizedToken.length < 3) return false;
+        return document.fuzzyTokens.some((fieldToken) =>
+          Math.abs(fieldToken.length - normalizedToken.length) <= 1 &&
+          editDistance(normalizedToken, fieldToken, 1) <= 1
+        );
+      }});
     }}
 
     function hangulInitials(value) {{
@@ -6368,20 +6951,22 @@ def render(person_name="가족"):
       if (normalizedInitialQuery && initials.startsWith(normalizedInitialQuery)) return 96;
       if (normalizedInitialQuery && initials.includes(normalizedInitialQuery)) return 72;
 
-      if (options.fuzzy && queryText.length >= 3) {{
-        const cutoff = 1;
-        const minimumLength = Math.max(2, queryText.length - 1);
-        const maximumLength = Math.min(fieldText.length, queryText.length + 1);
-        for (let windowLength = minimumLength; windowLength <= maximumLength; windowLength += 1) {{
-          for (let start = 0; start <= fieldText.length - windowLength; start += 1) {{
-            const segment = fieldText.slice(start, start + windowLength);
-            if (editDistance(queryText, segment, cutoff) <= cutoff) return 64;
-          }}
-        }}
-      }}
-
       if (options.fuzzy) {{
-        const similarity = bigramSimilarity(queryText, fieldText);
+        const fieldTokens = normalizedFieldTokens(value);
+        if (queryText.length >= 3) {{
+          const typoMatch = fieldTokens.some((token) =>
+            Math.abs(token.length - queryText.length) <= 1 &&
+            editDistance(queryText, token, 1) <= 1
+          );
+          if (typoMatch) return 64;
+        }}
+        const similarityCandidates = fieldText.length <= queryText.length + 5
+          ? [fieldText, ...fieldTokens]
+          : fieldTokens;
+        const similarity = similarityCandidates.reduce(
+          (best, candidate) => Math.max(best, bigramSimilarity(queryText, candidate)),
+          0
+        );
         if (similarity >= 0.72) return 68;
         if (similarity >= 0.58) return 46;
       }}
@@ -6402,40 +6987,271 @@ def render(person_name="가족"):
       return matched === tokens.length ? 34 : matched * 8;
     }}
 
+    function bestExpandedFieldScore(term, value, options = {{}}) {{
+      const candidates = expandedSearchTerms(term);
+      let best = fieldSearchScore(candidates[0], value, options);
+      for (let index = 1; index < candidates.length; index += 1) {{
+        best = Math.max(best, fieldSearchScore(candidates[index], value));
+      }}
+      return best;
+    }}
+
+    function institutionSearchMatch(institution, query) {{
+      const tokens = searchQueryTokens(query);
+      if (!tokens.length) return null;
+      if (!likelySearchCandidate(institutionSearchDocument(institution), tokens)) return null;
+      const aliases = institutionAliases(institution);
+      const knownAlias = exactKnownInstitutionAlias(query);
+      if (knownAlias && !aliases.some((alias) => normalizeSearchText(alias) === knownAlias)) return null;
+      const keywordText = (institution.keywords || []).join(" ");
+      const aliasText = aliases.join(" ");
+      const phraseNameScore = fieldSearchScore(query, institution.name, {{ fuzzy: true }});
+      const phraseAliasScore = fieldSearchScore(query, aliasText, {{ fuzzy: true }});
+      const tokenMatches = tokens.map((token) => {{
+        const signals = [
+          {{ key: "name", score: bestExpandedFieldScore(token, institution.name, {{ fuzzy: true }}) * 1.42 }},
+          {{ key: "alias", score: bestExpandedFieldScore(token, aliasText, {{ fuzzy: true }}) * 1.46 }},
+          {{ key: "topic", score: bestExpandedFieldScore(token, keywordText) * 0.92 }},
+          {{ key: "category", score: bestExpandedFieldScore(token, institution.category) * 0.78 }},
+          {{ key: "region", score: bestExpandedFieldScore(token, `${{institution.region || ""}} ${{institution.city || ""}}`) * 0.68 }},
+          {{ key: "address", score: bestExpandedFieldScore(token, institution.address) * 0.36 }}
+        ].sort((left, right) => right.score - left.score);
+        return signals[0];
+      }});
+      const covered = tokenMatches.filter((entry) => entry.score >= 42).length;
+      const strongSignal =
+        phraseNameScore >= 64 ||
+        phraseAliasScore >= 64 ||
+        tokenMatches.some((entry) => ["name", "alias"].includes(entry.key) && entry.score >= 72) ||
+        tokenMatches.some((entry) => ["topic", "category"].includes(entry.key) && entry.score >= 72);
+      if (covered !== tokens.length || !strongSignal) return null;
+      const score =
+        phraseNameScore * 1.36 +
+        phraseAliasScore * 1.42 +
+        tokenMatches.reduce((total, entry) => total + entry.score * 0.54, 0) +
+        tokenCoverageScore(query, [institution.name, aliasText, institution.region, institution.city, institution.category, keywordText]);
+      const minimumScore = tokens.length > 1 ? 92 : 58;
+      if (score < minimumScore) return null;
+      const reasons = [];
+      if (phraseAliasScore >= 64) reasons.push("기관 별칭 일치");
+      else if (phraseNameScore >= 64 || tokenMatches.some((entry) => entry.key === "name" && entry.score >= 72)) reasons.push("기관명 일치");
+      if (tokenMatches.some((entry) => entry.key === "topic" && entry.score >= 72)) reasons.push("관심 분야 연관");
+      if (tokenMatches.some((entry) => entry.key === "category" && entry.score >= 72)) reasons.push(institution.category || "기관 유형 일치");
+      if (tokenMatches.some((entry) => entry.key === "region" && entry.score >= 58)) reasons.push(institution.region || "지역 일치");
+      return {{ score, reasons: Array.from(new Set(reasons)).slice(0, 2) }};
+    }}
+
+    function eventSearchMatch(item, query) {{
+      const tokens = searchQueryTokens(query);
+      if (!tokens.length) return null;
+      if (!likelySearchCandidate(eventSearchDocument(item), tokens)) return null;
+      const institution = institutionById.get(item.institutionId);
+      const aliases = institutionAliases(institution || {{ name: item.institution }});
+      const aliasText = aliases.join(" ");
+      const knownAlias = exactKnownInstitutionAlias(query);
+      if (knownAlias && !aliases.some((alias) => normalizeSearchText(alias) === knownAlias)) return null;
+      const title = item.displayTitle || item.title || "";
+      const keywordText = (item.keywordList || []).join(" ");
+      const typeText = `${{item.type || ""}} ${{item.natureLabel || ""}} ${{item.contentType || ""}}`;
+      const phraseTitleScore = fieldSearchScore(query, title, {{ fuzzy: true }});
+      const phraseInstitutionScore = fieldSearchScore(query, item.institution, {{ fuzzy: true }});
+      const phraseAliasScore = fieldSearchScore(query, aliasText, {{ fuzzy: true }});
+      const tokenMatches = tokens.map((token) => {{
+        const signals = [
+          {{ key: "title", score: bestExpandedFieldScore(token, title, {{ fuzzy: true }}) * 1.42 }},
+          {{ key: "institution", score: bestExpandedFieldScore(token, item.institution, {{ fuzzy: true }}) * 1.08 }},
+          {{ key: "alias", score: bestExpandedFieldScore(token, aliasText, {{ fuzzy: true }}) * 1.12 }},
+          {{ key: "topic", score: bestExpandedFieldScore(token, keywordText) * 0.96 }},
+          {{ key: "type", score: bestExpandedFieldScore(token, typeText) * 0.82 }},
+          {{ key: "venue", score: bestExpandedFieldScore(token, item.displayVenue || item.venueLabel) * 0.68 }},
+          {{ key: "description", score: bestExpandedFieldScore(token, item.description) * 0.18 }}
+        ].sort((left, right) => right.score - left.score);
+        return signals[0];
+      }});
+      const covered = tokenMatches.filter((entry) => entry.score >= 42).length;
+      const strongSignal =
+        phraseTitleScore >= 64 ||
+        phraseInstitutionScore >= 64 ||
+        phraseAliasScore >= 64 ||
+        tokenMatches.some((entry) => ["title", "institution", "alias"].includes(entry.key) && entry.score >= 68) ||
+        tokenMatches.some((entry) => ["topic", "type"].includes(entry.key) && entry.score >= 72);
+      if (covered !== tokens.length || !strongSignal) return null;
+      const score =
+        phraseTitleScore * 1.34 +
+        phraseInstitutionScore * 0.98 +
+        phraseAliasScore * 1.04 +
+        tokenMatches.reduce((total, entry) => total + entry.score * 0.52, 0) +
+        tokenCoverageScore(query, [title, item.institution, aliasText, item.displayVenue, keywordText, typeText]);
+      const minimumScore = tokens.length > 1 ? 94 : 60;
+      if (score < minimumScore) return null;
+      const reasons = [];
+      if (phraseTitleScore >= 64 || tokenMatches.some((entry) => entry.key === "title" && entry.score >= 72)) reasons.push("전시 제목 연관");
+      if (phraseAliasScore >= 64) reasons.push("기관 별칭 일치");
+      else if (phraseInstitutionScore >= 64 || tokenMatches.some((entry) => entry.key === "institution" && entry.score >= 72)) reasons.push("기관명 일치");
+      if (tokenMatches.some((entry) => entry.key === "topic" && entry.score >= 72)) reasons.push("관심 분야 연관");
+      if (tokenMatches.some((entry) => entry.key === "type" && entry.score >= 72)) reasons.push(item.type || "일정 유형 일치");
+      return {{ score, reasons: Array.from(new Set(reasons)).slice(0, 2) }};
+    }}
+
     function institutionSearchScore(institution, query) {{
       if (!String(query || "").trim()) return 1;
-      if (/^[ㄱ-ㅎ]+$/.test(String(query || "").replace(/\\s+/g, ""))) {{
-        return fieldSearchScore(query, institution.name, {{ fuzzy: true }}) * 2;
-      }}
-      const score =
-        fieldSearchScore(query, institution.name, {{ fuzzy: true }}) * 1.5 +
-        fieldSearchScore(query, institution.city) * 0.58 +
-        fieldSearchScore(query, institution.region) * 0.52 +
-        fieldSearchScore(query, institution.category) * 0.48 +
-        fieldSearchScore(query, institution.address) * 0.36 +
-        fieldSearchScore(query, institution.ownership) * 0.30 +
-        fieldSearchScore(query, institution.directorySourceName, {{ fuzzy: true }}) * 0.72 +
-        fieldSearchScore(query, (institution.keywords || []).join(" ")) * 0.62 +
-        tokenCoverageScore(query, [institution.name, institution.directorySourceName, institution.city, institution.category, institution.address, ...(institution.keywords || [])]);
-      return score;
+      const match = institutionSearchMatch(institution, query);
+      return match ? match.score : 0;
     }}
 
     function eventSearchScore(item, query) {{
-      if (!String(query || "").trim()) return 0;
-      if (/^[ㄱ-ㅎ]+$/.test(String(query || "").replace(/\\s+/g, ""))) {{
-        return (
-          fieldSearchScore(query, item.displayTitle || item.title, {{ fuzzy: true }}) * 1.45 +
-          fieldSearchScore(query, item.institution, {{ fuzzy: true }})
-        );
+      const match = eventSearchMatch(item, query);
+      return match ? match.score : 0;
+    }}
+
+    function globalSearchReasonMarkup(reasons) {{
+      return (reasons || [])
+        .map((reason) => `<span class="global-result-reason">${{escapeHtml(reason)}}</span>`)
+        .join("");
+    }}
+
+    function globalInstitutionResultMarkup(entry) {{
+      const institution = entry.institution;
+      const eventLabel = institution.currentEventCount
+        ? `현재 일정 ${{institution.currentEventCount}}건`
+        : institution.directoryEntry
+          ? "공식 총람 등록 기관"
+          : "기관 정보 보기";
+      return `
+        <button class="global-result-row" type="button" data-global-institution-id="${{institution.id}}">
+          <span class="global-result-copy">
+            <span class="global-result-eyebrow">${{escapeHtml(institution.category || "문화기관")}} · ${{escapeHtml(institution.region || "")}}</span>
+            <strong>${{escapeHtml(institution.name)}}</strong>
+            <span class="global-result-meta">${{escapeHtml(institution.city || institution.address || institution.region || "")}} · ${{escapeHtml(eventLabel)}}</span>
+            <span class="global-result-reasons">${{globalSearchReasonMarkup(entry.match.reasons)}}</span>
+          </span>
+          <span class="global-result-arrow" aria-hidden="true">›</span>
+        </button>`;
+    }}
+
+    function globalEventResultMarkup(entry) {{
+      const item = entry.item;
+      const status = item.isPermanent ? "상설전" : (item.status || item.statusLabel || "");
+      return `
+        <button class="global-result-row" type="button" data-global-event-index="${{item.index}}">
+          <span class="global-result-copy">
+            <span class="global-result-eyebrow">${{escapeHtml(item.type || "일정")}} · ${{escapeHtml(item.institution || "")}}</span>
+            <strong>${{escapeHtml(item.displayTitle || item.title)}}</strong>
+            <span class="global-result-meta">${{escapeHtml(item.period || "")}}${{status ? ` · ${{escapeHtml(status)}}` : ""}}</span>
+            <span class="global-result-reasons">${{globalSearchReasonMarkup(entry.match.reasons)}}</span>
+          </span>
+          <span class="global-result-arrow" aria-hidden="true">›</span>
+        </button>`;
+    }}
+
+    function renderGlobalSearch() {{
+      const query = globalSearchInput.value.trim();
+      globalSearchClear.hidden = !query;
+      globalSearchStart.hidden = Boolean(query);
+      if (!query) {{
+        globalSearchColumns.hidden = true;
+        globalSearchEmpty.hidden = true;
+        globalSearchSummary.textContent = "기관명, 전시 제목, 관심 분야를 검색해보세요.";
+        return;
       }}
-      return (
-        fieldSearchScore(query, item.displayTitle || item.title, {{ fuzzy: true }}) * 1.45 +
-        fieldSearchScore(query, item.institution, {{ fuzzy: true }}) * 1.08 +
-        fieldSearchScore(query, item.displayVenue || item.venueLabel) * 0.82 +
-        fieldSearchScore(query, (item.keywordList || []).join(" ")) * 0.72 +
-        fieldSearchScore(query, item.description) * 0.28 +
-        tokenCoverageScore(query, [item.displayTitle, item.institution, item.displayVenue, ...(item.keywordList || [])])
+
+      const allowInstitutions = ["all", "institution"].includes(globalSearchType);
+      const allowExhibitions = ["all", "exhibition"].includes(globalSearchType);
+      const allowPrograms = globalSearchType === "program";
+      const regionMatches = (entryRegion) => globalSearchRegion === "all" || entryRegion === globalSearchRegion;
+      const institutionResults = allowInstitutions
+        ? institutions
+            .filter((institution) => regionMatches(institution.region))
+            .map((institution) => ({{ institution, match: institutionSearchMatch(institution, query) }}))
+            .filter((entry) => entry.match)
+            .sort((left, right) => {{
+              if (right.match.score !== left.match.score) return right.match.score - left.match.score;
+              if (right.institution.scaleScore !== left.institution.scaleScore) return right.institution.scaleScore - left.institution.scaleScore;
+              return left.institution.name.localeCompare(right.institution.name, "ko");
+            }})
+            .slice(0, 10)
+        : [];
+      const eventResults = (allowExhibitions || allowPrograms)
+        ? items
+            .filter((item) => regionMatches(item.region))
+            .filter((item) => allowPrograms ? ["강연", "교육", "행사"].includes(item.type) : item.type === "전시")
+            .map((item) => ({{ item, match: eventSearchMatch(item, query) }}))
+            .filter((entry) => entry.match)
+            .sort((left, right) => {{
+              if (right.match.score !== left.match.score) return right.match.score - left.match.score;
+              if (right.item.institutionScaleScore !== left.item.institutionScaleScore) {{
+                return right.item.institutionScaleScore - left.item.institutionScaleScore;
+              }}
+              return String(left.item.endDate || "9999-12-31").localeCompare(String(right.item.endDate || "9999-12-31"));
+            }})
+            .slice(0, 20)
+        : [];
+
+      globalInstitutionResults.innerHTML = institutionResults.map(globalInstitutionResultMarkup).join("");
+      globalEventResults.innerHTML = eventResults.map(globalEventResultMarkup).join("");
+      globalInstitutionResultsCount.textContent = `${{institutionResults.length}}곳`;
+      globalEventResultsCount.textContent = `${{eventResults.length}}건`;
+      globalEventResultsTitle.textContent = allowPrograms ? "강연·교육" : "전시";
+      globalInstitutionResultsSection.hidden = !allowInstitutions || institutionResults.length === 0;
+      globalEventResultsSection.hidden = (!allowExhibitions && !allowPrograms) || eventResults.length === 0;
+      const resultCount = institutionResults.length + eventResults.length;
+      globalSearchColumns.classList.toggle(
+        "single-column",
+        institutionResults.length === 0 || eventResults.length === 0
       );
+      globalSearchColumns.hidden = resultCount === 0;
+      globalSearchEmpty.hidden = resultCount > 0;
+      const regionLabel = globalSearchRegion === "all" ? "수도권" : globalSearchRegion;
+      globalSearchSummary.innerHTML = resultCount
+        ? `<strong>“${{escapeHtml(query)}}”</strong>와 가까운 ${{regionLabel}} 결과 ${{resultCount}}건`
+        : `<strong>“${{escapeHtml(query)}}”</strong>와 충분히 가까운 결과가 없습니다.`;
+    }}
+
+    function openGlobalSearch(options = {{}}) {{
+      if (!globalSearchOverlay.hidden) return;
+      globalSearchOverlay.hidden = false;
+      document.body.classList.add("search-open");
+      if (!options.fromHistory) {{
+        try {{
+          history.pushState({{ cultureAlertSearch: true }}, "");
+        }} catch (error) {{
+          // Search remains usable when the browser blocks History API updates.
+        }}
+      }}
+      renderGlobalSearch();
+      window.setTimeout(() => globalSearchInput.focus(), 0);
+    }}
+
+    function closeGlobalSearch() {{
+      globalSearchOverlay.hidden = true;
+      document.body.classList.remove("search-open");
+    }}
+
+    function requestCloseGlobalSearch() {{
+      if (!globalSearchOverlay.hidden && history.state && history.state.cultureAlertSearch) {{
+        history.back();
+      }} else {{
+        closeGlobalSearch();
+      }}
+    }}
+
+    function openInstitutionFromGlobalSearch(institutionId) {{
+      const institution = institutionById.get(institutionId);
+      if (!institution) return;
+      institutionKind = "all";
+      institutionRegion = ["서울", "경기", "인천"].includes(institution.region) ? institution.region : "all";
+      institutionSearch.value = institution.name;
+      document.querySelectorAll("[data-institution-kind]").forEach((button) => {{
+        button.setAttribute("aria-pressed", String(button.dataset.institutionKind === "all"));
+      }});
+      document.querySelectorAll("[data-institution-region]").forEach((button) => {{
+        button.setAttribute("aria-pressed", String(button.dataset.institutionRegion === institutionRegion));
+      }});
+      switchView("institutions");
+      renderInstitutionView();
+      renderInstitutionSpotlight(institutionId, false);
+      window.scrollTo({{ top: 0, behavior: "smooth" }});
+      requestCloseGlobalSearch();
     }}
 
     function institutionEventMarkup(item) {{
@@ -6872,9 +7688,53 @@ def render(person_name="가족"):
       if (view === "institutions") renderInstitutionView();
     }}
 
-    headerSearchButton.addEventListener("click", () => {{
-      switchView("institutions");
-      window.setTimeout(() => institutionSearch.focus(), 0);
+    headerSearchButton.addEventListener("click", () => openGlobalSearch());
+    globalSearchClose.addEventListener("click", requestCloseGlobalSearch);
+    globalSearchOverlay.addEventListener("click", (event) => {{
+      if (event.target === globalSearchOverlay) requestCloseGlobalSearch();
+    }});
+    globalSearchInput.addEventListener("input", () => {{
+      window.clearTimeout(globalSearchTimer);
+      globalSearchTimer = window.setTimeout(renderGlobalSearch, 70);
+    }});
+    globalSearchClear.addEventListener("click", () => {{
+      globalSearchInput.value = "";
+      renderGlobalSearch();
+      globalSearchInput.focus();
+    }});
+    globalSearchTypeFilters.addEventListener("click", (event) => {{
+      const button = event.target.closest("[data-global-type]");
+      if (!button) return;
+      globalSearchType = button.dataset.globalType;
+      document.querySelectorAll("[data-global-type]").forEach((other) => {{
+        other.setAttribute("aria-pressed", String(other === button));
+      }});
+      renderGlobalSearch();
+    }});
+    globalSearchRegionFilters.addEventListener("click", (event) => {{
+      const button = event.target.closest("[data-global-region]");
+      if (!button) return;
+      globalSearchRegion = button.dataset.globalRegion;
+      document.querySelectorAll("[data-global-region]").forEach((other) => {{
+        other.setAttribute("aria-pressed", String(other === button));
+      }});
+      renderGlobalSearch();
+    }});
+    document.querySelectorAll("[data-global-topic]").forEach((button) => {{
+      button.addEventListener("click", () => {{
+        globalSearchInput.value = button.dataset.globalTopic;
+        renderGlobalSearch();
+        globalSearchInput.focus();
+      }});
+    }});
+    globalSearchOverlay.addEventListener("click", (event) => {{
+      const institutionButton = event.target.closest("[data-global-institution-id]");
+      if (institutionButton) {{
+        openInstitutionFromGlobalSearch(Number(institutionButton.dataset.globalInstitutionId));
+        return;
+      }}
+      const eventButton = event.target.closest("[data-global-event-index]");
+      if (eventButton) openDetail(Number(eventButton.dataset.globalEventIndex));
     }});
     institutionSearch.addEventListener("input", renderInstitutionView);
     institutionSearch.addEventListener("keydown", (event) => {{
@@ -7050,13 +7910,22 @@ def render(person_name="가족"):
         closeDetail();
         return;
       }}
+      if (!globalSearchOverlay.hidden && !(event.state && event.state.cultureAlertSearch)) {{
+        closeGlobalSearch();
+        return;
+      }}
       const detailIndex = Number(event.state && event.state.cultureAlertDetailIndex);
       if (event.state && event.state.cultureAlertDetail && Number.isInteger(detailIndex)) {{
         openDetail(detailIndex, {{ fromHistory: true }});
+        return;
+      }}
+      if (event.state && event.state.cultureAlertSearch && globalSearchOverlay.hidden) {{
+        openGlobalSearch({{ fromHistory: true }});
       }}
     }});
     document.addEventListener("keydown", (event) => {{
       if (event.key === "Escape" && !overlay.hidden) requestCloseDetail();
+      else if (event.key === "Escape" && !globalSearchOverlay.hidden) requestCloseGlobalSearch();
       else if (event.key === "Escape" && !preferenceOverlay.hidden && activeProfileId) closePreferencePanel();
     }});
 

@@ -23,10 +23,19 @@ https://gmjeremy22.github.io/culture-alert-site/
 
 ## 자동 업데이트
 
-- `.github/workflows/daily-update.yml`은 매일 07:37 KST에 실행됩니다.
+- 외부 예약 호출이 `.github/workflows/daily-update.yml`을 매일 07:40 KST에 한 번 실행합니다.
 - GitHub Actions가 새 DB를 만들고, 공개 가능한 수집기 26개를 실행하고, 카드 HTML을 다시 만든 뒤 암호화해서 Pages에 배포합니다.
 - 기본 실행에서는 느리고 실패 가능성이 큰 `official-page-monitor`를 제외합니다.
 - 필요할 때만 workflow 환경변수 `CULTURE_ALERT_INCLUDE_OFFICIAL_MONITOR=1`로 켤 수 있습니다.
+
+## 통합 검색
+
+- 헤더의 `검색`에서 기관명, 전시 제목, 관심 분야를 한 번에 찾을 수 있습니다.
+- 기관 별칭, 한글 초성, 띄어쓰기 차이, 한 글자 오타와 제한된 분야 유사어를 함께 확인합니다.
+- 검색 결과는 기관과 전시로 나뉘며, 강연·교육은 사용자가 해당 검색 유형을 직접 선택했을 때만 표시합니다.
+- 제목·기관명·분야 태그 중 강한 연관 근거가 있는 결과만 표시하고 설명 본문에 우연히 등장한 단어만으로는 노출하지 않습니다.
+- 검색은 암호 해제 후 사용자 브라우저 안에서만 실행되며 검색어를 외부 서버로 전송하지 않습니다.
+- `node tools/test-search-relevance.js`로 별칭, 오타, 복합 분야, 무관 검색과 응답 속도를 자동 점검합니다.
 
 ## 추천 순서와 기관 규모 지표
 

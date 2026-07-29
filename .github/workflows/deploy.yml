@@ -49,6 +49,9 @@ jobs:
       - name: Build encrypted report
         run: python automation/run_daily_update.py
 
+      - name: Verify search relevance
+        run: node tools/test-search-relevance.js
+
       - name: Verify encrypted report
         run: node tools/verify-protected-site.js --html public/index.html --leak "feature-card"
 
