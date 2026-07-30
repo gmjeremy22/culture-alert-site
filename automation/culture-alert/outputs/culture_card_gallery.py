@@ -3763,6 +3763,53 @@ def render(person_name="가족"):
       letter-spacing: 0;
       white-space: nowrap;
     }}
+    .home-search-form {{
+      display: flex;
+      width: min(660px, 100%);
+      min-height: 54px;
+      margin-top: 22px;
+      border: 1px solid rgba(232, 223, 208, 0.2);
+      border-radius: 6px;
+      background: rgba(232, 223, 208, 0.055);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+      transition: border-color 160ms ease, background 160ms ease;
+    }}
+    .home-search-form:focus-within {{
+      border-color: rgba(191, 160, 120, 0.8);
+      background: rgba(232, 223, 208, 0.08);
+    }}
+    .home-search-input {{
+      min-width: 0;
+      flex: 1 1 auto;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      padding: 0 18px;
+      font: inherit;
+      font-size: 15px;
+    }}
+    .home-search-input::placeholder {{
+      color: rgba(232, 223, 208, 0.48);
+    }}
+    .home-search-submit {{
+      flex: 0 0 auto;
+      min-width: 76px;
+      margin: 6px;
+      border: 1px solid rgba(191, 160, 120, 0.5);
+      border-radius: 4px;
+      background: rgba(191, 160, 120, 0.15);
+      color: #F0E4D0;
+      font-size: 13px;
+      font-weight: 850;
+      cursor: pointer;
+    }}
+    .home-search-submit:hover,
+    .home-search-submit:focus-visible {{
+      border-color: var(--accent);
+      background: rgba(191, 160, 120, 0.24);
+      outline: none;
+    }}
     .selection-note {{
       display: grid;
       grid-template-columns: auto minmax(0, 1fr);
@@ -4418,6 +4465,19 @@ def render(person_name="가족"):
         font-size: clamp(26px, 7.4vw, 30px);
         font-weight: 760;
         line-height: 1.16;
+      }}
+      .home-search-form {{
+        width: 100%;
+        min-height: 48px;
+        margin-top: 16px;
+      }}
+      .home-search-input {{
+        padding-inline: 14px;
+        font-size: 14px;
+      }}
+      .home-search-submit {{
+        min-width: 64px;
+        margin: 5px;
       }}
       .selection-note {{
         grid-template-columns: auto minmax(0, 1fr);
@@ -5482,6 +5542,10 @@ def render(person_name="가족"):
         <div class="masthead-title">
           <p class="eyebrow">WEEKLY CULTURE EDIT</p>
           <h1 id="curationTitle">이번 주, 마음이 가는 곳</h1>
+          <form class="home-search-form" id="homeSearchForm" role="search">
+            <input class="home-search-input" id="homeSearchInput" type="search" autocomplete="off" spellcheck="false" aria-label="기관, 전시, 관심 분야 검색" placeholder="기관, 전시, 관심 분야 검색">
+            <button class="home-search-submit" type="submit">검색</button>
+          </form>
         </div>
         <aside class="selection-note" aria-label="추천 선정 기준">
           <span class="note-label">어떻게 골랐나요</span>
@@ -5859,6 +5923,8 @@ def render(person_name="가족"):
     const permanentView = document.getElementById("permanentView");
     const institutionView = document.getElementById("institutionView");
     const headerSearchButton = document.getElementById("headerSearchButton");
+    const homeSearchForm = document.getElementById("homeSearchForm");
+    const homeSearchInput = document.getElementById("homeSearchInput");
     const globalSearchOverlay = document.getElementById("globalSearchOverlay");
     const globalSearchClose = document.getElementById("globalSearchClose");
     const globalSearchInput = document.getElementById("globalSearchInput");
@@ -7720,6 +7786,11 @@ def render(person_name="가족"):
     }}
 
     headerSearchButton.addEventListener("click", () => openGlobalSearch());
+    homeSearchForm.addEventListener("submit", (event) => {{
+      event.preventDefault();
+      globalSearchInput.value = homeSearchInput.value.trim();
+      openGlobalSearch();
+    }});
     globalSearchClose.addEventListener("click", requestCloseGlobalSearch);
     globalSearchOverlay.addEventListener("click", (event) => {{
       if (event.target === globalSearchOverlay) requestCloseGlobalSearch();

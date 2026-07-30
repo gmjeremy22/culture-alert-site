@@ -152,7 +152,15 @@ function main() {
   if (!fs.existsSync(htmlPath)) {
     throw new Error(`HTML does not exist: ${htmlPath}`);
   }
-  const api = extractSearchApi(fs.readFileSync(htmlPath, "utf8"));
+  const html = fs.readFileSync(htmlPath, "utf8");
+  if (
+    !html.includes('id="homeSearchForm"') ||
+    !html.includes('id="homeSearchInput"') ||
+    !html.includes('homeSearchForm.addEventListener("submit"')
+  ) {
+    fail("the first-screen search entry point is missing or not connected");
+  }
+  const api = extractSearchApi(html);
   const tests = [];
 
   const koreanAlias = runSearch(api, "국현", { fixtureOnly: true });
