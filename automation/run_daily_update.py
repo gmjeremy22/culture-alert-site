@@ -74,9 +74,14 @@ def run_collection_and_render():
         scraper.ensure_schema(conn)
         for name in source_names:
             try:
-                events = scraper.SCRAPERS[name]()
+                outcome = scraper.SCRAPERS[name]()
+                events = getattr(outcome, "events", outcome)
+                checks = getattr(outcome, "checks", None)
                 inserted, updated = scraper.upsert_events(conn, events)
                 ended = reconcile_priority_events(conn, name, events)
+                scraper.record_collection_check(
+                    conn, name, events=events, overrides=checks
+                )
                 results.append(
                     {
                         "source": name,
@@ -88,6 +93,7 @@ def run_collection_and_render():
                     }
                 )
             except Exception as exc:
+                scraper.record_collection_check(conn, name, error=exc)
                 results.append(
                     {
                         "source": name,
@@ -111,6 +117,18 @@ def run_collection_and_render():
     total_cards, counts = culture_card_gallery.render()
     shutil.copyfile(CARD_HTML, RECOMMENDATION_HTML)
     write_cloud_report(results, status_updated, status_counts, total_cards, counts, scored)
+    failed = [item for item in results if item["error"]]
+    print(f"sources={len(results)}")
+    print(f"failed_sources={len(failed)}")
+    print(f"cards={total_cards}")
+    for item in results:
+        if item["error"]:
+            print(f"source={item['source']} status=failed error={item['error']}")
+        else:
+            print(
+                f"source={item['source']} status=ok fetched={item['fetched']} "
+                f"inserted={item['inserted']} updated={item['updated']} ended={item['ended']}"
+            )
 
 
 def write_cloud_report(results, status_updated, status_counts, total_cards, counts, scored):
