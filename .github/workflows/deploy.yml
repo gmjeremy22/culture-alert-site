@@ -63,6 +63,9 @@ jobs:
       - name: Verify recommendation priority
         run: node tools/test-recommendation-priority.js
 
+      - name: Verify current and upcoming separation
+        run: node tools/test-schedule-separation.js
+
       - name: Verify encrypted report
         run: node tools/verify-protected-site.js --html public/index.html --leak "feature-card"
 

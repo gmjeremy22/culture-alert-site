@@ -50,6 +50,13 @@ https://gmjeremy22.github.io/culture-alert-site/
 - `node tools/test-recommendation-priority.js`로 마감이 임박한 소규모 기관 일정이 주요 기관 추천을 앞지르지 않는지 자동 점검합니다.
 - 총람 원본이 바뀐 경우 `official_facility_directory.py --workbook <원본.xlsx>`를 실행해 기관 DB, 공식 메타데이터, 대조표와 규모 지표를 함께 갱신합니다.
 
+## 현재 일정과 예정 일정 분리
+
+- 시작일이 오늘보다 뒤인 전시·강연·교육·행사는 추천 보기, 현재 전시, 강연·교육 탭에서 제외하고 `예정 일정` 독립 탭에만 표시합니다.
+- 예정 일정은 시작일 가까운 순으로 정렬하며 카드에 `내일 시작`, `N일 뒤 시작`, `시작 예정` 상태를 명시합니다.
+- 기관 상세와 기관 카드도 현재 일정 건수와 예정 일정 건수를 따로 계산해 표시합니다.
+- `node tools/test-schedule-separation.js`로 현재·예정 카드 풀이 서로 섞이지 않는지 매 배포마다 자동 점검합니다.
+
 ## 주간 반자동 후보 점검
 
 - `.github/workflows/weekly-semi-auto.yml`은 매주 월요일 08:10 KST에 실행됩니다.

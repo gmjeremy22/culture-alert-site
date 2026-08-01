@@ -491,6 +491,7 @@ def compact_event_reference(item):
         "endDate": item["endDate"],
         "location": item["location"],
         "status": item["status"],
+        "startsInDays": item.get("startsInDays"),
         "nextOccurrence": next_occurrence,
     }
 
@@ -500,10 +501,13 @@ def attach_companion_events(items):
         item["index"] = index
     for item in items:
         venue_key = normalize_companion_key(item.get("venueLabel"))
+        item_is_upcoming = is_upcoming_item(item)
         companions = []
         seen = set()
         for other in items:
             if other is item:
+                continue
+            if is_upcoming_item(other) != item_is_upcoming:
                 continue
             same_venue = venue_key and normalize_companion_key(other.get("venueLabel")) == venue_key
             if not same_venue:
@@ -768,19 +772,29 @@ def load_institutions(conn, items, institution_metrics=None):
         exhibition_url,
         program_url,
     ) in rows:
-        current_events = events_by_institution.get(institution_id, [])
+        institution_events = events_by_institution.get(institution_id, [])
+        current_events = [
+            event for event in institution_events if not is_upcoming_item(event)
+        ]
+        upcoming_events = [
+            event for event in institution_events if is_upcoming_item(event)
+        ]
         collection_check = collection_checks.get(institution_id, {})
         directory = directory_metadata.get(institution_id, {})
         keywords = []
         seen_keywords = set()
-        for event in current_events:
+        for event in institution_events:
             for keyword in event.get("keywordList", []):
                 if keyword in seen_keywords:
                     continue
                 seen_keywords.add(keyword)
                 keywords.append(keyword)
         representative = next(
-            (event.get("imageUrl") for event in current_events if event.get("imageUrl")),
+            (
+                event.get("imageUrl")
+                for event in institution_events
+                if event.get("imageUrl")
+            ),
             "",
         )
         institution_metric, metric_match = match_institution_metric(
@@ -844,6 +858,18 @@ def load_institutions(conn, items, institution_metrics=None):
                     if event.get("type") in {"강연", "교육", "행사"}
                 ),
                 "eventIndexes": [event["index"] for event in current_events],
+                "upcomingEventCount": len(upcoming_events),
+                "upcomingExhibitionCount": sum(
+                    1 for event in upcoming_events if event.get("type") == "전시"
+                ),
+                "upcomingProgramCount": sum(
+                    1
+                    for event in upcoming_events
+                    if event.get("type") in {"강연", "교육", "행사"}
+                ),
+                "upcomingEventIndexes": [
+                    event["index"] for event in upcoming_events
+                ],
                 "representativeImage": representative,
                 "keywords": keywords[:12],
             }
@@ -905,6 +931,22 @@ def is_permanent_item(item):
     return "상설" in title
 
 
+def is_upcoming_item(item):
+    starts_in = item.get("startsInDays")
+    if starts_in is not None:
+        return starts_in > 0
+    return "예정" in str(item.get("status") or "")
+
+
+def upcoming_start_label(item):
+    starts_in = item.get("startsInDays")
+    if starts_in == 1:
+        return "내일 시작"
+    if starts_in is not None and starts_in > 1:
+        return f"{starts_in}일 뒤 시작"
+    return "시작 예정"
+
+
 MAJOR_INSTITUTION_MARKERS = (
     "국립",
     "서울시립",
@@ -931,12 +973,33 @@ def render(person_name="가족"):
     timed_indexed_items = [
         (index, item) for index, item in indexed_items if not is_permanent_item(item)
     ]
+    upcoming_indexed_items = sorted(
+        [
+            (index, item)
+            for index, item in timed_indexed_items
+            if is_upcoming_item(item)
+        ],
+        key=lambda entry: (
+            entry[1].get("startsInDays")
+            if entry[1].get("startsInDays") is not None
+            else 99999,
+            -float(entry[1].get("institutionScaleScore") or 0),
+            entry[1].get("displayTitle") or entry[1].get("title") or "",
+        ),
+    )
+    current_indexed_items = [
+        (index, item)
+        for index, item in timed_indexed_items
+        if not is_upcoming_item(item)
+    ]
     exhibition_indexed_items = [
-        (index, item) for index, item in timed_indexed_items if item.get("type") == "전시"
+        (index, item)
+        for index, item in current_indexed_items
+        if item.get("type") == "전시"
     ]
     program_indexed_items = [
         (index, item)
-        for index, item in timed_indexed_items
+        for index, item in current_indexed_items
         if item.get("type") in {"강연", "교육", "행사"}
     ]
     permanent_indexed_items = [
@@ -945,6 +1008,7 @@ def render(person_name="가족"):
     timed_items = [item for _, item in timed_indexed_items]
     exhibition_items = [item for _, item in exhibition_indexed_items]
     program_items = [item for _, item in program_indexed_items]
+    upcoming_items = [item for _, item in upcoming_indexed_items]
     permanent_items = [item for _, item in permanent_indexed_items]
     counts = type_counts(items)
     timed_counts = type_counts(timed_items)
@@ -958,6 +1022,10 @@ def render(person_name="가족"):
     program_counts = type_counts(program_items)
     program_count_text = " · ".join(
         f"{key} {value}건" for key, value in program_counts.items()
+    )
+    upcoming_counts = type_counts(upcoming_items)
+    upcoming_count_text = " · ".join(
+        f"{key} {value}건" for key, value in upcoming_counts.items()
     )
     permanent_count_text = f"상설전 {len(permanent_items)}건"
     update_time_text = datetime.now().strftime("%Y.%m.%d %H:%M")
@@ -1054,7 +1122,7 @@ def render(person_name="가족"):
             "</div>"
         )
 
-    def render_card(index, item, class_name):
+    def render_card(index, item, class_name, upcoming=False):
         image = item["imageUrl"]
         image_html = (
             f'<img src="{html.escape(image)}" alt="{html.escape(item["displayTitle"])}" loading="lazy">'
@@ -1077,11 +1145,17 @@ def render(person_name="가족"):
             if keyword_chips
             else ""
         )
+        upcoming_html = (
+            f'<div class="upcoming-state"><strong>{html.escape(upcoming_start_label(item))}</strong><span>{html.escape(item["type"])}</span></div>'
+            if upcoming
+            else ""
+        )
         return f"""
         <article class="{class_name}" data-type="{html.escape(item['type'])}" data-feature-index="{index}">
           <button class="card-button" type="button" data-index="{index}">
             <div class="poster">{image_html}</div>
             <div class="card-body">
+              {upcoming_html}
               {badges_html}
               <p class="card-place">{html.escape(item['displayVenue'])}</p>
               <h2>{html.escape(item['displayTitle'])}</h2>
@@ -1103,6 +1177,10 @@ def render(person_name="가족"):
     program_cards = "".join(
         render_card(index, item, "card program-card")
         for index, item in program_indexed_items
+    )
+    upcoming_cards = "".join(
+        render_card(index, item, "card upcoming-card", upcoming=True)
+        for index, item in upcoming_indexed_items
     )
     permanent_cards = "".join(
         render_card(index, item, "card list-card")
@@ -1282,15 +1360,49 @@ def render(person_name="가족"):
     }}
     .featured-view,
     .all-view,
+    .upcoming-view,
     .program-view,
     .permanent-view {{
       width: 100%;
     }}
     .featured-view[hidden],
     .all-view[hidden],
+    .upcoming-view[hidden],
     .program-view[hidden],
     .permanent-view[hidden] {{
       display: none;
+    }}
+    .upcoming-view {{
+      display: grid;
+      gap: 18px;
+    }}
+    .upcoming-view .view-heading > div > span {{
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 13px;
+    }}
+    .upcoming-state {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 11px;
+      border-bottom: 1px solid rgba(191, 160, 120, 0.2);
+      padding-bottom: 9px;
+    }}
+    .upcoming-state strong {{
+      color: #E4C38E;
+      font-size: 12px;
+      font-weight: 880;
+    }}
+    .upcoming-state span {{
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }}
+    .upcoming-card {{
+      border-color: rgba(191, 160, 120, 0.22);
     }}
     .feature-feed {{
       display: grid;
@@ -4858,6 +4970,20 @@ def render(person_name="가족"):
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }}
+    .institution-event-groups {{
+      display: grid;
+      gap: 18px;
+    }}
+    .institution-event-group {{
+      display: grid;
+      gap: 9px;
+    }}
+    .institution-event-group-title {{
+      margin: 0;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 880;
+    }}
     .institution-event-button {{
       display: grid;
       grid-template-columns: 64px minmax(0, 1fr);
@@ -5011,6 +5137,10 @@ def render(person_name="가족"):
     }}
     .institution-counts .has-current {{
       color: var(--accent);
+      font-weight: 850;
+    }}
+    .institution-counts .has-upcoming {{
+      color: #E4C38E;
       font-weight: 850;
     }}
     .institution-tag-row {{
@@ -5521,7 +5651,8 @@ def render(person_name="가족"):
       </div>
       <div class="toolbar" aria-label="보기 전환">
         <button class="view-button" type="button" data-view="featured" aria-pressed="true">추천 보기</button>
-        <button class="view-button" type="button" data-view="all" aria-pressed="false">기간 전시</button>
+        <button class="view-button" type="button" data-view="all" aria-pressed="false">현재 전시</button>
+        <button class="view-button" type="button" data-view="upcoming" aria-pressed="false">예정 일정</button>
         <button class="view-button" id="programViewButton" type="button" data-view="program" aria-pressed="false" hidden>강연·교육</button>
         <button class="view-button" type="button" data-view="permanent" aria-pressed="false">상설전</button>
         <button class="view-button" type="button" data-view="institutions" aria-pressed="false">기관 둘러보기</button>
@@ -5550,7 +5681,7 @@ def render(person_name="가족"):
         <aside class="selection-note" aria-label="추천 선정 기준">
           <span class="note-label">어떻게 골랐나요</span>
           <p>관람 규모·소장 기반이 탄탄한 주요 기관을 먼저 놓고, 그 안에서 취향과 일정 조건을 살폈어요.</p>
-          <p class="summary">진행/예정 {len(items)}건 · {html.escape(count_text)}</p>
+          <p class="summary">현재 {len(exhibition_items) + len(program_items)}건 · 예정 {len(upcoming_items)}건 · 상설 {len(permanent_items)}건</p>
         </aside>
       </section>
       <section class="curation-board cinematic-stage hero-stage" aria-label="오늘의 큐레이션">
@@ -5665,14 +5796,27 @@ def render(person_name="가족"):
       </section>
       <div class="empty-state" id="emptyRecommendations" hidden>조건에 맞는 일정이 없어요.</div>
     </section>
-    <section class="all-view" id="allView" aria-label="기간 전시" hidden>
+    <section class="all-view" id="allView" aria-label="현재 전시" hidden>
       <div class="view-heading">
-        <p>기간 전시</p>
+        <p>현재 전시</p>
         <span>{html.escape(exhibition_count_text)}</span>
       </div>
       <div class="grid" id="cardGrid">
         {all_cards}
       </div>
+    </section>
+    <section class="upcoming-view" id="upcomingView" aria-label="예정 일정" hidden>
+      <div class="view-heading">
+        <div>
+          <p>예정 일정</p>
+          <span>아직 시작하지 않은 일정만 시작일 가까운 순으로 모았어요.</span>
+        </div>
+        <span>{html.escape(upcoming_count_text or "0건")}</span>
+      </div>
+      <div class="grid" id="upcomingGrid">
+        {upcoming_cards}
+      </div>
+      <div class="empty-state" {'hidden' if upcoming_items else ''}>현재 수집된 예정 일정이 없어요.</div>
     </section>
     <section class="program-view" id="programView" aria-label="강연과 교육" hidden>
       <div class="view-heading program-view-heading">
@@ -5919,6 +6063,7 @@ def render(person_name="가족"):
     const closeButton = document.getElementById("detailClose");
     const featuredView = document.getElementById("featuredView");
     const allView = document.getElementById("allView");
+    const upcomingView = document.getElementById("upcomingView");
     const programView = document.getElementById("programView");
     const permanentView = document.getElementById("permanentView");
     const institutionView = document.getElementById("institutionView");
@@ -6037,6 +6182,19 @@ def render(person_name="가족"):
 
     function numeric(value) {{
       return typeof value === "number" && Number.isFinite(value) ? value : null;
+    }}
+
+    function isUpcomingSchedule(item) {{
+      const startsIn = numeric(item.startsInDays);
+      if (startsIn !== null) return startsIn > 0;
+      return String(item.status || "").includes("예정");
+    }}
+
+    function scheduleStartLabel(item) {{
+      const startsIn = numeric(item.startsInDays);
+      if (startsIn === 1) return "내일 시작";
+      if (startsIn !== null && startsIn > 1) return startsIn + "일 뒤 시작";
+      return "시작 예정";
     }}
 
     function escapeHtml(value) {{
@@ -6352,6 +6510,7 @@ def render(person_name="가족"):
       }}
       if (item.type !== "전시") return false;
       if (item.recommendationEligible === false) return false;
+      if (isUpcomingSchedule(item)) return false;
       const remainingDays = numeric(item.remainingDays);
       if (remainingDays !== null && remainingDays < 0) return false;
       const recommendationTitle = normalizeSearchText(item.displayTitle || item.title || "");
@@ -6723,6 +6882,7 @@ def render(person_name="가족"):
       const rankedPrograms = items
         .map((item, index) => ({{ item, index, score: scoreRecommendation(item, index) }}))
         .filter((entry) => ["강연", "교육", "행사"].includes(entry.item.type))
+        .filter((entry) => !isUpcomingSchedule(entry.item))
         .filter((entry) => {{
           const remainingDays = numeric(entry.item.remainingDays);
           return remainingDays === null || remainingDays >= 0;
@@ -7355,12 +7515,15 @@ def render(person_name="가족"):
       const thumb = item.imageUrl
         ? `<span class="institution-event-thumb"><img src="${{escapeHtml(item.imageUrl)}}" alt="" loading="lazy"></span>`
         : `<span class="institution-event-thumb">${{escapeHtml(item.type || "일정")}}</span>`;
+      const scheduleState = isUpcomingSchedule(item)
+        ? scheduleStartLabel(item)
+        : (item.status || "진행 상태 확인");
       return `
         <button class="institution-event-button" type="button" data-search-event-index="${{item.index}}">
           ${{thumb}}
           <span class="institution-event-copy">
             <strong>${{escapeHtml(item.displayTitle || item.title)}}</strong>
-            <span>${{escapeHtml(item.type)}} · ${{escapeHtml(item.period)}}</span>
+            <span>${{escapeHtml(item.type)}} · ${{escapeHtml(scheduleState)}} · ${{escapeHtml(item.period)}}</span>
           </span>
         </button>`;
     }}
@@ -7377,9 +7540,20 @@ def render(person_name="가족"):
           if (left.type !== "전시" && right.type === "전시") return 1;
           return String(left.endDate || "9999-12-31").localeCompare(String(right.endDate || "9999-12-31"));
         }});
-      const eventsMarkup = currentEvents.length
+      const upcomingEvents = (institution.upcomingEventIndexes || [])
+        .map((index) => items[index])
+        .filter(Boolean)
+        .sort((left, right) => {{
+          const startDifference = (numeric(left.startsInDays) ?? 99999) - (numeric(right.startsInDays) ?? 99999);
+          if (startDifference !== 0) return startDifference;
+          return institutionScaleScore(right) - institutionScaleScore(left);
+        }});
+      const currentEventsMarkup = currentEvents.length
         ? currentEvents.slice(0, 8).map(institutionEventMarkup).join("")
         : '<p class="institution-meta-line">현재 수집된 진행 일정은 없어요. 기관은 둘러보기 목록에 계속 보관하며 새 일정이 확인되면 자동으로 연결됩니다.</p>';
+      const upcomingEventsMarkup = upcomingEvents.length
+        ? `<section class="institution-event-group"><p class="institution-event-group-title">예정 일정 ${{upcomingEvents.length}}건</p><div class="institution-spotlight-events">${{upcomingEvents.slice(0, 8).map(institutionEventMarkup).join("")}}</div></section>`
+        : "";
       const officialLink = institution.officialUrl
         ? `<a class="institution-official-link" href="${{escapeHtml(institution.officialUrl)}}" target="_blank" rel="noopener">공식 페이지</a>`
         : "";
@@ -7393,7 +7567,7 @@ def render(person_name="가족"):
         <div class="institution-spotlight-main">
           <p class="institution-kicker">${{escapeHtml(institution.region)}} · ${{escapeHtml(institution.category)}}</p>
           <h2>${{escapeHtml(institution.name)}}</h2>
-          <p class="institution-meta-line">${{escapeHtml(institution.city || institution.region)}} · 진행 일정 ${{institution.currentEventCount}}건 · 전시 ${{institution.currentExhibitionCount}}건</p>
+          <p class="institution-meta-line">${{escapeHtml(institution.city || institution.region)}} · 현재 ${{institution.currentEventCount}}건 · 예정 ${{institution.upcomingEventCount || 0}}건</p>
           ${{directoryLine}}
           ${{addressLine}}
           <div class="institution-spotlight-actions">
@@ -7402,7 +7576,13 @@ def render(person_name="가족"):
             <button class="institution-collapse-button" type="button" data-close-institution>닫기</button>
           </div>
         </div>
-        <div class="institution-spotlight-events">${{eventsMarkup}}</div>`;
+        <div class="institution-event-groups">
+          <section class="institution-event-group">
+            <p class="institution-event-group-title">현재 일정 ${{currentEvents.length}}건</p>
+            <div class="institution-spotlight-events">${{currentEventsMarkup}}</div>
+          </section>
+          ${{upcomingEventsMarkup}}
+        </div>`;
       institutionSpotlight.hidden = false;
       if (shouldScroll) institutionSpotlight.scrollIntoView({{ block: "start", behavior: "smooth" }});
     }}
@@ -7427,8 +7607,11 @@ def render(person_name="가족"):
           <span class="institution-type-label">${{escapeHtml(institution.category)}}</span>
           ${{scaleLabel ? `<span class="institution-scale-label">${{scaleLabel}}</span>` : ""}}
         </div>`;
+      const upcomingCount = institution.upcomingEventCount || 0;
       const countText = institution.currentEventCount
-        ? `<span class="has-current">진행 일정 ${{institution.currentEventCount}}건</span><span>전시 ${{institution.currentExhibitionCount}} · 프로그램 ${{institution.currentProgramCount}}</span>`
+        ? `<span class="has-current">현재 일정 ${{institution.currentEventCount}}건</span><span>전시 ${{institution.currentExhibitionCount}} · 프로그램 ${{institution.currentProgramCount}}</span>${{upcomingCount ? `<span class="has-upcoming">예정 ${{upcomingCount}}건</span>` : ""}}`
+        : upcomingCount
+          ? `<span class="has-upcoming">예정 일정 ${{upcomingCount}}건</span><span>아직 시작하지 않은 일정</span>`
         : institution.storedEventCount
           ? "<span>현재 공개 일정 없음</span>"
           : institution.directoryEntry
@@ -7773,11 +7956,13 @@ def render(person_name="가족"):
       }});
       featuredView.hidden = view !== "featured";
       allView.hidden = view !== "all";
+      upcomingView.hidden = view !== "upcoming";
       programView.hidden = view !== "program";
       permanentView.hidden = view !== "permanent";
       institutionView.hidden = view !== "institutions";
       document.body.classList.toggle("view-featured", view === "featured");
       document.body.classList.toggle("view-all", view === "all");
+      document.body.classList.toggle("view-upcoming", view === "upcoming");
       document.body.classList.toggle("view-program", view === "program");
       document.body.classList.toggle("view-permanent", view === "permanent");
       document.body.classList.toggle("view-institutions", view === "institutions");

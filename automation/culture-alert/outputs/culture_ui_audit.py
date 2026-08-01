@@ -55,7 +55,9 @@ STALE_REASON_MARKERS = (
 
 REQUIRED_IDS = {
     "featuredView": "추천 보기 영역",
-    "allView": "기간 일정 영역",
+    "allView": "현재 전시 영역",
+    "upcomingView": "예정 일정 독립 영역",
+    "upcomingGrid": "예정 일정 카드 목록",
     "programView": "강연·교육 전용 영역",
     "programViewButton": "강연·교육 전용 탭",
     "programGrid": "강연·교육 카드 목록",
@@ -98,7 +100,7 @@ REQUIRED_IDS = {
     "recommendationSummary": "추천 조건 요약",
 }
 
-REQUIRED_VIEWS = {"featured", "all", "program", "permanent", "institutions"}
+REQUIRED_VIEWS = {"featured", "all", "upcoming", "program", "permanent", "institutions"}
 
 EDITORIAL_BADGE_LABELS = {
     "취향 적합",
@@ -153,6 +155,7 @@ SCRIPT_FLOW_MARKERS = {
     "기관 규모 우선 정렬": "right.institution.scaleScore - left.institution.scaleScore",
     "추천 기관 등급 계산": "function institutionPriorityTier",
     "주요 기관 최우선 추천 정렬": "function compareRecommendationEntries",
+    "예정 일정 판정": "function isUpcomingSchedule",
 }
 
 TEXT_FIELDS = (
@@ -185,6 +188,8 @@ class CardHtmlParser(HTMLParser):
         self.feature_cards = 0
         self.list_cards = 0
         self.program_cards = 0
+        self.upcoming_cards = 0
+        self.upcoming_indexes = []
         self.visible_text_parts = []
         self.skip_stack = []
 
@@ -213,6 +218,10 @@ class CardHtmlParser(HTMLParser):
             self.list_cards += 1
         if {"card", "program-card"} <= classes:
             self.program_cards += 1
+        if {"card", "upcoming-card"} <= classes:
+            self.upcoming_cards += 1
+            if "data-feature-index" in attrs:
+                self.upcoming_indexes.append(attrs["data-feature-index"])
 
     def handle_endtag(self, tag):
         tag = tag.lower()
@@ -410,6 +419,7 @@ def check_html_structure(findings, parser, html_text, items):
         ("본인 기기에만 저장됩니다.", "프로필 로컬 저장 안내"),
         ("강연·교육 탭 표시", "프로그램 전용 탭 선택"),
         ("취향과 가까운 프로그램부터 따로 모았어요.", "프로그램 전용 화면"),
+        ("아직 시작하지 않은 일정만 시작일 가까운 순으로 모았어요.", "예정 일정 독립 화면"),
         ("지도 보기", "상세창 지도 연결"),
     ]:
         if marker not in parser.visible_text and marker not in html_text:
@@ -519,8 +529,16 @@ def check_html_structure(findings, parser, html_text, items):
 
     total = len(items)
     timed = [item for item in items if not item.get("isPermanent")]
-    exhibitions = [item for item in timed if item.get("type") == "전시"]
-    programs = [item for item in timed if item.get("type") in {"강연", "교육", "행사"}]
+    def is_upcoming(item):
+        starts_in = item.get("startsInDays")
+        if starts_in is not None:
+            return starts_in > 0
+        return "예정" in str(item.get("status") or "")
+
+    upcoming = [item for item in timed if is_upcoming(item)]
+    current = [item for item in timed if not is_upcoming(item)]
+    exhibitions = [item for item in current if item.get("type") == "전시"]
+    programs = [item for item in current if item.get("type") in {"강연", "교육", "행사"}]
     permanent = [item for item in items if item.get("isPermanent")]
     if total == 0:
         add_finding(findings, "P1", "카드 없음", "최종 리포트에 표시할 카드 데이터가 없습니다.")
@@ -551,8 +569,16 @@ def check_html_structure(findings, parser, html_text, items):
             "강연·교육 전용 탭의 카드 수가 프로그램 데이터와 다릅니다.",
             f"program_cards={parser.program_cards}, programs={len(programs)}",
         )
+    if parser.upcoming_cards != len(upcoming):
+        add_finding(
+            findings,
+            "P1",
+            "예정 일정 카드 수 불일치",
+            "미래 시작 일정이 독립 예정 탭에 정확히 모이지 않았습니다.",
+            f"upcoming_cards={parser.upcoming_cards}, upcoming={len(upcoming)}",
+        )
 
-    expected_static_card_buttons = len(exhibitions) * 2 + len(programs) + len(permanent)
+    expected_static_card_buttons = len(exhibitions) * 2 + len(programs) + len(upcoming) + len(permanent)
     if len(parser.data_indexes) != expected_static_card_buttons:
         add_finding(
             findings,
@@ -595,7 +621,9 @@ def check_html_structure(findings, parser, html_text, items):
         except ValueError:
             continue
         if 0 <= index < total and (
-            items[index].get("isPermanent") or items[index].get("type") != "전시"
+            items[index].get("isPermanent")
+            or items[index].get("type") != "전시"
+            or is_upcoming(items[index])
         ):
             add_finding(
                 findings,
@@ -606,15 +634,36 @@ def check_html_structure(findings, parser, html_text, items):
             )
             break
 
-    summary_match = re.search(r"진행/예정\s+(\d+)건", parser.visible_text)
-    if summary_match and int(summary_match.group(1)) != total:
-        add_finding(
-            findings,
-            "P2",
-            "상단 카드 수 표시 불일치",
-            "상단 요약의 카드 수와 실제 데이터 수가 다릅니다.",
-            f"summary={summary_match.group(1)}, total={total}",
-        )
+    for raw in parser.upcoming_indexes:
+        try:
+            index = int(raw)
+        except ValueError:
+            continue
+        if 0 <= index < total and not is_upcoming(items[index]):
+            add_finding(
+                findings,
+                "P1",
+                "현재 일정이 예정 탭에 섞임",
+                "이미 시작한 일정이 독립 예정 일정 탭에 들어 있습니다.",
+                f"index={index}, title={items[index].get('displayTitle')}",
+            )
+            break
+
+    summary_match = re.search(
+        r"현재\s+(\d+)건\s*[·|]\s*예정\s+(\d+)건\s*[·|]\s*상설\s+(\d+)건",
+        parser.visible_text,
+    )
+    if summary_match:
+        summary_counts = tuple(map(int, summary_match.groups()))
+        expected_counts = (len(current), len(upcoming), len(permanent))
+        if summary_counts != expected_counts:
+            add_finding(
+                findings,
+                "P2",
+                "상단 일정 수 표시 불일치",
+                "현재·예정·상설 요약 수가 각 데이터 분류와 다릅니다.",
+                f"summary={summary_counts}, expected={expected_counts}",
+            )
 
 
 def check_items(findings, items):
@@ -762,14 +811,15 @@ def manual_review_checklist():
         "첫 화면 등장: 대표 추천, 주요 전시 선반, 마감 일정, 장소 묶음, 필터, 숨은 전시, 전체 카드가 짧은 간격으로 자연스럽게 나타나며 설정창 뒤에서 먼저 재생되지 않는지 확인",
         "프로필: 첫 접속에서 이름/관심 분야 3개/강연·교육 여부를 저장하고, 두 번째 프로필을 추가한 뒤 서로 전환되는지 확인",
         "개인화 추천: 모든 기본 추천은 전시만 포함하고, 강연·교육을 켠 프로필에만 전용 탭이 나타나는지 확인",
-        "강연·교육 탭: 전용 탭을 누르기 전에는 프로그램이 보이지 않고, 탭 안에서만 취향순 24건/필터/더 보기가 동작하는지 확인",
+        "강연·교육 탭: 전용 탭을 누르기 전에는 프로그램이 보이지 않고, 시작 예정 프로그램은 섞이지 않으며 취향순 24건/필터/더 보기가 동작하는지 확인",
         "첫 화면: 전체 폭 큐레이션 제목과 선정 기준 안내 뒤에 대표 추천, 주요 전시, 곧 마감하는 일정 순서가 분명하게 보이는지 확인",
         "동선 보드: 한 장소에서 묶어보기 카드와 route map panel이 long filter보다 먼저 보이고 동선 보기 버튼이 자연스럽게 느껴지는지 확인",
         "빠른 필터: 무료/가족/이번 주/전시/서울/경기/인천을 각각 눌러 대표 추천과 추천 전체가 함께 바뀌는지 확인",
         "상세 필터: 기본 접힘 상태에서 열기, 관심 키워드/지역/일정/우선순위/초기화를 눌러 요약 문구가 자연스럽게 바뀌는지 확인",
         "추천 선반: 주요 전시는 총람 규모가 반영되고, 숨은 전시는 주요 기관과 중복되지 않으며 취향 적합 후보가 2건 이상일 때만 나타나는지 확인",
         "추천 전체: 카드 제목이 2줄 안에서 정리되고 배지가 1-2초 안에 이해되는지 확인",
-        "기간 전시: 강연/교육/행사 카드가 섞이지 않고 기간 전시만 표시되는지 확인",
+        "현재 전시: 강연/교육/행사와 시작 예정 카드가 섞이지 않고 이미 시작한 전시만 표시되는지 확인",
+        "예정 일정: 미래 시작일을 가진 전시/강연/교육/행사가 독립 탭에만 시작일 가까운 순으로 표시되고 시작 상태 배지가 명확한지 확인",
         "상설전: 상설전 탭의 첫 12개와 이미지 없는 카드 몇 개를 열어 기간/상태 문구가 기간 일정과 섞이지 않는지 확인",
         "기관 둘러보기: 주요 기관이 먼저 보이고, 전체/미술관/박물관/기타 문화공간 및 지역/현재 일정 있음 필터와 기관 일정 보기가 자연스럽게 동작하는지 확인",
         "통합 검색: 헤더 검색 버튼과 기관 둘러보기 검색에서 기관명, 전시 제목, 별칭, 유사어, 띄어쓰기 차이, 한 글자 오타, 초성 검색 결과가 구분되어 적절한 순서로 나오는지 확인",
@@ -800,6 +850,7 @@ def write_report(report_path, html_path, parser, items, findings):
         f"- 상설전: {len(permanent)}건",
         f"- 추천 보기 카드 DOM: {parser.feature_cards}개",
         f"- 강연·교육 카드 DOM: {parser.program_cards}개",
+        f"- 예정 일정 카드 DOM: {parser.upcoming_cards}개",
         f"- 목록 카드 DOM: {parser.list_cards}개",
         f"- 확인 필요: P1 {priorities['P1']}건, P2 {priorities['P2']}건, P3 {priorities['P3']}건",
         "",
