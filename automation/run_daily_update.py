@@ -4,6 +4,7 @@ import subprocess
 import sys
 import argparse
 import sqlite3
+import time
 from pathlib import Path
 
 from init_culture_db import DB_PATH, OUTPUTS_DIR, initialize_database
@@ -16,6 +17,7 @@ VERIFY_SCRIPT = REPO_ROOT / "tools" / "verify-protected-site.js"
 CARD_HTML = OUTPUTS_DIR / "culture-card-gallery.html"
 RECOMMENDATION_HTML = OUTPUTS_DIR / "keyword-recommendation-report.html"
 CLOUD_REPORT = OUTPUTS_DIR / "weekly-culture-update-report.md"
+SOURCE_FETCH_ATTEMPTS = 2
 
 
 def run(command, cwd=None):
@@ -59,6 +61,22 @@ def selected_sources(scraper):
     return sources
 
 
+def fetch_source_with_retry(scraper, name):
+    last_error = None
+    for attempt in range(1, SOURCE_FETCH_ATTEMPTS + 1):
+        try:
+            return scraper.SCRAPERS[name](), attempt
+        except Exception as exc:
+            last_error = exc
+            if attempt < SOURCE_FETCH_ATTEMPTS:
+                print(
+                    f"source={name} status=retry attempt={attempt} "
+                    f"error={exc}"
+                )
+                time.sleep(2)
+    raise last_error
+
+
 def run_collection_and_render():
     sys.path.insert(0, str(OUTPUTS_DIR))
     import culture_alert_scraper as scraper
@@ -74,7 +92,7 @@ def run_collection_and_render():
         scraper.ensure_schema(conn)
         for name in source_names:
             try:
-                outcome = scraper.SCRAPERS[name]()
+                outcome, attempts = fetch_source_with_retry(scraper, name)
                 events = getattr(outcome, "events", outcome)
                 checks = getattr(outcome, "checks", None)
                 inserted, updated = scraper.upsert_events(conn, events)
@@ -89,6 +107,7 @@ def run_collection_and_render():
                         "inserted": inserted,
                         "updated": updated,
                         "ended": ended,
+                        "attempts": attempts,
                         "error": "",
                     }
                 )
@@ -101,6 +120,7 @@ def run_collection_and_render():
                         "inserted": 0,
                         "updated": 0,
                         "ended": 0,
+                        "attempts": SOURCE_FETCH_ATTEMPTS,
                         "error": str(exc),
                     }
                 )
@@ -127,7 +147,8 @@ def run_collection_and_render():
         else:
             print(
                 f"source={item['source']} status=ok fetched={item['fetched']} "
-                f"inserted={item['inserted']} updated={item['updated']} ended={item['ended']}"
+                f"inserted={item['inserted']} updated={item['updated']} "
+                f"ended={item['ended']} attempts={item['attempts']}"
             )
 
 
@@ -151,7 +172,8 @@ def write_cloud_report(results, status_updated, status_counts, total_cards, coun
         else:
             lines.append(
                 f"- {item['source']}: 발견 {item['fetched']}건, 신규 {item['inserted']}건, "
-                f"갱신 {item['updated']}건, 종료 정리 {item['ended']}건"
+                f"갱신 {item['updated']}건, 종료 정리 {item['ended']}건, "
+                f"시도 {item['attempts']}회"
             )
     lines.extend(["", "## 상태별 일정 수", ""])
     for status, count in sorted(status_counts.items()):
